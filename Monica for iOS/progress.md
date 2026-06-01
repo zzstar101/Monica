@@ -391,6 +391,14 @@
   - 设置页“迁移”卡片新增 Android 备份导入/导出按钮，接入 iOS 原生 `.fileImporter` / `.fileExporter`，导入后显示可导入数量和问题数量，再由用户确认写库。
   - `AndroidFeatureMatrix.md` 已记录 App 文件选择、预览确认导入和导出 ZIP 已接入；加密备份、附件、回收站、配置和时间线恢复仍待后续节点。
   - 最新目标验证：3 个新增 XCTest 在 `iPhone 17` iOS 26.5 模拟器通过；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 85 个 XCTest。
+- Android 备份包旧版 CSV 兜底导入已完成第一版：
+  - 按 TDD 新增 `androidBackupCodecImportsLegacyZipCsvFallbackEntries`，先确认 RED 为 ZIP 内旧版 CSV 条目被忽略、导入结果为空。
+  - `AndroidBackupCodec.importItems(from:)` 现在会扫描 ZIP 内 `.csv` 条目，并在对应 JSON 类型不存在时按 Android restore 规则兜底导入。
+  - 已支持旧版密码 CSV：`passwords.csv`、`Monica_*_password.csv`，以及 Android 导出的 `name,url,username,password,note,email,phone,custom_fields` 表头。
+  - 已支持旧版安全项 CSV：`Monica_*_totp.csv`、`Monica_*_cards_docs.csv`、`Monica_*_notes.csv` 和通用 `ID,Type,Title,Data,Notes,...` 表头，映射到 TOTP、笔记、银行卡和证件 draft。
+  - 新版 JSON 仍优先于旧 CSV，避免同一备份同时含 JSON 和 CSV 时重复导入同类条目。
+  - `AndroidFeatureMatrix.md` 已记录旧版 ZIP 内 CSV 兜底导入；加密备份、附件、回收站、配置和时间线恢复仍待后续节点。
+  - 最新验证：目标 SwiftPM 单测从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 38 个用例。
 
 ## 遇到的问题
 
