@@ -488,6 +488,12 @@
   - 设置页“权限管理”的通知行会展示真实授权状态映射后的“已允许 / 未允许 / 可检查”，不会主动请求权限或弹系统授权框。
   - `AndroidFeatureMatrix.md` 已把权限管理说明更新为通知读取真实授权状态；设置跳转和签名真机 entitlement 校验仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 97 个 XCTest；`git diff --check` 通过。
+- 权限管理系统设置入口已完成：
+  - 按 TDD 新增 `testPermissionStatusCenterOffersSettingsLinkForUserManagedPermissionsOnly`，先确认 RED 为 `AppPermissionStatusRow` 缺少 `settingsURL`。
+  - 相机和通知权限行现在提供 `UIApplication.openSettingsURLString` 入口；App Group/Keychain 这类签名配置项不显示设置按钮，避免误导。
+  - 设置页权限行会对有入口的项目显示“打开设置”按钮，使用 SwiftUI `openURL`，仍不主动触发系统权限请求。
+  - `AndroidFeatureMatrix.md` 已记录相机/通知提供 iOS App 设置入口；签名真机 entitlement 校验仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 98 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
