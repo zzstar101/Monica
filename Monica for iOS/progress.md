@@ -536,6 +536,12 @@
   - 现有弱密码/复用密码和重复项安全中心测试已同步覆盖新行顺序，确认无本地指纹命中时显示 `0 项`。
   - `AndroidFeatureMatrix.md` 已记录泄露风险第一版；在线泄露库同步、历史版本和完整修复流仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 105 个 XCTest；`git diff --check` 通过。
+- 安全中心修复建议列表已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterBuildsRepairSuggestionsWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `securityCenterRepairSuggestions`。
+  - `AppSecurityCenterRepairSuggestion` 现在为弱密码、复用密码、泄露风险和重复登录摘要生成独立建议，包含关联安全行、标题、图标和脱敏建议文案。
+  - 设置页安全中心会在存在风险时显示修复建议列表；本节点只做建议展示，不声明自动修复动作或完整修复流已完成。
+  - `AndroidFeatureMatrix.md` 已记录修复建议列表第一版；在线泄露库同步、历史版本和自动修复动作仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 106 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
