@@ -70,7 +70,7 @@
 | 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 待实现 | 条目历史、版本恢复、操作审计 |
 | Plus/支付 | `plus/`, `MonicaPlusScreen`, `PaymentScreen` | StoreKit 2 + 现有 Plus 映射 | 待实现 | Apple IAP 购买/恢复；Plus/CDK 与 IAP 权益统一 |
 | 权限管理 | `PermissionManagementScreen` | iOS 权限状态中心 | 开发中 | 设置页已显示相机、AutoFill、通知、App Group、Keychain 状态中心；相机读取系统授权状态，AutoFill/App Group/Keychain 读取当前 App 配置状态；通知真实授权状态、签名真机 entitlement 校验待后续 |
-| 开发者设置 | `DeveloperSettingsScreen` | iOS debug/diagnostics | 待实现 | 安全脱敏诊断、同步日志、fixture 导入 |
+| 开发者设置 | `DeveloperSettingsScreen` | iOS debug/diagnostics | 开发中 | 设置页已显示脱敏诊断中心，覆盖主存储、MDBX 桥接、App Group、本机标识脱敏值、AutoFill 索引状态和 WebDAV 同步状态摘要；详细同步日志、fixture 导入和导出诊断包待后续 |
 
 ## 扩展与设备范围
 

@@ -476,6 +476,12 @@
   - 设置页新增“权限管理”区块，显示每项能力的图标、状态和说明；相机读取系统授权状态，AutoFill/App Group/Keychain 根据当前 App/Extension 配置状态展示，通知先以可检查状态占位。
   - `AndroidFeatureMatrix.md` 已把权限管理推进为开发中；通知真实授权状态、设置跳转和签名真机 entitlement 校验仍待后续节点。
   - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 95 个 XCTest；`git diff --check` 通过。
+- 开发者设置脱敏诊断中心已完成第一版：
+  - 按 TDD 新增 `testDeveloperDiagnosticsExposeRedactedOperationalState`，先确认 RED 为缺少 `AppDeveloperDiagnostics`。
+  - `AppDeveloperDiagnostics` 现在生成主存储、MDBX 桥接、App Group、本机标识脱敏值、AutoFill 索引状态和 WebDAV 同步状态摘要，不包含 WebDAV URL、用户名、密码或完整本机标识。
+  - 设置页新增“开发者设置”区块，显示诊断值和说明，便于后续内测排查。
+  - `AndroidFeatureMatrix.md` 已把开发者设置推进为开发中；详细同步日志、fixture 导入和导出诊断包仍待后续节点。
+  - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 96 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
