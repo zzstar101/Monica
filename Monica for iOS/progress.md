@@ -464,6 +464,12 @@
   - Wi-Fi 编辑页已显示“二维码内容”，并用 iOS 原生 `ShareLink` 提供分享入口；本节点仍不声明已渲染二维码图片或写入系统 Wi-Fi 配置。
   - `AndroidFeatureMatrix.md` 已记录 Wi-Fi QR payload 和 iOS 分享入口。
   - 最新验证：Storage 目标测试和 App 目标 XCTest 均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 93 个 XCTest；`git diff --check` 通过。
+- Wi-Fi 二维码图片渲染已完成：
+  - 按 TDD 新增 `testWifiQRCodeRendererProducesShareableImage`，先确认 RED 为 App 层缺少 `WifiQRCodeRenderer`。
+  - `WifiQRCodeRenderer` 现在使用 CoreImage `CIQRCodeGenerator` 生成 Wi-Fi payload 对应二维码，并绘制到稳定的 192x192 白底图片，避免原始二维码模块尺寸影响 UI。
+  - Wi-Fi 编辑页已在保存后的 Wi-Fi 条目中显示可扫描二维码图片，同时保留二维码内容和 iOS 原生 `ShareLink`。
+  - `AndroidFeatureMatrix.md` 已把 Wi-Fi 条目推进为已实现；本节点仍不声明可绕过 iOS 限制直接写入系统 Wi-Fi 配置。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 94 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
