@@ -512,6 +512,12 @@
   - 设置页“安全中心”在存在重复登录条目时显示合并预览列表；本节点只展示预览，不执行写入、删除、忽略或撤销。
   - `AndroidFeatureMatrix.md` 已记录重复项清理具备摘要和合并预览；忽略列表、实际合并和可撤销合并仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 101 个 XCTest；`git diff --check` 通过。
+- 安全中心重复项实际合并已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterMergesDuplicateLoginPreviewBySoftDeletingDuplicates`，先确认 RED 为 `AppSessionModel` 缺少 `mergeDuplicateLoginPreview`。
+  - `mergeDuplicateLoginPreview(_:)` 现在会校验预览仍存在，保留主登录条目，并通过现有 repository 删除流程软删除重复条目；合并后刷新活动列表、回收站列表和 AutoFill 加密索引。
+  - 设置页重复项预览行新增“合并重复项”按钮；合并后的重复条目进入回收站，仍可用现有恢复入口找回。
+  - `AndroidFeatureMatrix.md` 已记录重复项清理支持摘要、预览和软删除合并；忽略列表和专门撤销栈仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 102 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
