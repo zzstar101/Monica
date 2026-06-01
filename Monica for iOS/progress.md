@@ -530,6 +530,12 @@
   - 设置页在安全中心显示“撤销上次合并”入口；本节点只覆盖最近一次重复项合并撤销，不声明完整操作历史/时间线已完成。
   - `AndroidFeatureMatrix.md` 已记录重复项清理支持最近一次合并的专门撤销入口；完整操作历史/时间线仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 104 个 XCTest；`git diff --check` 通过。
+- 安全中心泄露风险摘要已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterSummarizesBreachedPasswordsWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `breachedPasswordSHA256Fingerprints`。
+  - `AppSessionModel.securityCenterRows` 现在增加“泄露风险”摘要，使用本地 SHA-256 密码指纹集合统计命中的登录条目，不保存或显示泄露密码明文。
+  - 现有弱密码/复用密码和重复项安全中心测试已同步覆盖新行顺序，确认无本地指纹命中时显示 `0 项`。
+  - `AndroidFeatureMatrix.md` 已记录泄露风险第一版；在线泄露库同步、历史版本和完整修复流仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 105 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
