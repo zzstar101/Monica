@@ -473,15 +473,21 @@
 - 权限管理状态中心已完成第一版：
   - 按 TDD 新增 `testPermissionStatusCenterExposesIOSNativeCapabilities`，先确认 RED 为 `AppSessionModel` 缺少 `permissionStatusRows`。
   - `AppPermissionStatusRow` 现在统一描述相机、AutoFill、通知、App Group 和 Keychain 的 iOS 原生能力状态。
-  - 设置页新增“权限管理”区块，显示每项能力的图标、状态和说明；相机读取系统授权状态，AutoFill/App Group/Keychain 根据当前 App/Extension 配置状态展示，通知先以可检查状态占位。
-  - `AndroidFeatureMatrix.md` 已把权限管理推进为开发中；通知真实授权状态、设置跳转和签名真机 entitlement 校验仍待后续节点。
-  - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 95 个 XCTest；`git diff --check` 通过。
+  - 设置页新增“权限管理”区块，显示每项能力的图标、状态和说明；相机读取系统授权状态，通知读取 `UNUserNotificationCenter` 授权状态，AutoFill/App Group/Keychain 根据当前 App/Extension 配置状态展示。
+  - `AndroidFeatureMatrix.md` 已把权限管理推进为开发中；设置跳转和签名真机 entitlement 校验仍待后续节点。
+  - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 97 个 XCTest；`git diff --check` 通过。
 - 开发者设置脱敏诊断中心已完成第一版：
   - 按 TDD 新增 `testDeveloperDiagnosticsExposeRedactedOperationalState`，先确认 RED 为缺少 `AppDeveloperDiagnostics`。
   - `AppDeveloperDiagnostics` 现在生成主存储、MDBX 桥接、App Group、本机标识脱敏值、AutoFill 索引状态和 WebDAV 同步状态摘要，不包含 WebDAV URL、用户名、密码或完整本机标识。
   - 设置页新增“开发者设置”区块，显示诊断值和说明，便于后续内测排查。
   - `AndroidFeatureMatrix.md` 已把开发者设置推进为开发中；详细同步日志、fixture 导入和导出诊断包仍待后续节点。
   - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 96 个 XCTest；`git diff --check` 通过。
+- 通知权限真实状态已接入权限管理中心：
+  - 按 TDD 新增 `testPermissionStatusCenterUsesNotificationAuthorizationState`，先确认 RED 为 `AppSessionModel` 缺少 `notificationPermissionStatusProvider`。
+  - `AppSessionModel` 现在可注入通知权限状态 provider，并在生产模型创建和 App 回到前台时用 `UNUserNotificationCenter` 刷新缓存状态。
+  - 设置页“权限管理”的通知行会展示真实授权状态映射后的“已允许 / 未允许 / 可检查”，不会主动请求权限或弹系统授权框。
+  - `AndroidFeatureMatrix.md` 已把权限管理说明更新为通知读取真实授权状态；设置跳转和签名真机 entitlement 校验仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 97 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
