@@ -450,6 +450,13 @@
   - 设置页 Android 备份导入入口已切到 prepare 流程；检测到加密备份后弹出 iOS 原生密码提示，用户可取消或解密预览。
   - `AndroidFeatureMatrix.md` 已记录加密备份密码输入 UI；附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
   - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 92 个 XCTest；`git diff --check` 通过。
+- Android 备份附件引用列表已完成第一版：
+  - 按 TDD 扩展 `testAndroidBackupConfirmImportsAttachmentMetadataWithRemappedLoginID`，先确认 RED 为附件引用搜索无法通过 remap 后的关联条目 ID 命中。
+  - `AppSessionModel` 现在会加载活动/已删除附件 metadata，提供附件引用搜索状态，并把文件名、MIME、状态、source、hash、localPath 和关联条目 ID 纳入匹配。
+  - Vault 页 `.attachmentRef` 已从占位空态换成一等附件引用列表，显示文件名、类型、下载状态、存储模式、大小和本地密文路径，并接入软删除与恢复入口。
+  - 新增 `testAndroidBackupAttachmentReferenceCanBeDeletedAndRestored`，覆盖 Android 备份导入后的附件引用删除进入回收区、恢复回活动列表和状态文案。
+  - `AndroidFeatureMatrix.md` 已记录附件引用列表、搜索、删除和恢复；本节点仍不声明附件内容解密、QuickLook 预览、迁移或同步已完成。
+  - 最新验证：新增/扩展的 2 个 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 93 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
