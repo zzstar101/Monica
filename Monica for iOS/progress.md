@@ -371,6 +371,12 @@
   - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 35 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 80 个 XCTest。当前机器没有 `iPhone 16` 模拟器，后续回归使用可用的 `iPhone 17`/`iPhone 17 Pro` 目标。
 - 文档同步：
   - 已更新 `AndroidFeatureMatrix.md`，把 CSV 导入导出的状态推进为 AppSessionModel 预览/确认导入/导出接口已完成，文件选择/分享 UI 待接入。
+- CSV 文件导入导出入口已完成：
+  - 按 TDD 新增 `testCSVImportFileBuildsPreviewWithoutWritingVault`，确认 RED 为缺少 URL 文件导入入口；`AppSessionModel.previewCSVImport(from:)` 现在会读取 iOS 文件选择器返回的 CSV URL，生成预览但不写库。
+  - 按 TDD 新增 `testCSVExportDocumentWrapsCurrentVaultCSVForFileExporter`，确认 RED 为缺少 `CSVExportDocument`；`AppSessionModel.csvExportDocument()` 现在能把当前 vault CSV 包装为 SwiftUI `FileDocument`，供系统文件导出面板使用。
+  - 设置页新增“迁移”卡片，接入 iOS 原生 `fileImporter` / `fileExporter`；支持导入 CSV 后显示可导入数量和问题数量，再由用户点击“确认导入”写入当前 vault。
+  - `AndroidFeatureMatrix.md` 已把 CSV 导入导出从“开发中”推进为“已实现”。
+  - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 35 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 82 个 XCTest。
 
 ## 遇到的问题
 
