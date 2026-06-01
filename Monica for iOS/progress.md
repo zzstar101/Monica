@@ -443,6 +443,13 @@
   - 按 TDD 新增 `testAndroidBackupEncryptedImportPreviewDecryptsWithPassword`，先确认 RED 为 App 预览接口缺少 `decryptPassword`；`AppSessionModel.previewAndroidBackupImport` 现在可把解密密码传给 Storage 并显示正常预览。
   - `AndroidFeatureMatrix.md` 已记录加密备份 API 级解密能力；设置页密码输入 UI、附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
   - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 91 个 XCTest；`git diff --check` 通过。
+- Android 加密备份设置页密码输入已完成：
+  - 按 TDD 新增 `testAndroidBackupEncryptedFileCanBePreparedAndRetriedWithPassword`，先确认 RED 为 AppSessionModel 缺少加密备份待处理状态、密码输入字段和重试预览 API。
+  - `AppSessionModel.prepareAndroidBackupImport(from:)` 现在会在普通备份上直接生成预览，在加密备份上缓存文件数据和文件名到内存 pending 状态，不写入 MDBX，也不落盘保存密码。
+  - `previewPendingAndroidEncryptedBackupImport()` 会使用一次性 `androidBackupDecryptPassword` 解密 pending 文件；密码错误时清空输入但保留 pending 文件供重试，成功后生成预览并清空 pending 数据和密码。
+  - 设置页 Android 备份导入入口已切到 prepare 流程；检测到加密备份后弹出 iOS 原生密码提示，用户可取消或解密预览。
+  - `AndroidFeatureMatrix.md` 已记录加密备份密码输入 UI；附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
+  - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 92 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
