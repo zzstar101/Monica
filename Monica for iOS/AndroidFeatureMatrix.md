@@ -14,7 +14,7 @@
 | --- | --- | --- | --- | --- |
 | MDBX 本地保险库 | `mdbx/`, `Monica for Android/app/src/main/java/takagi/ru/monica/mdbx` | SwiftUI + UniFFI + `MonicaMDBX`/`MonicaStorage` | 已实现 | 可创建、打开、锁定、重开 MDBX；Rust smoke、SwiftPM、XCTest 通过 |
 | Android -> iOS 功能矩阵 | Android routes/services/docs | 本文档持续更新 | 已实现 | 每个里程碑更新状态和验收结果 |
-| 仓库基线提交 | Git workspace | 推送 iOS/MDBX 源码到 `zzstar101/Monica` | 待验证 | 只提交源码、工程配置和文档；不提交 `.build`、`Build`、`target` |
+| 仓库基线提交 | Git workspace | 推送 iOS/MDBX 源码到 `zzstar101/Monica` | 已实现 | 已推送 `e97ca360`；源码优先，`.build`、`Build`、`target` 等产物排除 |
 
 ## 核心保险库与条目
 
@@ -26,10 +26,10 @@
 | 银行卡 | `BankCardViewModel`, `CardWalletScreen`, `AddEditBankCardScreen` | 一等 `card` 条目 | 已实现 | 卡号/CVV 加密 payload；列表只显示摘要；删除恢复 |
 | 证件/身份 | `DocumentViewModel`, `AddEditDocumentScreen` | 一等 `identity` 条目 | 已实现 | 证件号加密 payload；列表摘要不泄漏完整敏感字段 |
 | Passkey 元数据 | `PasskeyViewModel`, `PasskeyListScreen`, `PasskeyDetailScreen` | 一等 `passkey` 条目 + 系统 Passkey | 开发中 | 元数据 CRUD 可用；系统创建/认证需 AuthenticationServices 真机验收 |
-| SSH Key | `AddEditSshKeyScreen`, `SshKeyDetailScreen` | 一等 `sshKey` 条目 | 开发中 | 存储接口已存在；需要完整 UI、搜索、收藏、删除恢复 |
-| API Token | Android 扩展条目/自定义字段 | 一等 `apiToken` 条目 | 开发中 | 存储接口已存在；需要完整 UI、搜索、收藏、删除恢复 |
-| Wi-Fi | `AddEditWifiScreen`, `WifiDetailScreen` | 一等 `wifi` 条目 | 开发中 | 存储接口已存在；需要完整 UI、二维码/分享策略、删除恢复 |
-| Bitwarden Send | `SendScreen`, `AddEditSendScreen` | 一等 `send` 条目 + Bitwarden Send 同步 | 开发中 | 存储接口已存在；需要 UI、同步、附件支持 |
+| SSH Key | `AddEditSshKeyScreen`, `SshKeyDetailScreen` | 一等 `sshKey` 条目 | 已实现 | 列表、详情编辑、新增、搜索、收藏、软删除、恢复通过 XCTest；私钥以引用字段保存 |
+| API Token | Android 扩展条目/自定义字段 | 一等 `apiToken` 条目 | 已实现 | 列表、详情编辑、新增、搜索、收藏、软删除、恢复通过 XCTest；Token 不在列表明文展示 |
+| Wi-Fi | `AddEditWifiScreen`, `WifiDetailScreen` | 一等 `wifi` 条目 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；二维码/系统分享策略待后续补齐 |
+| Bitwarden Send | `SendScreen`, `AddEditSendScreen` | 一等 `send` 条目 + Bitwarden Send 同步 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；Bitwarden 同步、附件支持待 P3 |
 | 附件引用 | `attachments/` | 一等 `attachmentRef` + 内容存储 | 开发中 | 元数据接口已存在；需要文件内容加密、预览、迁移和同步 |
 
 ## 自动填充、Passkey 与 iOS 原生替代
@@ -81,4 +81,3 @@
 | 小组件 | Android 通知/快捷状态 | iOS Widget | 待实现 | 安全显示 TOTP/快捷状态，不泄漏秘密 |
 | iPad | Android 大屏适配 | iPhone 优先 + iPad 自适应 | 开发中 | iPad 不崩溃、不遮挡；后续再做一等分栏体验 |
 | Apple Watch | 无直接 Android 等价 | 后置 | 待实现 | 本轮不作为完成条件 |
-
