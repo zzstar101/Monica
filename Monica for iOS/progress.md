@@ -524,6 +524,12 @@
   - 设置页重复项预览行新增“忽略”按钮；存在已忽略分组时显示“恢复已忽略重复项”，可一次清空忽略列表并恢复摘要/预览。
   - `AndroidFeatureMatrix.md` 已记录重复项清理支持忽略列表第一版；专门撤销栈仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 103 个 XCTest；`git diff --check` 通过。
+- 安全中心重复项合并撤销已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterCanUndoLastDuplicateLoginMerge`，先确认 RED 为 `AppSessionModel` 缺少 `canUndoLastDuplicateLoginMerge`、`lastDuplicateLoginMergeUndoTitle` 和 `undoLastDuplicateLoginMerge`。
+  - `mergeDuplicateLoginPreview(_:)` 现在记录最近一次合并的标题和被软删除重复条目 ID；`undoLastDuplicateLoginMerge()` 通过现有 repository 恢复这些登录条目，刷新活动列表、回收站列表和 AutoFill 加密索引，并清空撤销状态。
+  - 设置页在安全中心显示“撤销上次合并”入口；本节点只覆盖最近一次重复项合并撤销，不声明完整操作历史/时间线已完成。
+  - `AndroidFeatureMatrix.md` 已记录重复项清理支持最近一次合并的专门撤销入口；完整操作历史/时间线仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 104 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
