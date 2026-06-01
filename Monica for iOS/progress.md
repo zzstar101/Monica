@@ -399,6 +399,13 @@
   - 新版 JSON 仍优先于旧 CSV，避免同一备份同时含 JSON 和 CSV 时重复导入同类条目。
   - `AndroidFeatureMatrix.md` 已记录旧版 ZIP 内 CSV 兜底导入；加密备份、附件、回收站、配置和时间线恢复仍待后续节点。
   - 最新验证：目标 SwiftPM 单测从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 38 个用例。
+- Android 备份包附件 manifest 预览已完成第一版：
+  - 按 TDD 新增 `androidBackupCodecImportsAttachmentManifestMetadata`，先确认 RED 为 `AndroidBackupImportReport` 没有附件字段。
+  - `AndroidBackupImportReport` 新增 `attachments: [AndroidBackupAttachmentMetadata]`，用于导入预览阶段携带 Android `attachments/attachments_meta.json` 中的本地附件元数据。
+  - `AndroidBackupCodec.importItems(from:)` 现在会识别 `attachments/attachments_meta.json` 和 `attachments/*.enc` blob 路径，解析 `parentPasswordId`、文件名、MIME、大小、SHA-256、wrapped CEK、localPath、创建/更新时间和对应 ZIP blob entry。
+  - 当前只做 manifest 元数据和 blob 路径预览；附件密文内容落盘、父密码 id 重映射、预览打开、删除恢复和同步仍待后续节点。
+  - `AndroidFeatureMatrix.md` 已记录附件 manifest 元数据解析；Android 备份包整体仍保持“开发中”。
+  - 最新验证：目标 SwiftPM 单测从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例。
 
 ## 遇到的问题
 
