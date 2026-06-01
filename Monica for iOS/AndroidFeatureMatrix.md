@@ -65,7 +65,7 @@
 | 堆叠分组 | `PasswordGrouping`, `StackedPasswordGroup` | iOS 分组/堆叠视图 | 待实现 | 按备注/网站/应用/标题等策略分组 |
 | 字段/页面定制 | `PageAdjustmentCustomizationScreen`, `PasswordFieldCustomizationScreen` | iOS 风格显示偏好 | 待实现 | 字段显示、卡片密度、底部导航偏好可配置 |
 | 主题/图标 | `ColorSchemeSelectionScreen`, `IconSettingsScreen` | iOS 风格主题和图标设置 | 待实现 | 深浅色、强调色、图标显示策略、App Icon 变体 |
-| 安全分析 | `SecurityAnalysisScreen` | 安全中心 | 待实现 | 弱密码、复用、泄露风险、修复建议 |
+| 安全分析 | `SecurityAnalysisScreen` | 安全中心 | 开发中 | 设置页已显示安全中心第一版，统计弱密码和复用密码条目数且不泄漏具体密码；泄露风险、重复项合并、历史版本和修复建议待后续 |
 | 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 待实现 | 重复检测、忽略列表、合并预览、可撤销 |
 | 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 待实现 | 条目历史、版本恢复、操作审计 |
 | Plus/支付 | `plus/`, `MonicaPlusScreen`, `PaymentScreen` | StoreKit 2 + 现有 Plus 映射 | 待实现 | Apple IAP 购买/恢复；Plus/CDK 与 IAP 权益统一 |

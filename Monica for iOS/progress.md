@@ -494,6 +494,12 @@
   - 设置页权限行会对有入口的项目显示“打开设置”按钮，使用 SwiftUI `openURL`，仍不主动触发系统权限请求。
   - `AndroidFeatureMatrix.md` 已记录相机/通知提供 iOS App 设置入口；签名真机 entitlement 校验仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 98 个 XCTest；`git diff --check` 通过。
+- 安全中心弱密码/复用密码摘要已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterSummarizesWeakAndReusedPasswordsWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `securityCenterRows`。
+  - `AppSessionModel.securityCenterRows` 现在基于当前登录条目统计弱密码和复用密码条目数；弱密码规则为长度不足 12 或缺少大小写、数字、符号任一类。
+  - 设置页新增“安全中心”区块，显示弱密码和复用密码摘要与修复建议文案；详情文案不包含具体密码。
+  - `AndroidFeatureMatrix.md` 已把安全分析推进为开发中；泄露风险、重复项合并、历史版本和可执行修复流仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 99 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
