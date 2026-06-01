@@ -542,6 +542,12 @@
   - 设置页安全中心会在存在风险时显示修复建议列表；本节点只做建议展示，不声明自动修复动作或完整修复流已完成。
   - `AndroidFeatureMatrix.md` 已记录修复建议列表第一版；在线泄露库同步、历史版本和自动修复动作仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 106 个 XCTest；`git diff --check` 通过。
+- 密码历史/操作时间线第一版已完成：
+  - 按 TDD 新增 `testLoginEntryOperationsAppendRedactedTimelineEvents`，先确认 RED 为 `AppSessionModel` 缺少 `operationTimelineEvents`。
+  - `AppSessionModel` 现在以内存时间线记录登录条目的创建、更新、删除和恢复事件，最近 50 条按新到旧排列；事件只保存动作、条目类型、条目 ID、标题和时间。
+  - 设置页安全中心新增最近操作展示，显示最近 6 条脱敏事件；本节点不声明持久化密码历史、跨会话审计或版本恢复已完成。
+  - `AndroidFeatureMatrix.md` 已把“密码历史/时间线”推进为开发中，并记录持久化历史版本、跨会话审计和版本恢复仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 107 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

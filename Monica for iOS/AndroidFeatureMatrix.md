@@ -66,8 +66,8 @@
 | 字段/页面定制 | `PageAdjustmentCustomizationScreen`, `PasswordFieldCustomizationScreen` | iOS 风格显示偏好 | 待实现 | 字段显示、卡片密度、底部导航偏好可配置 |
 | 主题/图标 | `ColorSchemeSelectionScreen`, `IconSettingsScreen` | iOS 风格主题和图标设置 | 待实现 | 深浅色、强调色、图标显示策略、App Icon 变体 |
 | 安全分析 | `SecurityAnalysisScreen` | 安全中心 | 开发中 | 设置页已显示安全中心第一版，统计弱密码、复用密码、泄露风险和重复登录条目数且不泄漏具体密码；泄露风险第一版使用本地 SHA-256 指纹库命中统计；已显示弱密码、复用、泄露风险和重复项的修复建议列表；在线泄露库同步、历史版本和自动修复动作待后续 |
-| 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 开发中 | 已在安全中心显示重复登录条目摘要和合并预览，按标题/用户名/URL 去空白小写后分组；支持合并预览后软删除重复项并可从回收站恢复；支持忽略重复组并从摘要/预览中隐藏，设置页可恢复已忽略重复项；支持最近一次重复项合并的专门撤销入口；完整操作历史/时间线待后续 |
-| 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 待实现 | 条目历史、版本恢复、操作审计 |
+| 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 开发中 | 已在安全中心显示重复登录条目摘要和合并预览，按标题/用户名/URL 去空白小写后分组；支持合并预览后软删除重复项并可从回收站恢复；支持忽略重复组并从摘要/预览中隐藏，设置页可恢复已忽略重复项；支持最近一次重复项合并的专门撤销入口；会话内登录 CRUD 操作时间线已接入安全中心；完整跨会话操作历史和版本恢复待后续 |
+| 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 开发中 | App 会话内已记录登录条目创建、更新、删除、恢复操作时间线，并在设置页显示最近事件；事件只包含动作、类型、条目 ID、标题和时间，不包含密码、用户名等秘密；持久化历史版本、跨会话审计和版本恢复待后续 |
 | Plus/支付 | `plus/`, `MonicaPlusScreen`, `PaymentScreen` | StoreKit 2 + 现有 Plus 映射 | 待实现 | Apple IAP 购买/恢复；Plus/CDK 与 IAP 权益统一 |
 | 权限管理 | `PermissionManagementScreen` | iOS 权限状态中心 | 开发中 | 设置页已显示相机、AutoFill、通知、App Group、Keychain 状态中心；相机读取系统授权状态，通知读取 `UNUserNotificationCenter` 授权状态，AutoFill/App Group/Keychain 读取当前 App 配置状态；相机/通知提供 iOS App 设置入口；签名真机 entitlement 校验待后续 |
 | 开发者设置 | `DeveloperSettingsScreen` | iOS debug/diagnostics | 开发中 | 设置页已显示脱敏诊断中心，覆盖主存储、MDBX 桥接、App Group、本机标识脱敏值、AutoFill 索引状态和 WebDAV 同步状态摘要；详细同步日志、fixture 导入和导出诊断包待后续 |
