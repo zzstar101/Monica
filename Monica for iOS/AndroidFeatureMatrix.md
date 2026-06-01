@@ -30,7 +30,7 @@
 | API Token | Android 扩展条目/自定义字段 | 一等 `apiToken` 条目 | 已实现 | 列表、详情编辑、新增、搜索、收藏、软删除、恢复通过 XCTest；Token 不在列表明文展示 |
 | Wi-Fi | `AddEditWifiScreen`, `WifiDetailScreen` | 一等 `wifi` 条目 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；二维码/系统分享策略待后续补齐 |
 | Bitwarden Send | `SendScreen`, `AddEditSendScreen` | 一等 `send` 条目 + Bitwarden Send 同步 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；Bitwarden 同步、附件支持待 P3 |
-| 附件引用 | `attachments/` | 一等 `attachmentRef` + 内容存储 | 开发中 | 元数据接口已存在；需要文件内容加密、预览、迁移和同步 |
+| 附件引用 | `attachments/` | 一等 `attachmentRef` + 内容存储 | 开发中 | 元数据接口已存在；Android 备份确认导入时已可落库附件元数据并 remap 父密码条目；需要文件内容加密、预览、迁移和同步 |
 
 ## 自动填充、Passkey 与 iOS 原生替代
 
@@ -52,7 +52,7 @@
 | WebDAV 备份/恢复 | `webdav/`, `WebDavBackupScreen`, `SyncBackupScreen` | `MonicaSync` WebDAV | 已实现 | 上传、下载、SHA-256 校验、恢复前打开验证 |
 | OneDrive | `OneDriveBackupScreen`, MSAL config | `CloudFileProvider` OneDrive adapter | 待实现 | 登录、浏览、创建/打开、备份、恢复 |
 | Google Drive | KeePass Google Drive browser | `CloudFileProvider` Google Drive adapter | 待实现 | 登录、浏览、创建/打开、备份、恢复 |
-| Android 备份包 | `DataExportImportViewModel.exportZipBackup/importZipBackup`, `WebDavHelper.createBackupZip/restoreFromBackupFile` | `AndroidBackupCodec` + App 迁移入口 | 开发中 | Storage 层已支持 Android ZIP 新版 `folders/<分类>/passwords/authenticators/bank_cards/documents/notes/passkeys/*.json` 核心条目导入，并可导出 Android 风格 ZIP；已兼容旧版 ZIP 内 `*_password.csv`、`*_totp.csv`、`*_cards_docs.csv`、`*_notes.csv` 兜底导入；已解析 `attachments/attachments_meta.json` 附件 manifest 元数据和 blob 路径，并在 App 预览文案中显示附件数量；设置页已接入 `.zip` 文件选择、预览后确认导入当前 vault、导出 Android 风格 ZIP；加密备份、附件内容落盘/预览/迁移、回收站/配置恢复待接入 |
+| Android 备份包 | `DataExportImportViewModel.exportZipBackup/importZipBackup`, `WebDavHelper.createBackupZip/restoreFromBackupFile` | `AndroidBackupCodec` + App 迁移入口 | 开发中 | Storage 层已支持 Android ZIP 新版 `folders/<分类>/passwords/authenticators/bank_cards/documents/notes/passkeys/*.json` 核心条目导入，并可导出 Android 风格 ZIP；已兼容旧版 ZIP 内 `*_password.csv`、`*_totp.csv`、`*_cards_docs.csv`、`*_notes.csv` 兜底导入；已解析 `attachments/attachments_meta.json` 附件 manifest 元数据和 blob 路径，并在 App 预览文案中显示附件数量；确认导入时已把附件元数据写入 MDBX metadata repository，且 `parentPasswordId` 会 remap 到新建 iOS login entry id；设置页已接入 `.zip` 文件选择、预览后确认导入当前 vault、导出 Android 风格 ZIP；加密备份、附件密文内容落盘/预览/迁移、回收站/配置恢复待接入 |
 | CSV 导入导出 | import/export screens | CSV importer/exporter | 已实现 | Storage 层 CSV 编解码、字段映射、错误报告脱敏已实现；设置页已接入 iOS 文件导入/导出、预览后确认导入当前项目 |
 | KDBX/KeePass | `LocalKeePass*`, `keepass/` | KDBX 读写兼容 | 待实现 | 打开、编辑、保存、回收站、附件、云文件源 |
 | Bitwarden 同步 | `bitwarden/`, `SyncQueue` | Bitwarden 双向同步 | 待实现 | 登录、vault/folder、密码、TOTP、Send、附件、冲突处理 |

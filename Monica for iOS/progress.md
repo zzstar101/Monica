@@ -413,6 +413,13 @@
   - `confirmAndroidBackupImport(projectTitle:)` 在含附件 manifest 的导入完成后会提示附件已保留为待恢复元数据，避免用户误以为附件密文内容已经落盘和可预览。
   - `AndroidFeatureMatrix.md` 已记录附件数量进入 App 预览文案；附件内容落盘、父密码 id 重映射、预览打开、删除恢复和同步仍待后续节点。
   - 最新目标验证：新增 XCTest 从 RED 到 GREEN。
+- Android 备份包附件元数据确认导入已完成：
+  - 按 TDD 新增 `testAndroidBackupConfirmImportsAttachmentMetadataWithRemappedLoginID`，先确认 RED 为确认导入不会创建附件 metadata，也不会 remap Android `parentPasswordId`。
+  - `AndroidBackupImportReport` 新增 `importedItems: [AndroidBackupImportedItem]`，在保持旧 `items` API 的同时携带 Android JSON 源 `id`，供 App 导入阶段建立源 id 到新建 iOS entry id 的映射。
+  - `AppSessionModel.confirmAndroidBackupImport(projectTitle:)` 现在会在创建登录条目后，把附件 manifest 元数据写入 `createAttachmentMetadata`，`parentPasswordId` 会 remap 到新建的 login entry id。
+  - 附件 metadata 当前使用 `storageMode = "android-backup-pending"`、`storedSize = 0`，明确表示只完成元数据 landing，密文 blob 内容尚未恢复、解密、预览或同步。
+  - `AndroidFeatureMatrix.md` 已记录附件元数据落库和父 id remap；附件内容落盘/预览/迁移、加密 `.enc.zip`、回收站/配置恢复仍待后续节点。
+  - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 87 个 XCTest。
 
 ## 遇到的问题
 
