@@ -406,6 +406,13 @@
   - 当前只做 manifest 元数据和 blob 路径预览；附件密文内容落盘、父密码 id 重映射、预览打开、删除恢复和同步仍待后续节点。
   - `AndroidFeatureMatrix.md` 已记录附件 manifest 元数据解析；Android 备份包整体仍保持“开发中”。
   - 最新验证：目标 SwiftPM 单测从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例。
+- Android 备份包附件 manifest 已接入 App 预览提示：
+  - 按 TDD 新增 `testAndroidBackupImportPreviewIncludesAttachmentManifestCount`，先确认 RED 为 `AndroidBackupImportPreview` 缺少附件访问字段。
+  - `AndroidBackupImportPreview` 新增 `attachments` 便捷字段，直接暴露 Storage report 解析出的附件 manifest 元数据。
+  - `AppSessionModel.previewAndroidBackupImport(_:)` 的成功状态现在会在备份含附件 manifest 时显示附件数量，例如 `Android 备份预览：1 项可导入，1 个附件，0 个问题`。
+  - `confirmAndroidBackupImport(projectTitle:)` 在含附件 manifest 的导入完成后会提示附件已保留为待恢复元数据，避免用户误以为附件密文内容已经落盘和可预览。
+  - `AndroidFeatureMatrix.md` 已记录附件数量进入 App 预览文案；附件内容落盘、父密码 id 重映射、预览打开、删除恢复和同步仍待后续节点。
+  - 最新目标验证：新增 XCTest 从 RED 到 GREEN。
 
 ## 遇到的问题
 
