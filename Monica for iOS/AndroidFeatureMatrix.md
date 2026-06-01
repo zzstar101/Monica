@@ -53,7 +53,7 @@
 | OneDrive | `OneDriveBackupScreen`, MSAL config | `CloudFileProvider` OneDrive adapter | 待实现 | 登录、浏览、创建/打开、备份、恢复 |
 | Google Drive | KeePass Google Drive browser | `CloudFileProvider` Google Drive adapter | 待实现 | 登录、浏览、创建/打开、备份、恢复 |
 | Android 备份包 | backup/export screens | Android backup importer/exporter | 待实现 | Android 样本可导入；导出可被 Android 读取或明确兼容级别 |
-| CSV 导入导出 | import/export screens | CSV importer/exporter | 开发中 | Storage 层 CSV 编解码、字段映射、错误报告脱敏已实现；App 导入导出入口和落库流程待接入 |
+| CSV 导入导出 | import/export screens | CSV importer/exporter | 开发中 | Storage 层 CSV 编解码、字段映射、错误报告脱敏已实现；AppSessionModel 已支持 CSV 预览、确认后导入当前项目、导出当前已加载条目；文件选择/分享 UI 待接入 |
 | KDBX/KeePass | `LocalKeePass*`, `keepass/` | KDBX 读写兼容 | 待实现 | 打开、编辑、保存、回收站、附件、云文件源 |
 | Bitwarden 同步 | `bitwarden/`, `SyncQueue` | Bitwarden 双向同步 | 待实现 | 登录、vault/folder、密码、TOTP、Send、附件、冲突处理 |
 
