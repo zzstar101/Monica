@@ -436,6 +436,13 @@
   - `AppSessionModel.previewAndroidBackupImport` 现在会把加密备份 issue 转成中文失败状态并清空待确认 preview，避免用户进入“可导入/可确认”的误导路径。
   - 本节点只做识别和安全提示，不实现 AES-GCM/PBKDF2 解密；真正加密备份解密仍待后续节点。
   - `AndroidFeatureMatrix.md` 已记录 `MONICA_ENC_V1`/`.enc.zip` 加密备份识别状态。
+- Android 加密备份包解密 primitive 已完成：
+  - 按 TDD 新增 `androidBackupCodecDecryptsAndroidEncryptedBackupWithPassword`，先确认 RED 为 `AndroidBackupCodec.importItems` 缺少 `decryptPassword` 参数和 `.encryptedBackupDecryptionFailed` issue。
+  - `AndroidBackupCodec.importItems(from:fileName:decryptPassword:)` 现在可识别 Android `MONICA_ENC_V1` 加密包，在提供密码时按 Android 格式解析 32-byte salt、12-byte IV、AES-256-GCM ciphertext/tag，并用 PBKDF2-HMAC-SHA256 100000 次派生 32-byte key 后解密，再复用现有 ZIP 导入路径。
+  - 密码为空时仍保留原有“暂未支持解密/需未加密 ZIP”的安全提示路径；密码错误或文件损坏会返回 `.encryptedBackupDecryptionFailed` 和中文失败信息，避免进入可确认导入状态。
+  - 按 TDD 新增 `testAndroidBackupEncryptedImportPreviewDecryptsWithPassword`，先确认 RED 为 App 预览接口缺少 `decryptPassword`；`AppSessionModel.previewAndroidBackupImport` 现在可把解密密码传给 Storage 并显示正常预览。
+  - `AndroidFeatureMatrix.md` 已记录加密备份 API 级解密能力；设置页密码输入 UI、附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
+  - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 91 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
