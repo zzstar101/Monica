@@ -500,6 +500,12 @@
   - 设置页新增“安全中心”区块，显示弱密码和复用密码摘要与修复建议文案；详情文案不包含具体密码。
   - `AndroidFeatureMatrix.md` 已把安全分析推进为开发中；泄露风险、重复项合并、历史版本和可执行修复流仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 99 个 XCTest；`git diff --check` 通过。
+- 安全中心重复项检测摘要已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterSummarizesDuplicateLoginEntries`，先确认 RED 为安全中心缺少 `duplicate-logins` 行；随后补齐实现并让目标测试 GREEN。
+  - `AppSessionModel.securityCenterRows` 现在增加“重复项”摘要，按登录条目的标题、用户名和 URL 去空白并小写后分组，统计明显重复的登录条目数量。
+  - 重复项详情只显示检查建议，不包含密码；现有弱密码/复用密码测试同步确认无重复数据时显示 `0 项`。
+  - `AndroidFeatureMatrix.md` 已把重复项清理推进为开发中；忽略列表、合并预览、可撤销合并和完整修复流仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 100 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
