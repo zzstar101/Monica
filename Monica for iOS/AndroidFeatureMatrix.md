@@ -69,7 +69,7 @@
 | 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 待实现 | 重复检测、忽略列表、合并预览、可撤销 |
 | 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 待实现 | 条目历史、版本恢复、操作审计 |
 | Plus/支付 | `plus/`, `MonicaPlusScreen`, `PaymentScreen` | StoreKit 2 + 现有 Plus 映射 | 待实现 | Apple IAP 购买/恢复；Plus/CDK 与 IAP 权益统一 |
-| 权限管理 | `PermissionManagementScreen` | iOS 权限状态中心 | 待实现 | 相机、AutoFill、通知、App Group/Keychain 状态可见 |
+| 权限管理 | `PermissionManagementScreen` | iOS 权限状态中心 | 开发中 | 设置页已显示相机、AutoFill、通知、App Group、Keychain 状态中心；相机读取系统授权状态，AutoFill/App Group/Keychain 读取当前 App 配置状态；通知真实授权状态、签名真机 entitlement 校验待后续 |
 | 开发者设置 | `DeveloperSettingsScreen` | iOS debug/diagnostics | 待实现 | 安全脱敏诊断、同步日志、fixture 导入 |
 
 ## 扩展与设备范围

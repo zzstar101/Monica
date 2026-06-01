@@ -470,6 +470,12 @@
   - Wi-Fi 编辑页已在保存后的 Wi-Fi 条目中显示可扫描二维码图片，同时保留二维码内容和 iOS 原生 `ShareLink`。
   - `AndroidFeatureMatrix.md` 已把 Wi-Fi 条目推进为已实现；本节点仍不声明可绕过 iOS 限制直接写入系统 Wi-Fi 配置。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 94 个 XCTest；`git diff --check` 通过。
+- 权限管理状态中心已完成第一版：
+  - 按 TDD 新增 `testPermissionStatusCenterExposesIOSNativeCapabilities`，先确认 RED 为 `AppSessionModel` 缺少 `permissionStatusRows`。
+  - `AppPermissionStatusRow` 现在统一描述相机、AutoFill、通知、App Group 和 Keychain 的 iOS 原生能力状态。
+  - 设置页新增“权限管理”区块，显示每项能力的图标、状态和说明；相机读取系统授权状态，AutoFill/App Group/Keychain 根据当前 App/Extension 配置状态展示，通知先以可检查状态占位。
+  - `AndroidFeatureMatrix.md` 已把权限管理推进为开发中；通知真实授权状态、设置跳转和签名真机 entitlement 校验仍待后续节点。
+  - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 95 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
