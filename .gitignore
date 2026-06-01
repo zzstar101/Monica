@@ -53,6 +53,8 @@ Monica for Android/.kotlin/
 Monica for Android/.gradle/
 Monica for Android/app/build/
 Monica for Android/build/
+# Rust build caches
+mdbx/target/
 # Documentation and Analysis
 修复文档/
 doc/
@@ -74,4 +76,3 @@ bitwarden/
 !Monica for Android/app/src/main/java/takagi/ru/monica/bitwarden/**
 fdroiddata/
 CLI-WeChat-Bridge-main/
-

@@ -274,6 +274,40 @@ impl UnlockService {
         )
     }
 
+    /// 重设密码（要求当前连接已经通过其它方式解锁）。
+    ///
+    /// 用当前连接中的 vault_key 直接为新密码重新包裹，不需要旧密码。
+    pub fn reset_password_with_mode(
+        conn: &mut VaultConnection,
+        new_password: &str,
+        mode: TigaMode,
+    ) -> StorageResult<()> {
+        Self::validate_password(new_password)?;
+        let vault_key = conn
+            .keyring()
+            .map(|keyring| keyring.vault_key.clone())
+            .ok_or_else(|| StorageError::Validation("vault must be unlocked".to_string()))?;
+
+        let normalized = Self::normalize_unicode(new_password);
+        let mut kdf_params = KdfParams::for_password_with_mode(mode);
+        kdf_params.salt = kdf::generate_salt(16).map_err(|e| {
+            StorageError::Crypto(mdbx_crypto::error::CryptoError::RngError(e.to_string()))
+        })?;
+        let unlock_key = Self::derive_key(normalized.as_bytes(), &kdf_params)?;
+        let wrapped = Self::wrap_vault_key(&unlock_key, &vault_key)?;
+
+        let vault_ctx = Self::read_vault_context(conn)?;
+        let keyring = Keyring::from_vault_key(&vault_key, &vault_ctx)?;
+        conn.attach_keyring(keyring);
+
+        if Self::has_method_of_type(conn, UnlockMethodType::Password)? {
+            Self::update_method_key(conn, UnlockMethodType::Password, &kdf_params, &wrapped)
+        } else {
+            Self::store_method(conn, UnlockMethodType::Password, &kdf_params, &wrapped)
+                .map(|_| ())
+        }
+    }
+
     // -----------------------------------------------------------------------
     // LIST — 查询
     // -----------------------------------------------------------------------
@@ -680,6 +714,19 @@ mod tests {
         UnlockService::setup_password(&mut conn, "old-password").unwrap();
 
         UnlockService::change_password(&mut conn, "old-password", "new-password").unwrap();
+
+        assert!(UnlockService::unlock_with_password(&mut conn, "old-password").is_err());
+        assert!(UnlockService::unlock_with_password(&mut conn, "new-password").is_ok());
+    }
+
+    #[test]
+    fn test_reset_password_from_unlocked_security_key_session() {
+        let mut conn = setup();
+        UnlockService::setup_password(&mut conn, "old-password").unwrap();
+        UnlockService::setup_security_key(&mut conn, b"device-key").unwrap();
+
+        UnlockService::unlock_with_security_key(&mut conn, b"device-key").unwrap();
+        UnlockService::reset_password_with_mode(&mut conn, "new-password", TigaMode::Multi).unwrap();
 
         assert!(UnlockService::unlock_with_password(&mut conn, "old-password").is_err());
         assert!(UnlockService::unlock_with_password(&mut conn, "new-password").is_ok());

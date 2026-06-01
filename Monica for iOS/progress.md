@@ -1,0 +1,372 @@
+# 进度记录
+
+## 2026-05-30 / 2026-05-31
+
+- 创建 `Monica for iOS` 规划目录。
+- 梳理现有项目结构：
+  - Android 主应用
+  - MDBX Rust workspace
+  - MDBX 规范文档
+  - 文档站/官网
+- 记录 iOS 平台限制。
+- 创建规划文件：
+  - `task_plan.md`
+  - `findings.md`
+  - `cross-platform-migration-plan.md`
+- 按用户要求，将规划文件改为中文。
+- 通过 Plan mode 原生选项锁定 iOS 开发路径：
+  - MDBX 优先
+  - 首里程碑为技术验证
+  - iOS 17+
+  - iPhone 优先
+  - Tiga 首阶段 Multi Type
+  - 第二阶段本地 Vault
+  - TestFlight 只做 MDBX
+  - WebDAV 首版
+  - AutoFill 首版较完整
+  - App Group 加密索引
+  - Passkey 后置
+  - 永久免费
+  - UniFFI
+  - 模块化工程
+- 已按用户提醒阅读 `mdbx-doc` 目录下现有编号规范文件，并据此收紧 iOS FFI 的最小 API 边界。
+- 新增 `mdbx/crates/mdbx-ios-ffi`，通过 UniFFI 暴露 MDBX iOS 技术验证所需的最小 Rust facade。
+- 新增 `Monica for iOS/Scripts/generate-mdbx-swift-bindings.sh`，用于生成 Swift/header/modulemap。
+- 新增 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，用于构建 device/simulator staticlib 并组装 XCFramework。
+- 新增 `Monica for iOS/SwiftPackages` 下的模块化 Swift package 骨架。
+- 将 UniFFI 生成物输出目录调整为 `Monica for iOS/Generated/MDBXUniFFI`，避免未打包 XCFramework 前被 SwiftPM 误编译。
+- 新增 `Monica for iOS/Artifacts/MDBX` 产物目录说明，XCFramework 本体作为本地构建产物忽略。
+- 新增 `Monica for iOS/App/MonicaApp` SwiftUI App 源码骨架和 entitlements。
+- 新增 `Monica for iOS/Extensions/MonicaAutoFillExtension` Credential Provider Extension 源码骨架、Info.plist 和 entitlements。
+- 已安装 rustup 管理的 iOS Rust targets，并成功运行 `Scripts/build-mdbx-xcframework.sh`。
+- 已生成 `Artifacts/MDBX/MonicaMDBXGenerated.xcframework`，并将 UniFFI Swift binding 同步到 `MonicaMDBX` Swift package。
+- 已创建 `Monica.xcodeproj`，包含 `Monica` App target 和 `MonicaAutoFillExtension` target，并接入本地 Swift packages。
+- `MonicaMDBX` 已增加 Swift wrapper，隐藏生成的 UniFFI 类型，提供 create/open/project/login entry/list entries 的最小 iOS API。
+- App 的 Vault 页已增加 MDBX round-trip 检查入口，可触发 SwiftUI -> `MonicaMDBX` -> UniFFI -> Rust MDBX 的 create/open/read-write 验证。
+- 新增 `MonicaTests` Xcode unit test target，并通过共享 `Monica` scheme 自动运行 MDBX round-trip XCTest。
+- 新增 `Tests/MonicaTests/MDBXRoundTripTests.swift`，在 iOS simulator 中直接验证 `MonicaMDBXTechnicalVerifier.runProjectScopedLoginRoundTrip`。
+- `MonicaStorage` 已从占位常量推进为本地 vault repository 边界：
+  - `LocalVaultRepository`
+  - `LocalVaultEngine`
+  - `MDBXLocalVaultEngine`
+  - `LocalVaultSession`
+  - `LocalVaultDescriptor`
+- `MonicaStorage` 已依赖 `MonicaMDBX`，但 SwiftPM 单元测试通过 fake engine 验证 repository 行为，不在 macOS 测试中误触 iOS-only FFI。
+- `MonicaTests` 已接入 `VaultSessionModelTests.swift`，并验证 App 会话模型可以通过 `LocalVaultRepository` 创建、打开和锁定本地 MDBX vault。
+- App 的 Vault 页已从纯 MDBX 技术检查推进到本地 Vault 操作雏形：
+  - 可输入 vault 名称和主密码创建 `.mdbx` vault。
+  - 可通过文件导入器打开已有 `.mdbx` vault。
+  - 解锁后可执行本地锁定并清空活动会话。
+  - 解锁后可新增首类密码条目，并在当前会话中列出已创建的登录条目。
+  - 解锁后可按标题、用户名或 URL 对当前会话登录条目做基础搜索；锁定时搜索状态会同步清空。
+  - 解锁后可选择登录条目进入编辑表单，修改标题、用户名、密码和 URL，并通过 UniFFI/Rust `EntryRepo::update` 写回同一条 MDBX entry。
+  - 解锁后可软删除登录条目，列表中移入 `Recently Deleted`；可从回收站恢复，恢复会通过 Rust `EntryRepo::restore` 写入新的 MDBX commit/object version。
+  - 技术检查入口仍保留，用于独立验证 UniFFI round-trip。
+- `MonicaStorage` 已新增首个条目 repository 边界：
+  - `LocalVaultEntryRepository`
+  - `LocalVaultProject`
+  - `LocalLoginEntryDraft`
+  - `LocalLoginEntry`
+  - 通过 `LocalVaultEngine` 把 project-scoped login entry create/list/update/delete/list-deleted/restore 映射到 `MonicaMDBX`。
+- `MonicaStorage` 已新增 AutoFill 加密索引最小契约：
+  - `AutoFillEncryptedIndex`
+  - `AutoFillEncryptedIndexRecord`
+  - `AutoFillCredentialIndexRecord`
+  - `AutoFillIndexEncryptionKey`
+  - `AutoFillEncryptedIndexCodec`
+  - `AutoFillEncryptedIndexStore`
+  - `FileAutoFillEncryptedIndexStore`
+  - 文件名固定为 `autofill-index-v1.json`，面向 App Group container。
+  - envelope 只保存 schema/version、vault id、key id、更新时间和 nonce/ciphertext/tag，不保存明文域名、标题或账号。
+  - codec 使用 CryptoKit `AES.GCM` 对每条 credential metadata 加密；payload 可包含标题、账号和 service identifiers，但只进入 ciphertext。
+  - codec 强制 AutoFill 索引 key 为 32 字节，后续由 Keychain/LocalAuthentication 解锁边界提供真实 key material。
+  - iOS 写入使用 atomic + complete file protection，macOS SwiftPM 测试环境使用 atomic。
+  - `MonicaStorage` Package 显式声明 iOS 17+ 和 macOS 13+，避免 SwiftPM macOS 测试目标对 CryptoKit 可用性产生误判。
+- `MDBXLocalVaultEngine` 已保留当前打开的 `MonicaMDBXVault` 引用，让同一个 App session 可以继续创建 project、创建 login entry、更新 login entry、软删除和恢复 login entry。
+- `Info.plist` 已加入现代 `UILaunchScreen` 声明，修复 iPhone 17 Pro 模拟器上的兼容窗口/letterbox 显示。
+- Vault、AutoFill、Settings 三个 tab 的列表已增加底部安全留白，避免 iOS 26 浮动 tab bar 遮挡末尾操作。
+- App 会话已接入 iOS scene phase：
+  - 进入 `inactive` 时显示全屏隐私遮罩，避免系统截图或切 App 过程暴露 vault 内容。
+  - 进入 `background` 时立即锁定 vault，并清空活动 vault 名称、条目列表、回收站列表、搜索、编辑状态和临时密码字段。
+  - 回到 `active` 时移除隐私遮罩；如果已因后台锁定，仍保持 locked 状态。
+- App 会话已接入基础自动锁定窗口：
+  - 默认 idle timeout 为 5 分钟，并在 Settings 中显示。
+  - create/open 成功后记录会话活动时间。
+  - 用户点击和条目增删改等操作会刷新活动时间。
+  - App 回到 active 时会检查 idle timeout，超时则复用 `lockLocalVault()` 清理敏感状态。
+- Settings 已接入用户可配置自动锁定策略：
+  - 预设为 1 分钟、5 分钟、15 分钟、30 分钟。
+  - 默认仍为 5 分钟。
+  - 切换策略时会刷新当前活动窗口，避免用户刚调整设置就被旧窗口立即锁定。
+  - Settings 使用 Picker 写回 `AppSessionModel.updateAutoLockPolicy`，不再只是只读显示。
+- App vault create/open 失败路径已加强：
+  - 失败后保持 locked。
+  - 清空主密码输入。
+  - 不保留活动 vault/session。
+  - 保留 `vaultOperationState.failed(...)` 作为用户可见错误状态。
+- `MonicaSecurity` 已从占位说明推进为 Keychain/LocalAuthentication 第一层边界：
+  - 新增 `WrappedVaultKey`，只表示包装后的 key material，不表示原始 vault key。
+  - 新增 `WrappedVaultKeyStore` 协议、`MemoryWrappedKeyStore` 测试实现和 `KeychainWrappedVaultKeyStore` iOS Keychain 实现。
+  - 新增 `MonicaLocalAuthenticator` 协议、`RecordingLocalAuthenticator` 测试实现和 `DeviceOwnerLocalAuthenticator` LocalAuthentication 实现。
+  - 新增 `VaultKeychainManager`，要求读取包装 key material 前先通过本地认证。
+  - 新增 `AutoFillIndexKeyMaterial`，表示 32 字节 AutoFill 索引加密 key material，不表示 vault 主密钥。
+  - 新增 `AutoFillIndexKeyStore` 协议、`MemoryAutoFillIndexKeyStore` 测试实现和 `KeychainAutoFillIndexKeyStore` iOS Keychain 实现。
+  - 新增 `AutoFillIndexKeychainManager`，要求读取 AutoFill index key material 前先通过 LocalAuthentication，并拒绝非 32 字节 key material。
+  - 新增 Xcode 集成测试，验证认证取出的 AutoFill index key 可以直接解密 `MonicaStorage` 生成的 AES-GCM 索引 payload。
+- App 会话已接入主 App 侧 AutoFill 加密索引生成：
+  - `AppSessionModel.refreshAutoFillEncryptedIndex` 会把当前 `loginEntries` 映射为标题、账号和 service identifiers 元数据。
+  - 元数据通过 `AutoFillEncryptedIndexCodec` 逐条 AES-GCM 加密后写入注入的 `AutoFillEncryptedIndexStore`。
+  - 生成的 envelope 只保留 vault id、key id、更新时间和 nonce/ciphertext/tag，不包含明文域名、标题或账号。
+  - 创建、编辑、软删除和恢复登录条目后，如果 App 已配置 AutoFill index store 和 key provider，会自动刷新加密索引。
+  - 未配置 AutoFill index store/key provider 时，普通本地 Vault 条目操作保持原行为。
+- AutoFill Extension 已接入解锁读取加密索引的第一条链路：
+  - `MonicaStorage` 新增 `AutoFillCredentialIndexUnlocker` 和 `AutoFillUnlockedCredentialIndex`。
+  - 解锁器会校验 vault id 和 key id，再用 AES-GCM 解密索引 payload。
+  - 解锁后的索引支持域名/URL service identifier 匹配和内存搜索。
+  - Extension 从 App Group 读取 `autofill-index-v1.json`，再通过 `AutoFillIndexKeychainManager` + `DeviceOwnerLocalAuthenticator` 认证读取 AutoFill index key。
+  - Extension 的 credential list 会按系统传入的 `ASCredentialServiceIdentifier` 匹配结果，并提供搜索框过滤已匹配的加密索引元数据。
+  - 当前 Extension 仍不填充密码；无 UI 请求继续返回 `userInteractionRequired`，选择凭据后的明文读取和系统填充后置。
+- 主 App 生产路径已接入 AutoFill 加密索引默认 wiring：
+  - 新增 `AppAutoFillIndexKeyMaterialStore` 和 `AppAutoFillIndexKeyMaterialProvider`。
+  - provider 按 vault id 从 store 复用已有 32 字节 AutoFill index key material；没有时通过 `SecRandomCopyBytes` 生成，并使用固定 key id `autofill-index-key-v1`。
+  - 新增 `AppKeychainAutoFillIndexKeyMaterialStore`，使用同步 Security framework `SecItem` API 保存/读取 AutoFill index key material，service 与 Extension 使用的 `ru.takagi.monica.autofill-index-key` 保持一致。
+  - `AppSessionModel` 的 AutoFill index key provider 已改为接收 vault id，避免多个 vault 误用同一把索引 key。
+  - `AppRootView` 现在通过 `AppSessionModel.production(environment:)` 初始化；App Group container 可用时注入 `FileAutoFillEncryptedIndexStore` 和 Keychain-backed provider，不可用时退回普通本地 Vault session，避免无签名模拟器环境影响核心 Vault 操作。
+- AutoFill 已推进到选择后填充链路：
+  - `MonicaStorage` 新增 AutoFill 加密 secret snapshot 契约，使用 AES-GCM 逐条加密账号和密码，文件名为 `autofill-secrets-v1.json`。
+  - 主 App 在刷新 AutoFill 索引时同步刷新加密 secret snapshot；创建、编辑、软删除和恢复登录条目后都会尝试同步 index 与 secret snapshot。
+  - AutoFill Extension 会从 App Group 读取 `autofill-index-v1.json` 与 `autofill-secrets-v1.json`，经 LocalAuthentication/Keychain 解锁同一把 AutoFill index key 后解密。
+  - 用户选择匹配记录后，Extension 会按 entry id 读取解密后的 username/password，构造 `ASPasswordCredential` 并调用 `extensionContext.completeRequest(withSelectedCredential:)` 交给系统填充。
+  - 无 UI credential 请求仍返回 `userInteractionRequired`；QuickType identity 已有 App 侧同步链路，真实展示和无 UI 返回路径需要签名真机环境继续验证。
+- AutoFill identity store / QuickType 暴露路径已完成第一条 App 侧同步链路：
+  - 新增 `AppAutoFillCredentialIdentity` 和 `AppAutoFillCredentialIdentityStore`，让 App 会话可以在不直接依赖 AuthenticationServices 类型的情况下生成可测试的 identity 列表。
+  - 新增 `SystemAutoFillCredentialIdentityStore`，生产路径使用 `ASCredentialIdentityStore.shared.replaceCredentialIdentities(_:completion:)` 同步 `ASPasswordCredentialIdentity`。
+  - `AppSessionModel.refreshAutoFillEncryptedIndex` 现在可同时写入加密 index、加密 secret snapshot，并同步 credential identities；条目创建、更新、软删除和恢复会保持 identity store 同步。
+  - 生成 identity 时会从 URL 同步域名和原始 URL 两种 service identifier；空 username 不生成 QuickType identity。
+  - 真实 QuickType 展示仍需要签名真机环境验证，因为无签名 simulator 下 App Group / Credential Provider 权限不可用。
+- 已在 `iPhone 17 Pro` 模拟器实测安装、启动和截图：
+  - iOS 26.5
+  - UDID `4F179679-A513-4C20-A935-6164CBCE2711`
+  - 截图路径 `/tmp/monica-iphone17pro-fullscreen-vault.png`
+- 已验证：
+  - `cargo test -p mdbx-ios-ffi`
+  - `cargo test -p mdbx-storage repo::entry::tests`
+  - `swift test` in `SwiftPackages/MonicaSecurity`
+  - `swift test` in `SwiftPackages/MonicaMDBX`
+  - `swift test` in `SwiftPackages/MonicaStorage`
+  - `xcodebuild -project Monica.xcodeproj -scheme Monica -sdk iphonesimulator ... build`
+  - `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination id=4F179679-A513-4C20-A935-6164CBCE2711`
+  - 当前 `MonicaSecurity` SwiftPM 覆盖 7 个用例，新增 AutoFill index key 认证读取、无效长度拒绝、认证失败不返回 key material。
+  - 当前 `MonicaStorage` SwiftPM 覆盖 15 个用例，新增 AutoFill 加密索引 save/load、缺失文件返回 nil、文件不包含明文 credential metadata、AES-GCM encrypt/decrypt round-trip、codec 输出不包含明文 credential metadata、解密索引域名匹配和搜索、AutoFill 加密 secret snapshot encrypt/decrypt、secret 文件不包含明文账号/密码。
+  - 当前 Xcode XCTest 覆盖 25 个用例：MDBX UniFFI round-trip、Storage entry repository 真实 MDBX round-trip、本地 vault create/open/lock App 会话、App 首条密码创建/list 会话、App 登录条目搜索过滤、App 登录条目选择/编辑、App 登录条目删除/恢复、后台自动锁定、inactive 隐私遮罩、自动锁定窗口未过期/已过期/用户活动刷新、自动锁定预设、自动锁定策略切换生效、认证 AutoFill index key 解密 Storage 索引 payload、AutoFill index key material provider 创建/复用、主 App 加密 AutoFill 索引生成、条目变更自动同步 AutoFill 索引、主 App 写入可供 Extension 解锁填充的 AutoFill secret snapshot、条目变更同步 AutoFill credential identities、create/open 失败安全清理。
+  - 最新 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 25 个 XCTest；`CODE_SIGNING_ALLOWED=NO` 下出现 App Group `client is not entitled` 日志，当前生产工厂会在 App Group container 不可用时不启用 AutoFill index/secret store/provider。
+  - 本轮重新验证 `SwiftPackages/MonicaSecurity`、`SwiftPackages/MonicaStorage`、`SwiftPackages/MonicaMDBX` 的 `swift test`，分别通过 7、15、2 个 Swift Testing 用例。
+  - 本轮先运行新增 AutoFill identity 同步单测，确认 RED 为缺失类型/协议；补齐实现后该单测通过，再运行完整 `xcodebuild test`，`iPhone 17 Pro` 模拟器通过 25 个 XCTest。
+- WebDAV 首版基础已开始落地到 `MonicaSync`：
+  - 先写失败测试覆盖 WebDAV PUT 上传、GET 下载、Basic auth header、SHA-256 完整性 header、下载完整性校验、恢复预览和 HTTP 错误状态。
+  - 新增 `WebDAVEndpoint`、`WebDAVBackupPackage`、`WebDAVBackupReceipt`、`WebDAVDownloadedBackup`、`WebDAVRestorePreview`。
+  - 新增 `WebDAVTransportRequest`、`WebDAVTransportResponse`、`WebDAVTransport` 协议，用于测试时注入 recording transport，生产时使用 `URLSessionWebDAVTransport`。
+  - 新增 `WebDAVClient.upload(_:)` 和 `WebDAVClient.download(fileName:)`；上传接受 HTTP 200/201/204，下载要求 HTTP 200。
+  - 上传会写 `Authorization: Basic ...`、`Content-Type: application/octet-stream` 和 `X-Monica-Backup-SHA256`；下载如果远端返回 `X-Monica-Backup-SHA256`，会先校验再产生恢复预览。
+  - `MonicaSync` Package 已补 `.macOS(.v13)`，让 macOS SwiftPM 测试环境可用 CryptoKit SHA-256 和 async URLSession。
+  - 本轮 `SwiftPackages/MonicaSync` 的 `swift test` 通过 5 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 25 个 XCTest。
+- WebDAV 已从 `MonicaSync` 核心推进到 App 手动备份/恢复预览入口：
+  - 按 TDD 先新增 App 层 WebDAV 备份/恢复预览测试，RED 为缺失 `AppWebDAVBackupService`。
+  - 新增 `AppWebDAVBackupService` 协议和 `URLSessionAppWebDAVBackupService` 生产 adapter，App 层仍通过 `MonicaSync.WebDAVClient` 做真实网络请求。
+  - `AppSessionModel` 新增 WebDAV 配置字段、`WebDAVBackupState`、`uploadActiveVaultBackup()` 和 `downloadWebDAVRestorePreview()`。
+  - 手动备份会读取当前 active vault 文件并上传，成功后保存 byte count / SHA-256 receipt 状态，并清空 WebDAV 密码输入。
+  - 恢复流程当前只下载并生成 `WebDAVRestorePreview`，不会覆盖本地 active vault 文件；确认恢复/落盘策略后续继续补。
+  - Settings 已新增 WebDAV 区块，支持输入 server URL、username、password、remote file，并触发 `Back Up Vault` / `Preview Restore`。
+  - 新增 XCTest 覆盖上传 active vault 文件、记录 endpoint/package/receipt，以及下载恢复预览不覆盖本地 vault。
+  - 最新完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 27 个 XCTest。
+  - 最新 `SwiftPackages/MonicaSync` 的 `swift test` 通过 5 个 Swift Testing 用例。
+- WebDAV 恢复确认/安全落盘已补第一版：
+  - 按 TDD 新增 `testConfirmWebDAVRestoreAtomicallyReplacesVaultAndLocksSession`，RED 为缺失 `confirmWebDAVRestore` 和 `restoreSucceeded` 状态。
+  - `LocalVaultEngine` 新增 `closeVault(_:)`，`LocalVaultRepository` 新增 `closeVault(for:)`，`MDBXLocalVaultEngine` 会从进程内 vault cache 移除对应 handle。
+  - `AppSessionModel.lockLocalVault()` 现在会释放当前 active vault session。
+  - `AppSessionModel.confirmWebDAVRestore()` 要求已有恢复预览，确认时先释放并清理当前 unlocked session，再用临时文件 + `FileManager.replaceItemAt` 替换本地 vault 文件。
+  - Settings 的 WebDAV 区块新增 `Restore Backup` destructive 按钮，只在已有恢复预览时显示。
+  - 最新 `SwiftPackages/MonicaStorage` 的 `swift test` 通过 15 个 Swift Testing 用例。
+  - 最新完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 28 个 XCTest。
+- WebDAV 用户可读失败提示已补第一版：
+  - 按 TDD 新增 WebDAV 失败提示回归测试，先确认 `testWebDAVUploadAuthenticationFailureUsesReadableMessage` 红灯为 401 仍显示底层 HTTP 文案。
+  - `AppSessionModel` 新增 WebDAV 错误映射，上传、下载恢复预览和确认恢复失败都会进入统一用户提示。
+  - 当前覆盖认证失败、远端备份完整性校验失败、网络断开；同时为 404、5xx、超时、无法解析/连接服务器和非 HTTP 响应保留可读 fallback。
+  - 最新 `SwiftPackages/MonicaSync` 的 `swift test` 通过 5 个 Swift Testing 用例。
+  - 最新完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 31 个 XCTest。
+- WebDAV 恢复前可打开验证已补第一版：
+  - 已按用户要求重新读取 `mdbx-doc/02-storage-sync-spec.zh-CN.md` 和 `mdbx-doc/04-roadmap-acceptance.zh-CN.md`，恢复路径继续遵循恢复测试、数据耐久性和 WebDAV/网盘不可信的边界。
+  - 按 TDD 新增恢复验证测试，先确认 RED 为 App 会话缺少 `webDAVRestoreVaultPassword`。
+  - Settings 的恢复预览区域新增恢复 vault 密码输入；确认恢复要求输入恢复 vault 密码。
+  - `AppSessionModel.confirmWebDAVRestore()` 现在会先把下载的备份写入临时 `.mdbx` 候选文件，并用恢复 vault 密码通过 `LocalVaultRepository.openVault` 打开验证；验证通过才释放当前 active vault session 并原子替换本地 vault 文件。
+  - 如果候选备份打不开，当前本地 vault 文件不会被覆盖，当前 unlocked session 保持可用，恢复预览保留，恢复密码输入被清空，状态显示“Restored backup could not be opened. Check the vault password.”
+  - 最新 `SwiftPackages/MonicaStorage` 的 `swift test` 通过 15 个 Swift Testing 用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 5 个 Swift Testing 用例。
+  - 最新完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 32 个 XCTest。
+- WebDAV `.sha256` sidecar 兼容已补第一版：
+  - 动机是部分 WebDAV 服务不会在 GET 响应中保留自定义 `X-Monica-Backup-SHA256` header，因此完整性校验不能只依赖 header。
+  - `WebDAVClient.upload(_:)` 现在会在上传 `mobile.mdbx` 后继续上传 `mobile.mdbx.sha256`，内容为 vault SHA-256 文本加换行。
+  - `WebDAVClient.download(fileName:)` 会优先使用远端返回的 `X-Monica-Backup-SHA256`；如果 header 缺失，则读取同名 `.sha256` sidecar 并校验下载内容。
+  - sidecar 上传失败、下载状态异常、sidecar 空内容或 checksum 不匹配都会进入明确失败状态，不产生恢复预览。
+  - `SwiftPackages/MonicaSync` 已新增/更新测试覆盖 sidecar 上传、sidecar 上传失败、header 缺失时读取 sidecar 和 sidecar checksum 不匹配。
+- App vault Keychain/LocalAuthentication 解锁边界第一版曾先以测试 resolver 搭出门禁流程，现已被下一段 MDBX `security_key` 路线替换：
+  - 已按 TDD 新增两个 App 层 XCTest，先确认 RED 为缺失 `AppVaultKeychainService`。
+  - 新增 `AppVaultKeychainService` 协议，用于 App 层保存 opaque `WrappedVaultKey`，以及在 LocalAuthentication 成功后读取 wrapped key。
+  - `AppSessionModel` 新增 `VaultKeychainState`、remembered vault descriptor/vault id、`prepareVaultKeychainUnlock()` 和 `unlockRememberedVaultWithKeychain(deviceID:)`。
+  - 手动 create/open 成功后会记住非敏感 vault 描述符；`prepareVaultKeychainUnlock()` 只保存注入 provider 产出的 opaque wrapped key，不保存主密码。
+  - 当时 keychain unlock 流程会先通过 `loadWrappedKeyAfterAuthentication(vaultID:reason:)`，再用注入 resolver 打开 remembered vault；该做法只用于验证认证门禁和 App 状态流，没有进入最终生产路线。
+  - 生产路径当时只接入 `KeychainAppVaultKeychainService`，底层使用 `VaultKeychainManager<KeychainWrappedVaultKeyStore, DeviceOwnerLocalAuthenticator>`；没有启用 fake provider。
+  - Settings 已显示 Vault Keychain 状态，并预留 Enable Keychain Unlock / Unlock with Keychain 操作。
+  - 本轮目标测试从 RED 到 GREEN：新增 2 个 XCTest 通过；随后已继续升级到 MDBX `security_key` 路线。
+- App vault Keychain/LocalAuthentication 解锁已从测试 resolver 推进到 MDBX `security_key` 路线：
+  - 已按用户要求重新读取 `mdbx-doc/03-security-spec.zh-CN.md` 第 10 节，确认 iOS 生物识别/Keychain 应包裹或释放本地 security key material，而不是取代真实 vault secret，也不应保存主密码。
+  - Rust `mdbx-ios-ffi` 已新增 `MdbxVault.setup_local_security_key_unlock` 和 `open_vault_with_security_key`，并用 smoke test 验证可在不提供主密码时用 local security key material 打开 vault，错误 material 会失败。
+  - 已重新运行 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，同步 UniFFI Swift binding 和 `MonicaMDBXGenerated.xcframework`。
+  - `MonicaMDBX` Swift wrapper 新增 `setupLocalSecurityKeyUnlock(_:)` 和 `MonicaMDBXRuntime.openVaultWithSecurityKey(...)`。
+  - `MonicaStorage` 新增 `LocalVaultRepository.setupLocalSecurityKeyUnlock(for:securityKeyMaterial:)` 与 `openVaultWithSecurityKey(...)`，`MDBXLocalVaultEngine` 将其映射到 `MonicaMDBX`。
+  - `AppSessionModel.prepareVaultKeychainUnlock()` 现在会先把 provider 产出的 local security key material 注册到当前 MDBX vault，再保存到 Keychain；`unlockRememberedVaultWithKeychain` 认证后读取 material 并调用 `openVaultWithSecurityKey`，不再通过 resolver 还原主密码。
+  - 生产路径新增 `AppVaultSecurityKeyMaterialProvider`，通过 `SecRandomCopyBytes` 生成 32 字节本地 security key material，并交给 Keychain/LocalAuthentication service 保存/读取。
+  - 最新验证：`cargo test -p mdbx-ios-ffi` 通过 4 个 smoke test；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 16 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 35 个 XCTest。
+- 本地 Vault 安全笔记条目纵切已完成第一版：
+  - 已按用户要求在写 MDBX/Rust/FFI 逻辑前重新读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/03-security-spec.zh-CN.md` 和 `mdbx-doc/08-implementation-completion-plan.zh-CN.md`，继续遵循 `project -> entry` 层级、`entry_type` 类型隔离和 secret payload 加密存储边界。
+  - 按 TDD 新增 Rust FFI smoke test，覆盖 project-scoped note create/list/update/delete/list-deleted/restore/reopen。
+  - `mdbx-ios-ffi` 已新增 `NoteEntryRecord` 和 note entry create/list/update/delete/list-deleted/restore API，并复用类型校验，避免 login/note 串类型读取。
+  - 已重新运行 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，同步 UniFFI Swift binding 和 XCFramework。
+  - `MonicaMDBX` 已新增 `MonicaMDBXNoteEntry` 与对应 Swift wrapper 方法。
+  - `MonicaStorage` 已新增 `LocalNoteEntryDraft`、`LocalNoteEntry` 和 repository/engine note 方法，覆盖创建、更新、软删除、回收站列表和恢复。
+  - `MonicaTests` 已新增 `testProjectScopedNoteRoundTripThroughUniFFI`，并补齐 App 测试 fake engine 的 note 方法，保证 App target 编译时跟随 `LocalVaultEngine` 协议演进。
+  - App 层已新增安全笔记首版入口：`AppSessionModel` 管理 note 创建表单、列表、搜索、选择编辑、软删除、回收站和恢复状态；Vault 页新增 `Notes`、`Selected Note` 和 `Deleted Notes` 区块；锁定、后台锁定、create/open 失败和 Keychain security-key 解锁路径会同步清理或初始化 note 会话状态。
+  - 按 TDD 新增 `testCreateUpdateDeleteAndRestoreNoteEntryInActiveVault`，先确认 RED 为缺少 App note 状态/动作，再实现 AppSessionModel 和 SwiftUI Vault 页。
+  - 最新验证：`cargo test -p mdbx-ios-ffi` 通过 5 个 smoke test；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 17 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 37 个 XCTest。
+- 本地 Vault TOTP 条目技术纵切已启动：
+  - 已按用户要求先读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/01-product-spec.zh-CN.md`、`mdbx-doc/03-security-spec.zh-CN.md` 和 `mdbx-doc/11-monica-pass-cli-development.zh-CN.md` 中与 TOTP 相关的约束。
+  - 当前遵循的边界：TOTP 是同一 project 下的 sibling entry，`entry_type = totp`；TOTP seed 属于秘密，不进入日志或明文字段；payload 使用兼容 Android `TotpData` 的 JSON 字段名，包括 `secret`、`issuer`、`accountName`、`period`、`digits`、`algorithm`、`otpType` 和 `counter`。
+  - 按 TDD 新增 Rust FFI smoke test `creates_updates_deletes_restores_and_reopens_project_scoped_totp_entry`，先确认 RED 为缺少 `create_totp_entry` 等 API。
+  - `mdbx-ios-ffi` 已新增 `TotpEntryRecord` 和 TOTP create/list/list-deleted/update/delete/restore API，并复用 project/type 校验，避免不同 entry type 串读。
+  - 已重新运行 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，同步 UniFFI Swift binding 和 XCFramework。
+  - `MonicaMDBX` 已新增 `MonicaMDBXTotpEntry` 与 Swift wrapper 方法，并新增 iOS XCTest `testProjectScopedTotpRoundTripThroughUniFFI` 覆盖 create/update/delete/restore/reopen。
+  - TOTP 当时只完成存储/桥接 round-trip；验证码生成算法、Storage repository 和 App UI 入口尚未接入。
+  - 当时验证：`cargo test -p mdbx-ios-ffi` 通过 6 个 smoke test；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 38 个 XCTest。
+- 本地 Vault TOTP 条目已推进到 Storage repository 和 App UI：
+  - 按 TDD 先确认 App 层 `testCreateUpdateDeleteAndRestoreTotpEntryInActiveVault` 红灯为缺少 `AppSessionModel` 的 TOTP 状态/动作。
+  - `AppSessionModel` 已新增 TOTP 创建表单、列表、搜索、选择编辑、软删除、回收站和恢复状态。
+  - `createTotpEntry` / `updateSelectedTotpEntry` / `deleteSelectedTotpEntry` / `restoreTotpEntry` 已通过 `LocalVaultEntryRepository` 写入同一 active project，`otpType` 当前固定为 `TOTP`，`counter` 固定为 `0`。
+  - TOTP secret 在创建后、锁定后、create/open 失败后和编辑状态清理时会从 App 会话敏感字段中清除；TOTP 不进入 AutoFill 加密索引或 credential identities。
+  - Vault 页已新增 `TOTP`、`Selected TOTP` 和 `Deleted TOTP` 区块，支持 title、secret、issuer、account、period、digits、algorithm 的存储/编辑和按标题/issuer/account 搜索。
+  - 当时仍不生成动态验证码，也未做二维码导入；这两项转入下一步。
+  - 当时验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 18 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 39 个 XCTest。
+- TOTP 动态验证码基础已接入 Core 和 App：
+  - 按 TDD 先在 `MonicaCore` 新增 RFC 6238 向量测试和 Base32/参数校验测试，确认 RED 为缺少 `TotpGenerator`、算法枚举和错误类型。
+  - `MonicaCore` 新增 `TotpAlgorithm`、`TotpError` 和 `TotpGenerator`，使用 CryptoKit HMAC 生成 TOTP，支持 SHA1/SHA256/SHA512、6-8 位数字、可配置 period 和 Base32 secret 规范化。
+  - `MonicaCore` Package 补 `.macOS(.v13)`，解决 macOS SwiftPM 测试环境对 CryptoKit 可用性的编译约束。
+  - 按 TDD 在 App 层新增 `testTotpEntryGeneratesCodeFromStoredSeed`，确认 RED 为缺少 `AppSessionModel.totpCode(for:at:)`。
+  - `AppSessionModel` 已通过 `MonicaCore.TotpGenerator` 从 `LocalTotpEntry` 生成验证码，Vault 页 TOTP 列表和 `Selected TOTP` 区块会显示当前 code。
+  - 当时仍未做二维码导入和按剩余秒数自动刷新的精细体验。
+- TOTP `otpauth://` URI 导入基础已接入 Core 和 App：
+  - 按 TDD 先在 `MonicaCore` 新增标准 `otpauth://totp` URI、label fallback 和错误路径测试，确认 RED 为缺少 `TotpURIParser`。
+  - `MonicaCore` 新增 `TotpImportDraft` 和 `TotpURIParser`，支持 issuer/account label、secret、period、digits、algorithm 解析；会拒绝非 `otpauth://totp`、缺失或非法 secret、非法 digits 和未知 algorithm。
+  - 按 TDD 在 App 层新增 `testImportTotpURIpopulatesDraftFieldsWithoutSavingEntry`，确认 RED 为缺少 `AppSessionModel.importTotpURI`。
+  - `AppSessionModel.importTotpURI(_:)` 只把 URI 解析结果填入 TOTP 草稿表单，不创建 MDBX entry，也不触发 repository；成功后清空 URI 输入并显示导入状态。
+  - Vault 页 TOTP 区块新增 `otpauth URI` 安全输入框和 `Import URI` 按钮，便于先通过粘贴或后续二维码扫描结果导入；后台锁定和失败清理会同步清掉 URI 字段，避免 seed 留在会话状态里。
+  - 当时真正相机二维码扫描和按剩余秒数自动刷新的精细体验仍后置。
+- TOTP 相机二维码扫描入口和时间刷新体验已接入 App：
+  - 按 TDD 在 App 层新增 `testScannedTotpQRCodeImportsDraftFieldsWithoutSavingEntry`，确认 RED 为缺少 `AppSessionModel.importScannedTotpQRCode`。
+  - 按 TDD 新增 `testTotpTimeRemainingUsesEntryPeriod`，确认 RED 为缺少 `AppSessionModel.totpTimeRemaining(for:at:)`。
+  - `AppSessionModel.importScannedTotpQRCode(_:)` 复用 `TotpURIParser` 路线，把扫描得到的 QR payload 导入 TOTP 草稿表单，不创建 MDBX entry，也不触发 repository。
+  - `AppSessionModel.totpTimeRemaining(for:at:)` 按 entry period 计算剩余秒数，供 UI 刷新使用。
+  - Vault 页 TOTP 区块新增 `Scan QR` 按钮，使用 AVFoundation `AVCaptureSession` + `AVCaptureMetadataOutput` 扫描 QR code；扫描成功后关闭 sheet 并导入草稿。
+  - `Info.plist` 已新增 `NSCameraUsageDescription`，相机权限文案为 `Scan TOTP setup QR codes.`。
+  - TOTP 列表和 `Selected TOTP` 通过 `TimelineView(.periodic(..., by: 1))` 每秒刷新当前 code、剩余秒数和进度条。
+  - Swift 6 下 `AVCaptureMetadataOutputObjectsDelegate` 需要显式 `@preconcurrency` conformance；当前 delegate queue 使用 `.main`，UI 状态变更仍在主线程完成。
+  - 当时验证：`SwiftPackages/MonicaCore` 的 `swift test` 通过 5 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 18 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 43 个 XCTest。
+- 本地 Vault 银行卡条目纵切已完成第一版：
+  - 已按用户要求在写 MDBX/Rust/FFI 逻辑前读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/03-security-spec.zh-CN.md`、`mdbx-doc/01-product-spec.zh-CN.md` 和 `mdbx-doc/11-monica-pass-cli-development.zh-CN.md` 中与 typed entry / card 边界相关的约束。
+  - 当前遵循的边界：银行卡是同一 project 下的 typed entry，`entry_type = card`；卡号、CVV、备注等敏感字段全部放入 MDBX entry payload，不拆成明文列；Card 不进入 AutoFill index、secret snapshot 或 credential identities。
+  - 按 TDD 新增 Rust FFI smoke test，覆盖 project-scoped card create/list/update/delete/list-deleted/restore/reopen。
+  - `mdbx-ios-ffi` 已新增 `CardEntryRecord` 和 card create/list/list-deleted/update/delete/restore API；已重新生成 UniFFI Swift binding 和 `MonicaMDBXGenerated.xcframework`。
+  - `MonicaMDBX` 已新增 `MonicaMDBXCardEntry` 与 Swift wrapper 方法，`MonicaStorage` 已新增 `LocalCardEntryDraft`、`LocalCardEntry` 和 repository/engine card 方法。
+  - App 层已新增银行卡首版入口：`AppSessionModel` 管理 card 创建表单、列表、搜索、选择编辑、软删除、回收站和恢复状态；Vault 页新增 `Cards`、`Selected Card` 和 `Deleted Cards` 区块，并只在列表摘要中显示 network/issuer/末四位。
+  - Card 敏感字段在创建成功/失败、锁定、后台锁定、create/open 失败和编辑状态清理时会清空；Card mutation 不刷新 AutoFill index，保持 Card 不进入 AutoFill。
+  - 当时验证：`cargo test -p mdbx-ios-ffi` 通过 7 个 smoke test；`SwiftPackages/MonicaCore` 的 `swift test` 通过 5 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 19 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaUI` 的 `swift test` 通过 1 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 45 个 XCTest。
+- 本地 Vault 证件元数据条目纵切已完成第一版：
+  - 已按用户要求在写 MDBX/Rust/FFI 逻辑前读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/01-product-spec.zh-CN.md`、`mdbx-doc/11-monica-pass-cli-development.zh-CN.md`、`mdbx-doc/README.md` 和 `mdbx-doc/03-security-spec.zh-CN.md` 中与 typed entry / identity / payload 边界相关的约束。
+  - 当前遵循的边界：证件元数据是同一 project 下的 typed entry，`entry_type = identity`；证件号、备注等敏感字段全部放入 MDBX entry payload，不拆成明文列；Identity 不进入 AutoFill index、secret snapshot 或 credential identities。
+  - 按 TDD 新增 Rust FFI smoke test，覆盖 project-scoped identity create/list/update/delete/list-deleted/restore/reopen。
+  - `mdbx-ios-ffi` 已新增 `IdentityEntryRecord` 和 identity create/list/list-deleted/update/delete/restore API；已重新生成 UniFFI Swift binding 和 `MonicaMDBXGenerated.xcframework`。
+  - `MonicaMDBX` 已新增 `MonicaMDBXIdentityEntry` 与 Swift wrapper 方法，`MonicaStorage` 已新增 `LocalIdentityEntryDraft`、`LocalIdentityEntry` 和 repository/engine identity 方法。
+  - App 层已新增证件元数据首版入口：`AppSessionModel` 管理 identity 创建表单、列表、搜索、选择编辑、软删除、回收站和恢复状态；Vault 页新增 `Identities`、`Selected Identity` 和 `Deleted Identities` 区块。
+  - Identity 敏感字段在创建成功/失败、锁定、后台锁定、create/open 失败和编辑状态清理时会清空；Identity mutation 不刷新 AutoFill index，保持 Identity 不进入 AutoFill。
+  - 当时完整回归：`cargo test -p mdbx-ios-ffi` 通过 8 个 smoke test；`SwiftPackages/MonicaCore` 的 `swift test` 通过 5 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 20 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaUI` 的 `swift test` 通过 1 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 47 个 XCTest。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把 Identity 纵切从待办改为已完成第一版，并记录最新完整回归结果。
+- 本地 Vault 密码生成器 MVP 已完成：
+  - 按 TDD 先在 `MonicaCore` 新增密码生成器测试，RED 为缺少 `PasswordGenerator`、`PasswordGeneratorPolicy` 和 `PasswordGeneratorError`。
+  - `MonicaCore` 已新增安全随机密码生成器，默认策略为 20 位，包含大小写字母、数字和符号，不包含空白字符，并保证每个启用字符集至少出现一次；生产随机源使用 `SecRandomCopyBytes`。
+  - 按 TDD 在 App 层新增 `testGenerateLoginPasswordFillsDraftWithoutSavingEntry` 和 `testGenerateSelectedLoginPasswordFillsEditingDraftWithoutSavingEntry`，RED 为缺少 `passwordGenerator` 注入和 AppSessionModel 生成方法。
+  - `AppSessionModel` 已接入可注入的密码生成闭包；新增登录和选中登录编辑都可生成密码，但只填入草稿字段，不自动调用 repository，不写入 MDBX。
+  - Vault 页 `Passwords` 和 `Selected Login` 区块已新增 `Generate Password` 按钮。
+  - 最新验证：`SwiftPackages/MonicaCore` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 20 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaUI` 的 `swift test` 通过 1 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 49 个 XCTest。此次未改 Rust/MDBX 代码，因此未重跑 `cargo test -p mdbx-ios-ffi`。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把密码生成器从待补改为已完成 MVP，并记录最新验证结果。
+- 本地 Vault 登录条目收藏 MVP 已完成：
+  - 已按用户要求在写 MDBX/Rust/FFI 逻辑前读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/01-product-spec.zh-CN.md`、`mdbx-doc/03-security-spec.zh-CN.md` 和 `mdbx-doc/11-monica-pass-cli-development.zh-CN.md` 中与 entry schema、payload 和本地 Vault 元数据相关的约束。
+  - 当前边界是不改 MDBX v1 schema；`entries` 表不新增 favorite 明文列，登录条目的 `favorite: bool` 存在加密/序列化 payload 中。
+  - `create_login_entry` 默认 `favorite = false`；`update_login_entry` 会保留已有 favorite，避免普通编辑清掉收藏。
+  - Rust FFI 新增 `LoginEntryRecord.favorite` 和 `MdbxVault.set_login_favorite(project_id, entry_id, favorite)`，并用 smoke test 覆盖收藏、普通更新保留收藏、重开 vault 后收藏状态仍存在。
+  - 已重新运行 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，同步 UniFFI Swift binding 和 `MonicaMDBXGenerated.xcframework`。
+  - `MonicaMDBX`、`MonicaStorage` 和 `AppSessionModel` 已接入登录条目收藏；Vault 页列表显示收藏标记，`Selected Login` 支持 `Favorite` toggle。
+  - 收藏状态不进入 AutoFill encrypted index、secret snapshot 或 credential identities；AutoFill 仍只消费标题、账号、URL 和填充所需 username/password。
+  - 最新验证：`cargo test -p mdbx-ios-ffi` 通过 9 个 smoke test；`SwiftPackages/MonicaCore` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 21 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaUI` 的 `swift test` 通过 1 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 50 个 XCTest。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把登录条目收藏 MVP 从待补改为已完成，并记录最新验证结果。
+- 本地 Vault 多类型条目收藏 MVP 已完成：
+  - 已按用户要求在写 MDBX/Rust/FFI 逻辑前读取 `mdbx-doc/06-sqlite-schema-v1.zh-CN.md`、`mdbx-doc/01-product-spec.zh-CN.md`、`mdbx-doc/03-security-spec.zh-CN.md` 和 `mdbx-doc/11-monica-pass-cli-development.zh-CN.md` 中与 entry schema、payload、TOTP seed 和本地 Vault 元数据相关的约束。
+  - 当前边界仍是不改 MDBX v1 schema；安全笔记、TOTP、银行卡和证件元数据的 `favorite: bool` 与登录条目一致，存在各自加密/序列化 payload 中，不新增明文列。
+  - create 默认 `favorite = false`；普通 update 会保留已有 favorite，避免编辑标题、seed、卡号、证件号等字段时清掉收藏状态。
+  - Rust FFI 新增 note/TOTP/card/identity 的 favorite record 字段和 `set_note_favorite`、`set_totp_favorite`、`set_card_favorite`、`set_identity_favorite`，并用 smoke test 覆盖收藏、普通更新保留收藏、重开 vault 后收藏状态仍存在。
+  - 已重新运行 `Monica for iOS/Scripts/build-mdbx-xcframework.sh`，同步 UniFFI Swift binding 和 `MonicaMDBXGenerated.xcframework`。
+  - `MonicaMDBX`、`MonicaStorage` 和 `AppSessionModel` 已接入 note/TOTP/card/identity 收藏；Vault 页各类型列表显示收藏标记，选中态支持 `Favorite` toggle。
+  - 收藏状态不进入 AutoFill encrypted index、secret snapshot 或 credential identities；AutoFill 仍只消费登录条目的标题、账号、URL 和填充所需 username/password。
+  - 最新验证：`cargo test -p mdbx-ios-ffi` 通过 10 个 smoke test；`SwiftPackages/MonicaCore` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaSecurity` 的 `swift test` 通过 7 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 22 个用例；`SwiftPackages/MonicaSync` 的 `swift test` 通过 8 个用例；`SwiftPackages/MonicaUI` 的 `swift test` 通过 1 个用例；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 51 个 XCTest。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把多类型条目收藏 MVP 从后续待办改为已完成，并记录最新验证结果。
+- TOTP 扫描错误提示第一版已完成：
+  - 按 TDD 新增 `testScannedTotpQRCodeFailureUsesReadableMessageWithoutChangingDraft`，确认 RED 为无效 QR 触发 Swift 默认 `MonicaCore.TotpError error 4` 文案。
+  - `AppSessionModel` 已为手动粘贴和相机扫描的 TOTP import 路径增加可读错误映射；无效扫描不会覆盖已有 TOTP 草稿，也不会创建 MDBX entry。
+  - `TotpQRCodeScannerSheet` 会在扫描失败时显示错误提示；scanner 回调改为返回是否接受该码，无效码会保持 sheet 打开并恢复扫描，成功码才关闭 sheet。
+  - 最新验证：目标 XCTest 通过；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 52 个 XCTest。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把 TOTP 扫描错误提示从待打磨项中拆出已完成部分，并记录最新验证结果。
+- 本地 Vault 多类型收藏列表体验已完成第一版：
+  - 按 TDD 新增 `testFilteredEntryListsPrioritizeAndFilterFavoritesAcrossTypes`，先确认 RED 为 `AppSessionModel` 缺少多类型 Favorites Only 状态。
+  - `AppSessionModel` 已为 login/note/TOTP/card/identity 增加 Favorites Only 状态；`filtered*Entries` 现在会默认把收藏项稳定排在前面，并支持“只看收藏”与搜索条件叠加。
+  - 锁定 vault 或 create/open 失败清理会同步重置 Favorites Only 状态，避免下次解锁继承旧会话筛选。
+  - Vault 页各类型列表搜索框下方已增加 `Favorites Only` toggle；该改动只发生在 App 会话/UI 层，没有修改 MDBX/Rust/FFI 或存储 schema。
+  - 最新验证：目标 XCTest 通过；完整 `xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 53 个 XCTest。`CODE_SIGNING_ALLOWED=NO` 下 App Group `client is not entitled` 日志仍为预期。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，把多类型收藏列表排序/筛选体验记录为已完成第一版。
+- 真机测试第一轮已开始：
+  - 已发现真实设备 `Evangelion`，设备型号为 iPhone 15 Pro，CoreDevice identifier `6298298A-15D5-5930-83A6-0E790F22F0C6`，硬件 UDID `00008130-00117521220A001C`；`xcodebuild -showdestinations` 可识别为 iOS destination。
+  - 本机存在 1 个有效 Apple Development signing identity：`Apple Development: 1095181037@qq.com (B6R6XP99R2)`；当前本地没有 provisioning profiles。
+  - 直接真机 build 失败，原因是 `Monica` 和 `MonicaAutoFillExtension` targets 未设置 development team。
+  - 使用命令行覆盖 `DEVELOPMENT_TEAM=B6R6XP99R2` 并加 `-allowProvisioningUpdates` 后仍失败，原因是 Xcode Accounts 没有 Team `B6R6XP99R2` 的有效账号，并且缺少 `takagi.ru.monica` 与 `takagi.ru.monica.autofill` 的 iOS App Development provisioning profiles。
+  - 已运行 `xcodebuild -project 'Monica for iOS/Monica.xcodeproj' -scheme Monica -configuration Debug -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build`，真机 `iphoneos` arm64 device-slice build 通过，证明 App、AutoFill Extension、Swift packages 和 `MonicaMDBXGenerated.xcframework` 的 device slice 可编译和链接。
+  - 已确认构建产物 `Monica.app/Monica`、`Monica.app/Monica.debug.dylib` 和 `MonicaAutoFillExtension.appex/MonicaAutoFillExtension` 均为 arm64 Mach-O。
+  - 尝试通过 `xcrun devicectl device install app --device 00008130-00117521220A001C .../Monica.app` 安装未签名产物失败，设备返回 `0xe800801c (No code signature found.)`，属于预期签名阻塞。
+- 中文化和 Android 图标复用已完成：
+  - 主 App SwiftUI 用户可见文本已改为中文，包括 tab、section、按钮、输入框、状态文案、WebDAV 错误提示、TOTP 导入/扫描错误提示、自动锁定选项和 Keychain 解锁文案。
+  - AutoFill Extension 用户可见文本已改为中文，包括锁定/解锁、搜索、空状态和错误提示；Extension display name 为 `Monica 自动填充`。
+  - `Info.plist` 相机权限说明已改为 `用于扫描 TOTP 设置二维码。`，Xcode project `knownRegions` 已加入 `zh-Hans`。
+  - Swift Package 中会透出到 UI 或错误状态的基线文案已中文化，包括 `MonicaCoreInfo.storageStrategy = "MDBX 优先"`、`MonicaUIBaseline.deviceFocus = "iPhone 优先"`、Security/Storage/Sync/MDBX 用户可读错误和认证 reason。
+  - 已复用 Android 图标源文件 `Monica for Android/app/src/main/res/drawable-nodpi/monica_launcher.png`，生成 iOS `App/MonicaApp/Assets.xcassets/AppIcon.appiconset/`，尺寸包含 40、58、60、80、87、120、180 和 1024 px。
+  - 图标已用 CoreGraphics 重新生成成不透明 PNG，`sips` 验证 `hasAlpha: no`；`Assets.xcassets` 已加入 Xcode project file reference，并通过 Resources build phase 接入 `Monica` target。
+  - 用户可见英文扫描结果目前只剩 Monica、MDBX、TOTP、WebDAV、Keychain、App Group、SHA-256、UniFFI、系统图标名、bundle/service 标识和 asset catalog 元数据等技术名或平台标识。
+  - 最新验证：`xcodebuild test` 在 `iPhone 17 Pro` 模拟器通过 53 个 XCTest；`SwiftPackages/MonicaCore`、`MonicaUI`、`MonicaSecurity` 的 `swift test` 分别通过 7、1、7 个用例；`iphoneos` unsigned build 通过。无签名测试中 App Group `client is not entitled` 仍为预期。
+- 文档同步：
+  - 已更新 `task_plan.md`、`findings.md`、`README.md` 和 `cross-platform-migration-plan.md`，记录中文化、Android 图标复用、AppIcon 接入和最新验证结果。
+
+## 遇到的问题
+
+- 当前没有规划阻塞。
+- 已确认 `xcodebuild test` 不能使用 `generic/platform=iOS Simulator`，必须指定具体模拟器。
+- 真机安装/运行当前被签名和 provisioning 阻塞：需要在 Xcode Accounts 添加/刷新 Team `B6R6XP99R2` 的账号，或提供包含 App Group、Keychain Access Group、Credential Provider Extension 能力的 development provisioning profiles；之后再验证 App Group、Keychain access group、Credential Provider、QuickType、TOTP 相机权限和 MDBX `security_key` 真机解锁。
+- 待完成技术项：在真机/签名环境确认 device slice、App Group、Keychain access group、Credential Provider、QuickType identity 展示、TOTP 相机权限/扫描画面，以及 Keychain/LocalAuthentication + MDBX `security_key` 解锁可运行；继续打磨 TOTP 扫描视觉细节和本地 Vault 多类型条目体验；继续完善 WebDAV 真实服务兼容测试。

@@ -425,6 +425,38 @@ impl EntryRepo {
 
         Ok(())
     }
+
+    pub fn restore(
+        conn: &VaultConnection,
+        ctx: &CommitContext,
+        entry_id: &str,
+    ) -> StorageResult<Entry> {
+        let entry = EntryRepo::get_by_id(conn, entry_id)?
+            .ok_or_else(|| StorageError::NotFound(entry_id.to_string()))?;
+
+        if !entry.deleted {
+            return Err(StorageError::ConstraintViolation(
+                "entry is not deleted".to_string(),
+            ));
+        }
+        ensure_active_project(conn, &entry.project_id)?;
+
+        let now = chrono::Utc::now().to_rfc3339();
+        let commit_id = ctx.commit_object_change(conn, "entries", entry_id, "restore", "entry")?;
+        let object_clock = bump_clock(&entry.object_clock);
+
+        conn.inner().execute(
+            "UPDATE entries SET deleted = 0, object_clock = ?2,
+             head_commit_id = ?3, updated_at = ?4, updated_by_device_id = ?5
+             WHERE entry_id = ?1",
+            params![entry_id, object_clock, commit_id, now, ctx.device_id],
+        )?;
+
+        ObjectVersionRepo::record_entry_current(conn, &commit_id, entry_id)?;
+
+        EntryRepo::get_by_id(conn, entry_id)?
+            .ok_or_else(|| StorageError::NotFound(entry_id.to_string()))
+    }
     // -----------------------------------------------------------------------
     // ENCRYPTION HELPERS
     // -----------------------------------------------------------------------
@@ -937,6 +969,31 @@ mod tests {
 
         EntryRepo::soft_delete(&conn, &ctx, &entry.entry_id).unwrap();
         assert!(EntryRepo::soft_delete(&conn, &ctx, &entry.entry_id).is_err());
+    }
+
+    #[test]
+    fn test_restore_deleted_entry() {
+        let (conn, ctx, project_id) = setup();
+        let entry = EntryRepo::create(
+            &conn,
+            &ctx,
+            &project_id,
+            EntryType::Note,
+            Some("Back"),
+            &serde_json::json!({"text": "restore me"}),
+        )
+        .unwrap();
+
+        EntryRepo::soft_delete(&conn, &ctx, &entry.entry_id).unwrap();
+        let restored = EntryRepo::restore(&conn, &ctx, &entry.entry_id).unwrap();
+
+        assert_eq!(restored.entry_id, entry.entry_id);
+        assert!(!restored.deleted);
+        assert_ne!(restored.head_commit_id, entry.head_commit_id);
+
+        let visible = EntryRepo::list_by_project(&conn, &project_id).unwrap();
+        assert_eq!(visible.len(), 1);
+        assert_eq!(visible[0].entry_id, entry.entry_id);
     }
 
     // -----------------------------------------------------------------------

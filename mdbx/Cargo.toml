@@ -5,6 +5,7 @@ members = [
     "crates/mdbx-crypto",
     "crates/mdbx-storage",
     "crates/mdbx-sync",
+    "crates/mdbx-ios-ffi",
     "crates/mdbx-cli",
 ]
 
