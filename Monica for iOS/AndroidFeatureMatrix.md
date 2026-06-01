@@ -28,7 +28,7 @@
 | Passkey 元数据 | `PasskeyViewModel`, `PasskeyListScreen`, `PasskeyDetailScreen` | 一等 `passkey` 条目 + 系统 Passkey | 开发中 | 元数据 CRUD 可用；系统创建/认证需 AuthenticationServices 真机验收 |
 | SSH Key | `AddEditSshKeyScreen`, `SshKeyDetailScreen` | 一等 `sshKey` 条目 | 已实现 | 列表、详情编辑、新增、搜索、收藏、软删除、恢复通过 XCTest；私钥以引用字段保存 |
 | API Token | Android 扩展条目/自定义字段 | 一等 `apiToken` 条目 | 已实现 | 列表、详情编辑、新增、搜索、收藏、软删除、恢复通过 XCTest；Token 不在列表明文展示 |
-| Wi-Fi | `AddEditWifiScreen`, `WifiDetailScreen` | 一等 `wifi` 条目 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；二维码/系统分享策略待后续补齐 |
+| Wi-Fi | `AddEditWifiScreen`, `WifiDetailScreen` | 一等 `wifi` 条目 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；已生成标准 `WIFI:T:...;S:...;P:...;H:...;;` QR payload，支持 WPA/WEP/open 归一、隐藏网络标记和特殊字符转义；编辑页已显示二维码内容并接入 iOS ShareLink，真正二维码图片渲染待后续补齐 |
 | Bitwarden Send | `SendScreen`, `AddEditSendScreen` | 一等 `send` 条目 + Bitwarden Send 同步 | 开发中 | 基础 CRUD、搜索、收藏、删除恢复已实现；Bitwarden 同步、附件支持待 P3 |
 | 附件引用 | `attachments/` | 一等 `attachmentRef` + 内容存储 | 开发中 | 元数据接口已存在；Android 备份确认导入时已可落库附件元数据并 remap 父密码条目；Android 备份 `.enc` 密文 blob 已保存到本地待恢复缓存，metadata 保留 source/downloadState/wrapped CEK/localPath；iOS Vault 页已显示附件引用列表，支持按文件名/类型/状态/source/hash/localPath/关联条目 ID 搜索，并支持软删除与恢复；需要解密、预览、迁移和同步 |
 

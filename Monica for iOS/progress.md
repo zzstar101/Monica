@@ -457,6 +457,13 @@
   - 新增 `testAndroidBackupAttachmentReferenceCanBeDeletedAndRestored`，覆盖 Android 备份导入后的附件引用删除进入回收区、恢复回活动列表和状态文案。
   - `AndroidFeatureMatrix.md` 已记录附件引用列表、搜索、删除和恢复；本节点仍不声明附件内容解密、QuickLook 预览、迁移或同步已完成。
   - 最新验证：新增/扩展的 2 个 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 41 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 93 个 XCTest；`git diff --check` 通过。
+- Wi-Fi QR 分享 payload 已完成第一版：
+  - 按 TDD 新增 `localWifiEntriesExposeStandardQRCodePayload`，先确认 RED 为 `LocalWifiEntry` 缺少标准二维码 payload。
+  - `LocalWifiEntry.qrCodePayload` 现在生成标准 `WIFI:T:...;S:...;P:...;H:...;;` 字符串，支持 WPA/WPA2/WPA3 归一到 `WPA`、WEP、open/nopass、隐藏网络标记，以及反斜杠、分号、逗号、冒号和双引号转义。
+  - 按 TDD 扩展 `testCreateUpdateFavoriteDeleteAndRestoreWifiEntryInActiveVault`，先确认 RED 为 AppSessionModel 缺少编辑中 Wi-Fi QR payload；`editingWifiQRCodePayload` 现在从当前编辑草稿派生分享内容。
+  - Wi-Fi 编辑页已显示“二维码内容”，并用 iOS 原生 `ShareLink` 提供分享入口；本节点仍不声明已渲染二维码图片或写入系统 Wi-Fi 配置。
+  - `AndroidFeatureMatrix.md` 已记录 Wi-Fi QR payload 和 iOS 分享入口。
+  - 最新验证：Storage 目标测试和 App 目标 XCTest 均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 93 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
