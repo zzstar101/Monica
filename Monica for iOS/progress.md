@@ -548,6 +548,12 @@
   - 设置页安全中心新增最近操作展示，显示最近 6 条脱敏事件；本节点不声明持久化密码历史、跨会话审计或版本恢复已完成。
   - `AndroidFeatureMatrix.md` 已把“密码历史/时间线”推进为开发中，并记录持久化历史版本、跨会话审计和版本恢复仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 107 个 XCTest；`git diff --check` 通过。
+- 核心条目操作时间线扩展已完成：
+  - 按 TDD 新增 `testCoreEntryOperationsAppendRedactedTimelineEvents`，先确认 RED 为 note/TOTP/card/identity 操作后时间线仍为空。
+  - `AppSessionModel` 现在会把 note、TOTP、银行卡和证件条目的创建、更新、删除、恢复操作追加到同一条会话内时间线，顺序和 login 保持一致。
+  - 新测试确认时间线只记录动作、条目类型、条目 ID、标题和时间，不包含笔记正文、TOTP seed、账号名、卡号、CVV 或证件号。
+  - `AndroidFeatureMatrix.md` 已更新“密码历史/时间线”覆盖范围；持久化历史版本、跨会话审计和版本恢复仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 108 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
