@@ -384,6 +384,13 @@
   - 导出会生成 Android 风格 ZIP 和对应 JSON 文件路径；当前覆盖核心条目，App 文件选择/确认导入、加密 `.enc.zip`、附件、回收站、配置和时间线恢复仍待后续节点接入。
   - `AndroidFeatureMatrix.md` 已把 Android 备份包从“待实现”推进为“开发中”，并记录本节点兼容边界。
   - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 37 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 82 个 XCTest。
+- Android 备份包 App 文件入口已完成第一版：
+  - 按 TDD 新增 `testAndroidBackupImportFileBuildsPreviewWithoutWritingVault`、`testAndroidBackupImportPreviewDoesNotWriteUntilConfirmed` 和 `testAndroidBackupExportDocumentWrapsCurrentVaultZipForFileExporter`，先确认 RED 为缺少 AppSessionModel Android 备份导入/导出接口。
+  - `AppSessionModel.previewAndroidBackupImport(_:)` / `previewAndroidBackupImport(from:)` 会解析 `.zip` 并生成独立 Android 备份预览，不写入 MDBX；`confirmAndroidBackupImport(projectTitle:)` 才将预览条目写入当前 vault/project。
+  - `AppSessionModel.androidBackupExportDocument()` 已把当前可见 vault 条目导出为 Android 风格 ZIP，并包装成 SwiftUI `FileDocument`。
+  - 设置页“迁移”卡片新增 Android 备份导入/导出按钮，接入 iOS 原生 `.fileImporter` / `.fileExporter`，导入后显示可导入数量和问题数量，再由用户确认写库。
+  - `AndroidFeatureMatrix.md` 已记录 App 文件选择、预览确认导入和导出 ZIP 已接入；加密备份、附件、回收站、配置和时间线恢复仍待后续节点。
+  - 最新目标验证：3 个新增 XCTest 在 `iPhone 17` iOS 26.5 模拟器通过；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 85 个 XCTest。
 
 ## 遇到的问题
 
