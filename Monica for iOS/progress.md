@@ -506,6 +506,12 @@
   - 重复项详情只显示检查建议，不包含密码；现有弱密码/复用密码测试同步确认无重复数据时显示 `0 项`。
   - `AndroidFeatureMatrix.md` 已把重复项清理推进为开发中；忽略列表、合并预览、可撤销合并和完整修复流仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 100 个 XCTest；`git diff --check` 通过。
+- 安全中心重复项合并预览已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterBuildsDuplicateLoginMergePreviewsWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `duplicateLoginMergePreviews`。
+  - `AppSessionModel.duplicateLoginMergePreviews` 现在复用重复检测分组，生成保留项、待合并项、匹配账号/网址和条目数量；预览文案不包含密码。
+  - 设置页“安全中心”在存在重复登录条目时显示合并预览列表；本节点只展示预览，不执行写入、删除、忽略或撤销。
+  - `AndroidFeatureMatrix.md` 已记录重复项清理具备摘要和合并预览；忽略列表、实际合并和可撤销合并仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 101 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
