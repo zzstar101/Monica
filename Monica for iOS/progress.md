@@ -518,6 +518,12 @@
   - 设置页重复项预览行新增“合并重复项”按钮；合并后的重复条目进入回收站，仍可用现有恢复入口找回。
   - `AndroidFeatureMatrix.md` 已记录重复项清理支持摘要、预览和软删除合并；忽略列表和专门撤销栈仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 102 个 XCTest；`git diff --check` 通过。
+- 安全中心重复项忽略列表已完成第一版：
+  - 按 TDD 新增 `testSecurityCenterCanIgnoreAndRestoreDuplicateLoginPreviews`，先确认 RED 为 `AppSessionModel` 缺少 `ignoreDuplicateLoginPreview`、`ignoredDuplicateLoginGroupCount` 和 `clearIgnoredDuplicateLoginPreviews`。
+  - `AppSessionModel` 现在以内存集合记录被忽略的重复登录分组；忽略后重复项摘要计数和合并预览都会排除该组，不删除登录条目，也不会进入回收站。
+  - 设置页重复项预览行新增“忽略”按钮；存在已忽略分组时显示“恢复已忽略重复项”，可一次清空忽略列表并恢复摘要/预览。
+  - `AndroidFeatureMatrix.md` 已记录重复项清理支持忽略列表第一版；专门撤销栈仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 103 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

@@ -66,7 +66,7 @@
 | 字段/页面定制 | `PageAdjustmentCustomizationScreen`, `PasswordFieldCustomizationScreen` | iOS 风格显示偏好 | 待实现 | 字段显示、卡片密度、底部导航偏好可配置 |
 | 主题/图标 | `ColorSchemeSelectionScreen`, `IconSettingsScreen` | iOS 风格主题和图标设置 | 待实现 | 深浅色、强调色、图标显示策略、App Icon 变体 |
 | 安全分析 | `SecurityAnalysisScreen` | 安全中心 | 开发中 | 设置页已显示安全中心第一版，统计弱密码、复用密码和重复登录条目数且不泄漏具体密码；泄露风险、重复项合并动作、历史版本和修复建议待后续 |
-| 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 开发中 | 已在安全中心显示重复登录条目摘要和合并预览，按标题/用户名/URL 去空白小写后分组；支持合并预览后软删除重复项并可从回收站恢复；忽略列表和专门撤销栈待后续 |
+| 重复项清理 | `DedupEngineScreen` | 安全中心重复项合并 | 开发中 | 已在安全中心显示重复登录条目摘要和合并预览，按标题/用户名/URL 去空白小写后分组；支持合并预览后软删除重复项并可从回收站恢复；支持忽略重复组并从摘要/预览中隐藏，设置页可恢复已忽略重复项；专门撤销栈待后续 |
 | 密码历史/时间线 | `TimelineScreen`, `PasswordHistoryDao`, `OperationLogDao` | 历史版本和操作时间线 | 待实现 | 条目历史、版本恢复、操作审计 |
 | Plus/支付 | `plus/`, `MonicaPlusScreen`, `PaymentScreen` | StoreKit 2 + 现有 Plus 映射 | 待实现 | Apple IAP 购买/恢复；Plus/CDK 与 IAP 权益统一 |
 | 权限管理 | `PermissionManagementScreen` | iOS 权限状态中心 | 开发中 | 设置页已显示相机、AutoFill、通知、App Group、Keychain 状态中心；相机读取系统授权状态，通知读取 `UNUserNotificationCenter` 授权状态，AutoFill/App Group/Keychain 读取当前 App 配置状态；相机/通知提供 iOS App 设置入口；签名真机 entitlement 校验待后续 |
