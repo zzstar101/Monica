@@ -377,6 +377,13 @@
   - 设置页新增“迁移”卡片，接入 iOS 原生 `fileImporter` / `fileExporter`；支持导入 CSV 后显示可导入数量和问题数量，再由用户点击“确认导入”写入当前 vault。
   - `AndroidFeatureMatrix.md` 已把 CSV 导入导出从“开发中”推进为“已实现”。
   - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 35 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 82 个 XCTest。
+- Android 备份包 Storage codec 已完成第一版：
+  - 按 TDD 新增 `androidBackupCodecImportsCurrentZipFolderLayout` 和 `androidBackupCodecExportsAndroidFolderLayoutAndRoundTrips`，先确认 RED 为缺少 `AndroidBackupCodec`。
+  - `MonicaStorage` 新增 `AndroidBackupCodec`，通过 ZIPFoundation 读写 ZIP 包，支持 Android 新版 `folders/<分类>/passwords/authenticators/bank_cards/documents/notes/passkeys/*.json` 核心布局。
+  - 导入会把 Android 密码、TOTP、笔记、银行卡、证件和 passkey JSON 映射为现有 `VaultCSVItemDraft`，并按 Android 文件名 id 稳定排序，避免 ZIP central directory 顺序影响预览。
+  - 导出会生成 Android 风格 ZIP 和对应 JSON 文件路径；当前覆盖核心条目，App 文件选择/确认导入、加密 `.enc.zip`、附件、回收站、配置和时间线恢复仍待后续节点接入。
+  - `AndroidFeatureMatrix.md` 已把 Android 备份包从“待实现”推进为“开发中”，并记录本节点兼容边界。
+  - 最新验证：`SwiftPackages/MonicaStorage` 的 `swift test` 通过 37 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 82 个 XCTest。
 
 ## 遇到的问题
 
