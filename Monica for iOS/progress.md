@@ -429,6 +429,13 @@
   - 本节点仍不做附件解密、预览、同步或完整恢复声明；无密文 blob 的附件仍以 `android-backup-pending`/`missing-blob` 保留 metadata。
   - `AndroidFeatureMatrix.md` 已记录 Android 备份 `.enc` blob 本地保留和附件 metadata 恢复字段；加密 `.enc.zip`、附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 88 个 XCTest。
+- Android 加密备份包安全识别已完成：
+  - 按 TDD 新增 `androidBackupCodecReportsEncryptedBackupAsUnsupported`，先确认 RED 为缺少 `encryptedBackupUnsupported` issue 和文件名入口。
+  - `AndroidBackupCodec.importItems(from:fileName:)` 现在会在普通 ZIP 解析前识别 Android `MONICA_ENC_V1` 文件头和 `.enc.zip` 文件名，返回明确 issue，而不是把加密包当损坏 ZIP 处理。
+  - 按 TDD 新增 `testAndroidBackupEncryptedImportPreviewRequiresUnsupportedDecryptFlow` 和 `testAndroidBackupEncryptedFileNameRequiresUnsupportedDecryptFlow`，先确认 RED 为 App 状态保持 idle 或只抛 ZIP 错误。
+  - `AppSessionModel.previewAndroidBackupImport` 现在会把加密备份 issue 转成中文失败状态并清空待确认 preview，避免用户进入“可导入/可确认”的误导路径。
+  - 本节点只做识别和安全提示，不实现 AES-GCM/PBKDF2 解密；真正加密备份解密仍待后续节点。
+  - `AndroidFeatureMatrix.md` 已记录 `MONICA_ENC_V1`/`.enc.zip` 加密备份识别状态。
 
 ## 遇到的问题
 
