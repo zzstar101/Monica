@@ -560,6 +560,12 @@
   - 新测试确认时间线只记录动作、条目类型、条目 ID、标题和时间，不包含 Passkey user handle/credential/public key/private key reference、SSH 公钥/私钥引用、API token/scopes、Wi-Fi 密码或 Send 正文。
   - `AndroidFeatureMatrix.md` 已更新“密码历史/时间线”覆盖到当前除附件外的一等条目；持久化历史版本、跨会话审计、附件操作和版本恢复仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 109 个 XCTest；`git diff --check` 通过。
+- 附件引用操作时间线扩展已完成：
+  - 按 TDD 新增 `testAttachmentReferenceDeleteAndRestoreAppendRedactedTimelineEvents`，先确认 RED 为附件引用删除/恢复后时间线为空。
+  - `AppSessionModel` 现在会把 `attachmentRef` 删除、恢复操作追加到同一条会话内时间线，顺序和已有条目一致。
+  - 新测试确认时间线只记录动作、条目类型、附件 ID、文件名和时间，不包含附件 hash、wrapped key、本地密文路径、密文内容或关联登录密码。
+  - `AndroidFeatureMatrix.md` 已更新“密码历史/时间线”覆盖到所有当前一等条目；持久化历史版本、跨会话审计、附件内容操作和版本恢复仍待后续。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 110 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
