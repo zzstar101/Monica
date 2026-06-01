@@ -420,6 +420,15 @@
   - 附件 metadata 当前使用 `storageMode = "android-backup-pending"`、`storedSize = 0`，明确表示只完成元数据 landing，密文 blob 内容尚未恢复、解密、预览或同步。
   - `AndroidFeatureMatrix.md` 已记录附件元数据落库和父 id remap；附件内容落盘/预览/迁移、加密 `.enc.zip`、回收站/配置恢复仍待后续节点。
   - 最新验证：新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 87 个 XCTest。
+- Android 备份包附件密文 blob 落盘已完成：
+  - 按 TDD 扩展 `androidBackupCodecImportsAttachmentManifestMetadata`，先确认 RED 为附件 manifest 只能看到 blob 路径，不能携带 `attachments/*.enc` 密文 bytes。
+  - `AndroidBackupAttachmentMetadata` 新增 `encryptedBlob`；`AndroidBackupCodec.importItems(from:)` 现在会从 ZIP 中读取匹配的 `attachments/*.enc`，随 manifest 元数据一起进入导入预览。
+  - 按 TDD 扩展 `testAndroidBackupConfirmImportsAttachmentMetadataWithRemappedLoginID`，先确认 RED 为确认导入不会保存附件密文，也不会把恢复字段写入 metadata。
+  - `AppSessionModel.confirmAndroidBackupImport(projectTitle:)` 现在会把附件密文保存到可注入的 `AndroidBackupAttachmentBlobStore`，默认实现 `FileAndroidBackupAttachmentBlobStore` 写入 Application Support 下的 Android backup attachment pending cache；metadata 记录 `storageMode = "android-backup-encrypted-blob"`、`source = "android-backup-local"`、`downloadState = "downloaded"`、`wrappedContentEncryptionKey` 和清洗后的 `localPath`。
+  - 按 TDD 新增 `testFileAndroidBackupAttachmentBlobStoreWritesSanitizedEncryptedBlob`，先确认 RED 为非 ASCII 文件名未被收敛；文件落盘路径现在只允许 ASCII `A-Z/a-z/0-9/._-`，并去掉目录穿越。
+  - 本节点仍不做附件解密、预览、同步或完整恢复声明；无密文 blob 的附件仍以 `android-backup-pending`/`missing-blob` 保留 metadata。
+  - `AndroidFeatureMatrix.md` 已记录 Android 备份 `.enc` blob 本地保留和附件 metadata 恢复字段；加密 `.enc.zip`、附件解密/预览/迁移/同步、回收站/配置恢复仍待后续节点。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 39 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 88 个 XCTest。
 
 ## 遇到的问题
 
