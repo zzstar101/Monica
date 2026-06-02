@@ -813,6 +813,14 @@
   - envelope 摘要只显示 KDBX 版本、header/payload 字节数和公开 cipher/compression/KDF 摘要，不显示数据库密码、key file 内容、encrypted payload 字节或 decoded secret。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 63 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDF 参数结构化解析第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 的 KDBX4 VariantDictionary 解析、Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `keepPassFormatInspectorParsesKdbx4Argon2KdfParametersWithoutLeakingSalt`，先确认 RED 为 `KeePassHeaderSummary` 缺少 `kdfParameters`。
+  - `MonicaStorage` 新增 `KeePassKdbxKdfParameters`、`KeePassKdbxArgon2Parameters` 和 `KeePassKdbxAesKdfParameters`，在 header summary/envelope 中保留后续 crypto 层所需的结构化 KDF 输入。
+  - VariantDictionary 解析从只读取 `$UUID` 扩展为可读取 byte array、UInt32 和 UInt64；当前覆盖 Argon2d/Argon2id 的 salt、iterations、memoryBytes、parallelism、version，以及 AES-KDF 的 seed、rounds。
+  - KDF display 摘要只显示 algorithm、memory/iterations/parallelism/version/rounds 等非秘密数值；测试确认 salt/seed 不进入 display 文案或 envelope 摘要。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、master key 派生、block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增 Argon2 目标测试先 RED 后 GREEN；AES-KDF 目标测试通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 65 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
