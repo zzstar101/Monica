@@ -860,6 +860,13 @@
   - KDBX4 现在明确停在脱敏“KDBX4 HMAC block stream 解码尚未接入”；错误文案不会泄漏 stream start bytes、block hash、encrypted payload、decrypted block stream、数据库密码、key file 内容、derived/master key 或 XML 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明 KDBX4 HMAC block stream、inner protected value stream、Argon2d/Argon2id 执行、KDBX3 旧式 header KDF 字段解析、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 75 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX3 旧式 AES-KDF header 解析第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或 App UI；改动集中在 `MonicaStorage` 的 KDBX3 header KDF 参数解析和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassFormatInspectorParsesKdbx3LegacyAesKdfParametersWithoutLeakingSeed`，先确认 RED 为 KDBX3 header 只显示 `AES-256，GZip` 且 `kdfParameters` 为 nil。
+  - `KeePassFormatInspector` 现在会在 KDBX3 header field 5/6 中解析 TransformSeed 与 TransformRounds，并映射为既有 `KeePassKdbxKdfParameters(algorithm: .aesKdf, aesKdf: ...)`；公开 crypto 摘要会显示 `AES-KDF`，KDF 摘要只显示 rounds，不显示 transform seed。
+  - KDBX4 VariantDictionary KDF 解析路径保持原样；KDBX3 legacy KDF 分支只在 `formatVersion == .kdbx3` 且存在 TransformSeed/TransformRounds 时生效，避免误判 KDBX4 header。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实加密 KDBX3 fixture 端到端导入、KDBX4 HMAC block stream、inner protected value stream、Argon2d/Argon2id 执行、KDBX 保存或附件写回/编辑已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 76 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
