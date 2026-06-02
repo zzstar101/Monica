@@ -777,6 +777,13 @@
   - App 会话默认 `keePassDatabaseReader` 已从纯 unsupported reader 改为 `DefaultKeePassDatabaseReader`，因此后续真实 KDBX 解密器只要输出 XML/明文 snapshot 数据，就能复用现有预览、导入计划和确认导入链路。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；目标 reader 测试通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 57 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX key file 凭据候选兼容第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 的 KeePass 凭据候选契约、App 预检状态文案和回归测试。
+  - 先对照 Android `KeePassCredentialSupport`，确认 Android 解锁时会为 key file 尝试 raw、XML `<Data>`、64 位 hex text 和 `sha256(raw)` 多种 key material，并组合 `password-only`、`key-only`、`empty-password+key`、`password+key` label。
+  - 按 TDD 新增 Storage 用例 `keepPassCredentialSupportBuildsAndroidCompatibleKeyFileCandidatesWithoutLeakingMaterial`，先确认 RED 为缺少 `KeePassKeyFileMaterial`、`KeePassCredentialSupport`、`credentialCandidates` 和候选数量摘要；随后补齐候选生成、key material 去重、失败提示 label 摘要和 key file 文件名清洗。
+  - 既有 `keepPassUnlockPreflightRequiresCredentialsAndSummarizesInputs` 已扩展覆盖 key file 候选数量，App 用例 `testKeePassUnlockPreflightAcceptsPasswordAndKeyFileWithoutWritingVaultOrLeakingSecrets` 已更新为显示“密码 + 密钥文件（N 种 key 解析）”，仍不泄漏数据库密码或 key file 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点只建立 Android 同口径 key file 候选输入，不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 58 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
