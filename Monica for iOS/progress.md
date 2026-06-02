@@ -632,6 +632,15 @@
   - 现有 `testFileAndroidBackupAttachmentBlobStoreWritesSanitizedEncryptedBlob` 已扩展覆盖真实文件仓库的路径清洗、存在性检查和读取行为。
   - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点仍不声明附件解密、QuickLook 预览、迁移、同步或回收站/配置恢复已完成。
   - 最新验证：新增附件内容 XCTest 从 RED 到 GREEN；真实文件仓库定向 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 124 个 XCTest；`git diff --check` 通过。
+- 附件内容解密/临时预览物化第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的附件内容解密器、App 会话临时预览物化和回归测试。
+  - 按 TDD 新增 Storage 用例 `localAttachmentContentDecryptorOpensAndroidEncryptedBlobWithRawCek` 和 `localAttachmentContentDecryptorRejectsInvalidAndroidBlobWithoutLeakingSecrets`，先确认 RED 为缺少 `LocalAttachmentContentDecryptor` / `LocalAttachmentContentCryptoError`。
+  - `MonicaStorage` 新增 `LocalAttachmentContentDecryptor`，按 Android `AttachmentCryptoStreams` 的 `12B IV + ciphertext + 16B tag` 布局使用 CryptoKit AES-256-GCM 解密，并强制 raw CEK 为 32 字节；格式错误、CEK 长度错误和认证失败返回脱敏错误。
+  - 按 TDD 新增 App 用例 `testAndroidBackupAttachmentPreviewMaterializesDecryptedTempFileWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `materializeAttachmentPreview`。
+  - `AppSessionModel.materializeAttachmentPreview(_:contentEncryptionKey:)` 已可读取本地附件密文、调用 Storage 解密器，并把明文写入 UUID 隔离的临时预览目录；返回 `AppAttachmentPreviewFile`，文件名会清洗路径组件，状态文案只包含清洗后的文件名和字节数。
+  - 新测试确认预览文件内容等于解密明文，且状态文案/展示文件名不泄漏 content hash、wrapped CEK、本地密文路径或附件明文。
+  - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点只声明 raw CEK 解密和临时文件物化，Android wrapped CEK 解包、QuickLook UI 预览、迁移和同步仍待后续。
+  - 最新验证：Storage 新增解密用例从 RED 到 GREEN；App 新增预览物化 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 125 个 XCTest。
 
 ## 遇到的问题
 
