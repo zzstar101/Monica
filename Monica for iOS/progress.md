@@ -906,6 +906,14 @@
   - 错误文案和 display summary 不泄漏 inner stream key、ChaCha20 key/nonce、keystream、protected base64、decoded password、数据库密码、key file、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Storage KDBX4 ChaCha20 protected value 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 5 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 82 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 解密后 inner header 解析第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的默认 KeePass reader、KDBX4 inner header parser 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderParsesKdbx4InnerHeaderBeforeProtectedValuesWithoutLeakingSecrets`，先确认 RED 为解密后 payload 以 KDBX4 inner header 开头时 reader 返回 `KDBX 解码器尚未接入`。
+  - `DefaultKeePassDatabaseReader` 现在会在 KDBX4 解密 payload 直接 XML/GZip XML 读取失败后，尝试解析解密后 inner header：field `1` 读取 inner random stream ID，field `2` 读取 inner random stream key，field `0` + zero length 作为结束标记，随后把剩余 XML 或 GZip XML 交给既有只读 snapshot reader。
+  - 解析出的 inner random stream ID/key 会与外层 KDBX crypto inputs 合并，再供 KDBX4 ChaCha20 protected value decoder 解保护；旧的 direct XML、GZip XML、KDBX3 Salsa20 和外层 header 兼容路径保持不变。
+  - 错误文案和 display summary 不泄漏 inner header bytes、inner stream key、protected base64、decoded password、数据库密码、key file、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Storage KDBX4 inner header 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 7 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 83 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
