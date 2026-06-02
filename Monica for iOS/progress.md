@@ -720,6 +720,13 @@
   - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会记录本次 KeePass source entry ID、source group ID、source group path 到新建 iOS login ID、project ID 的内部映射；成功状态文案不包含 UUID，选择新 KDBX 或普通清理会清空旧映射，成功导入后的临时 KDBX bytes/password/key file 清理会保留本次映射。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、TOTP 导入、编辑保存、回收站或云文件源已完成。
   - 最新验证：Storage 原生身份目标测试从 RED 到 GREEN；App 原生身份映射目标测试从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 135 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX TOTP 占位元数据导入第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 `MonicaStorage`；改动集中在 App 会话确认导入路径、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `testKeePassConfirmImportCreatesTotpPlaceholdersForPendingTotpMetadata`，先确认 RED 为 `AppKeePassImportedEntryReference` 缺少 `importedTotpEntryID`，随后补齐实现。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会在 KeePass 候选带 `hasTotp` 时，为同一 iOS 分类创建一个 TOTP 占位条目：title 由 KeePass title 派生，issuer 使用 KeePass title，accountName 使用 KeePass username，period/digits/algorithm 使用 TOTP 默认值，secret 固定为空字符串。
+  - `AppKeePassImportedEntryReference` 现在可记录同一个 KeePass source entry/group 到 iOS login ID、iOS TOTP ID 和 iOS project ID 的内部映射；成功状态文案显示创建的 TOTP 占位数量，但不泄漏 KeePass entry UUID、group UUID、数据库密码或 key file 内容。
+  - 既有 KeePass 元数据确认导入测试已同步覆盖 `hasTotp` 时会创建空 secret 的 TOTP 占位项；本节点仍不声明真实 KDBX 解码、TOTP secret 导入、附件导入、编辑保存、回收站或云文件源已完成。
+  - 最新验证：新增 App XCTest 先 RED 后 GREEN；KeePass 确认导入相关 3 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 136 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
