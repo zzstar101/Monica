@@ -610,6 +610,13 @@
   - Vault 页已接入分类管理条，支持分类菜单、创建、重命名和删除当前空分类；当前 Storage/MDBX project 管理由 iOS 会话索引维护，Rust UniFFI/MDBX 原生 project list/rename/delete 持久化和跨分类批量移动仍待后续。
   - `AndroidFeatureMatrix.md` 已更新“分类/快速筛选”验收内容，继续标记为开发中。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 44 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 121 个 XCTest；`git diff --check` 通过。
+- 跨分类批量移动模块已完成：
+  - 按 TDD 扩展 Storage 用例 `entryRepositoryMovesEntriesBetweenProjectsPreservingIdentity`，先确认 RED 为 `.totp` 及后续类型移动仍返回 `unsupportedEntryType`。
+  - `mdbx-ios-ffi` 新增 `move_totp_entry`、`move_card_entry`、`move_identity_entry` 和 `move_parity_entry`，复用 `EntryRepo::move_to_project`，移动前校验 source project、entry type、deleted 状态；parity 条目额外校验 `kind`，避免 `document-ref` 下 Wi-Fi、Send、附件引用串搬。
+  - `MonicaMDBX` 和 `MDBXLocalVaultEngine.moveEntry` 已接入全类型移动，覆盖 `login/note/totp/card/identity/passkey/sshKey/apiToken/wifi/send/attachmentRef`；移动会保留原条目 ID，从源分类移除并在目标分类可见。
+  - `AppSessionModel.moveSelectedVaultBatchItems(toProjectID:)` 和 Vault 页移动菜单复用该 repository 能力，移动后刷新当前分类、清空搜索和批量选择状态；登录条目移动会刷新 AutoFill 加密索引；所有移动写入脱敏 `.moved` 时间线。
+  - `AndroidFeatureMatrix.md` 已更新“分类/快速筛选”验收内容；Rust UniFFI/MDBX 原生 project list/rename/delete 持久化仍待后续。
+  - 最新验证：Storage RED 已确认；`entryRepositoryMovesEntriesBetweenProjectsPreservingIdentity` 转 GREEN；App 批量移动定向 XCTest 通过；真实 MDBX 移动定向 XCTest 通过；`cargo test -p mdbx-ios-ffi` 通过 11 个 smoke tests；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 123 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

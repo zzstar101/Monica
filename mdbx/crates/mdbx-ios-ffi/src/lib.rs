@@ -309,6 +309,27 @@ impl MdbxVault {
         login_record_from_entry(&restored)
     }
 
+    pub fn move_login_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        target_project_id: String,
+    ) -> Result<LoginEntryRecord, MdbxFfiError> {
+        let conn = self.conn.lock().map_err(|_| MdbxFfiError::LockPoisoned)?;
+        let entry = login_entry_for_project(&conn, &project_id, &entry_id)?;
+        if entry.deleted {
+            return Err(StorageError::ConstraintViolation(format!(
+                "entry {} is deleted",
+                entry_id
+            ))
+            .into());
+        }
+
+        let ctx = CommitContext::new(self.device_id.clone());
+        let moved = EntryRepo::move_to_project(&conn, &ctx, &entry_id, &target_project_id)?;
+        login_record_from_entry(&moved)
+    }
+
     pub fn create_note_entry(
         &self,
         project_id: String,
@@ -440,6 +461,27 @@ impl MdbxVault {
         let ctx = CommitContext::new(self.device_id.clone());
         let restored = EntryRepo::restore(&conn, &ctx, &entry_id)?;
         note_record_from_entry(&restored)
+    }
+
+    pub fn move_note_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        target_project_id: String,
+    ) -> Result<NoteEntryRecord, MdbxFfiError> {
+        let conn = self.conn.lock().map_err(|_| MdbxFfiError::LockPoisoned)?;
+        let entry = typed_entry_for_project(&conn, &project_id, &entry_id, EntryType::Note)?;
+        if entry.deleted {
+            return Err(StorageError::ConstraintViolation(format!(
+                "entry {} is deleted",
+                entry_id
+            ))
+            .into());
+        }
+
+        let ctx = CommitContext::new(self.device_id.clone());
+        let moved = EntryRepo::move_to_project(&conn, &ctx, &entry_id, &target_project_id)?;
+        note_record_from_entry(&moved)
     }
 
     pub fn create_totp_entry(
@@ -600,6 +642,22 @@ impl MdbxVault {
         totp_record_from_entry(&restored)
     }
 
+    pub fn move_totp_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        target_project_id: String,
+    ) -> Result<TotpEntryRecord, MdbxFfiError> {
+        let moved = move_typed_entry(
+            self,
+            project_id,
+            entry_id,
+            target_project_id,
+            EntryType::Totp,
+        )?;
+        totp_record_from_entry(&moved)
+    }
+
     pub fn create_card_entry(
         &self,
         project_id: String,
@@ -756,6 +814,22 @@ impl MdbxVault {
         let ctx = CommitContext::new(self.device_id.clone());
         let restored = EntryRepo::restore(&conn, &ctx, &entry_id)?;
         card_record_from_entry(&restored)
+    }
+
+    pub fn move_card_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        target_project_id: String,
+    ) -> Result<CardEntryRecord, MdbxFfiError> {
+        let moved = move_typed_entry(
+            self,
+            project_id,
+            entry_id,
+            target_project_id,
+            EntryType::Card,
+        )?;
+        card_record_from_entry(&moved)
     }
 
     pub fn create_identity_entry(
@@ -917,6 +991,22 @@ impl MdbxVault {
         let ctx = CommitContext::new(self.device_id.clone());
         let restored = EntryRepo::restore(&conn, &ctx, &entry_id)?;
         identity_record_from_entry(&restored)
+    }
+
+    pub fn move_identity_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        target_project_id: String,
+    ) -> Result<IdentityEntryRecord, MdbxFfiError> {
+        let moved = move_typed_entry(
+            self,
+            project_id,
+            entry_id,
+            target_project_id,
+            EntryType::Identity,
+        )?;
+        identity_record_from_entry(&moved)
     }
 
     pub fn create_parity_entry(
@@ -1103,6 +1193,31 @@ impl MdbxVault {
         parity_record_from_entry(&restored)
     }
 
+    pub fn move_parity_entry(
+        &self,
+        project_id: String,
+        entry_id: String,
+        entry_type: String,
+        kind: String,
+        target_project_id: String,
+    ) -> Result<ParityEntryRecord, MdbxFfiError> {
+        let entry_type = parity_entry_type(&entry_type)?;
+        let conn = self.conn.lock().map_err(|_| MdbxFfiError::LockPoisoned)?;
+        let entry = typed_entry_for_project(&conn, &project_id, &entry_id, entry_type)?;
+        if entry.deleted {
+            return Err(StorageError::ConstraintViolation(format!(
+                "entry {} is deleted",
+                entry_id
+            ))
+            .into());
+        }
+        ensure_parity_kind(&entry, &kind)?;
+
+        let ctx = CommitContext::new(self.device_id.clone());
+        let moved = EntryRepo::move_to_project(&conn, &ctx, &entry_id, &target_project_id)?;
+        parity_record_from_entry(&moved)
+    }
+
     pub fn setup_local_security_key_unlock(
         &self,
         key_material: Vec<u8>,
@@ -1142,6 +1257,26 @@ fn set_typed_entry_favorite(
 
     let ctx = CommitContext::new(vault.device_id.clone());
     EntryRepo::update(&conn, &ctx, &entry).map_err(MdbxFfiError::from)
+}
+
+fn move_typed_entry(
+    vault: &MdbxVault,
+    project_id: String,
+    entry_id: String,
+    target_project_id: String,
+    entry_type: EntryType,
+) -> Result<mdbx_core::model::Entry, MdbxFfiError> {
+    let conn = vault.conn.lock().map_err(|_| MdbxFfiError::LockPoisoned)?;
+    let entry = typed_entry_for_project(&conn, &project_id, &entry_id, entry_type)?;
+    if entry.deleted {
+        return Err(
+            StorageError::ConstraintViolation(format!("entry {} is deleted", entry_id)).into(),
+        );
+    }
+
+    let ctx = CommitContext::new(vault.device_id.clone());
+    EntryRepo::move_to_project(&conn, &ctx, &entry_id, &target_project_id)
+        .map_err(MdbxFfiError::from)
 }
 
 #[uniffi::export]
