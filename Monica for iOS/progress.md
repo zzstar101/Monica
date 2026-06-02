@@ -829,6 +829,14 @@
   - `DefaultKeePassDatabaseReader` 现在在普通加密 KDBX 分支会先解析严格 payload envelope、带上结构化 KDF 参数和候选 label 构造 decrypt input context，再调用可注入 decryptor；decryptor 若返回 XML 或 GZip XML payload，则复用既有 XML reader；默认占位仍明确返回“解码器尚未接入”。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实 Argon2/AES-KDF 执行、master key 派生、payload/block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 67 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX AES-KDF 派生边界第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX payload/block 解密；改动集中在 `MonicaStorage` 的 KDBX key deriver、占位 payload decryptor 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxAesKdfDeriverTransformsCompositeKeyWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxKeyDeriver`。
+  - `MonicaStorage` 新增 `KeePassKdbxDerivedKey`、`KeePassKdbxKeyDeriver` 和 `DefaultKeePassKdbxKeyDeriver`，当前支持 AES-KDF，Argon2d/Argon2id 仍明确返回“尚未接入”。
+  - AES-KDF 使用 KDBX header 中的 32 字节 seed 对 32 字节 composite key 执行 AES-256 ECB rounds 变换，再 SHA-256 得到 derived key；测试用 NIST AES-256 单块已知向量验证一轮变换，摘要只显示算法、rounds 和 derived key 长度，不泄漏 seed、composite key、derived key 或 encrypted payload。
+  - 按 TDD 新增 Storage 用例 `unsupportedKeePassPayloadDecryptorDerivesKdfBeforePayloadDecodeWithoutLeakingSecrets`，先确认 RED 为占位 decryptor 不能注入 key deriver；随后让占位 decryptor 先调用可注入 key deriver，再返回脱敏“KDBX payload 解密尚未接入”。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实 Argon2/AES-KDF 全覆盖、master key 派生、payload/block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 69 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

@@ -59,6 +59,8 @@
 
 KDBX/KeePass 进展备注：Storage 已新增 KDBX 解密输入上下文，将 payload envelope、结构化 KDF 参数、候选凭据 label 和 Android 同口径复合凭据 key material 组合为可注入 `KeePassKdbxPayloadDecryptor` 的输入。复合 key material 使用 SHA-256(password UTF-8) 与 resolved key file material 拼接后再 SHA-256；摘要只显示 KDBX 版本、payload 字节数、KDF、候选 label 和凭据组件类型，不泄漏数据库密码、key file 内容、salt/seed、复合 key 或 encrypted payload。默认 reader 已在普通加密 KDBX 分支先构造该上下文并调用占位 decryptor；真实 Argon2/AES-KDF 执行、payload/block 解密、附件写回/编辑和 KDBX 保存仍待后续。
 
+KDBX/KeePass 进展备注：Storage 已新增 KDBX key deriver 边界并完成 AES-KDF transform 第一版。AES-KDF 使用 KDBX header 中的 32 字节 seed 对 32 字节 composite key 执行 AES-256 ECB rounds 变换，再 SHA-256 得到 derived key；测试使用 NIST AES-256 已知向量验证一轮变换。占位 payload decryptor 现在会先调用可注入 key deriver，再返回脱敏“payload 解密尚未接入”；Argon2d/Argon2id KDF、master key/payload/block 解密、真实加密 KDBX 导入和保存仍待后续。
+
 ## 管理、设置与商业化
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
