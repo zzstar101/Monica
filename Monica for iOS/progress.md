@@ -680,6 +680,13 @@
   - Settings KeePass/KDBX 区块已新增“预览结构”入口，成功时显示 KDBX 版本、分组数、条目数以及少量脱敏分组/条目摘要；切换 KDBX、凭据或密钥文件，或锁库时会清理旧 snapshot。
   - 本节点只建立真实 KDBX 解码器可插拔的只读边界，不声明已经完成 KDBX 密码学解码、打开、编辑、保存、回收站、附件或云文件源。
   - 最新验证：Storage/App 新增目标测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 50 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 132 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 只读导入计划预览第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的只读导入计划模型、App 会话状态、设置页预览入口和回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassReadOnlyImportPlannerBuildsPreviewOnlyPlanWithoutLeakingSecrets`，先确认 RED 为缺少 `KeePassReadOnlyImportPlanner`；随后补齐可预览候选、跳过条目、跳过原因和脱敏汇总。
+  - 按 TDD 新增 App 用例 `testKeePassReadOnlyImportPlanUsesSnapshotWithoutWritingVaultOrLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `previewKeePassReadOnlyImportPlan()` 和 `keePassReadOnlyImportPlan`；随后补齐基于 reader snapshot 的导入计划预览链路。
+  - Settings KeePass/KDBX 区块已新增“预览导入项”入口，显示可预览候选数、跳过数、候选标题/账号和跳过原因；切换 KDBX、凭据、密钥文件或锁库时会清理旧计划。
+  - 本节点不把 KeePass 条目写入 MDBX，不制造空密码条目，也不声明已经完成真实 KDBX 解密或确认导入；它只为后续真实 KDBX reader 接入后的确认导入流建立脱敏计划层。
+  - 最新验证：Storage/App 新增目标测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 133 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
