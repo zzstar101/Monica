@@ -922,6 +922,13 @@
   - 由 inner header binary pool 提供的附件会作为 `KeePassReadOnlyAttachment.decodedContent` 进入 snapshot，后续复用既有确认导入、本地附件内容仓库和 QuickLook 预览链路；display summary 和错误文案不泄漏 inner header bytes、附件明文、数据库密码、key file、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Storage KDBX4 inner header binary attachment 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 5 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 84 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 ChaCha20 payload cipher 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX payload cipher 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxChaCha20PayloadCipherDecryptsPayloadWithoutLeakingSecrets`，先确认 RED 为 `.chacha20` payload cipher 返回 `KDBX ChaCha20 payload 解密尚未接入`。
+  - `DefaultKeePassKdbxPayloadCipher` 现在支持 KDBX4 ChaCha20 payload 解密：要求 32-byte master key 与 12-byte encryption IV，使用既有 ChaCha20 keystream XOR 密文 payload，解密后继续复用现有 KDBX4 HMAC block unwrap、XML/GZip、inner header、protected value 和附件链路。
+  - AES-256-CBC 路径保持不变；Twofish 与未知 cipher 仍明确返回脱敏 unsupported；错误文案不显示 master key、IV、encrypted payload、数据库密码、key file、derived key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和 payload cipher 进展备注；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Storage ChaCha20 payload cipher 目标测试先 RED 后 GREEN；KeePass cipher/reader 目标测试组通过 5 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 85 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
