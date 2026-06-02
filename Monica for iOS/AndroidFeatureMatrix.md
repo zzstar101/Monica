@@ -62,7 +62,7 @@
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
 | --- | --- | --- | --- | --- |
 | 分类/快速筛选 | `CategoryDao`, `PasswordQuickFilter*` | iOS 分类、筛选、批量管理 | 开发中 | Vault 页已接入 iOS 横向快速筛选条，支持“全部 / 当前分类 / 收藏 / 回收站”入口，显示当前分类活动条目、收藏条目和已删除条目计数；点击收藏会清空搜索并联动所有一等条目的收藏筛选，点击回收站会隐藏活动列表并保留现有删除/恢复区块，锁库时筛选状态复位；完整分类 CRUD、跨分类切换、批量移动/删除仍待后续 |
-| 堆叠分组 | `PasswordGrouping`, `StackedPasswordGroup` | iOS 分组/堆叠视图 | 待实现 | 按备注/网站/应用/标题等策略分组 |
+| 堆叠分组 | `PasswordGrouping`, `StackedPasswordGroup` | iOS 分组/堆叠视图 | 开发中 | 密码页已接入“堆叠分组”开关，支持按网站 host 聚合并把 `www.` 归一到主域名；无 URL 条目回退标题分组；分组摘要显示条目数、标题预览和账号摘要，不包含密码；搜索、收藏和回收站筛选会联动分组结果，锁库时分组模式复位；备注/应用/自定义策略仍待后续 |
 | 字段/页面定制 | `PageAdjustmentCustomizationScreen`, `PasswordFieldCustomizationScreen` | iOS 风格显示偏好 | 待实现 | 字段显示、卡片密度、底部导航偏好可配置 |
 | 主题/图标 | `ColorSchemeSelectionScreen`, `IconSettingsScreen` | iOS 风格主题和图标设置 | 待实现 | 深浅色、强调色、图标显示策略、App Icon 变体 |
 | 安全分析 | `SecurityAnalysisScreen` | 安全中心 | 开发中 | 设置页已显示安全中心第一版，统计弱密码、复用密码、泄露风险和重复登录条目数且不泄漏具体密码；泄露风险第一版使用本地 SHA-256 指纹库命中统计；已显示弱密码、复用、泄露风险和重复项的修复建议列表；在线泄露库同步、历史版本和自动修复动作待后续 |

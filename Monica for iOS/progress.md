@@ -573,6 +573,13 @@
   - 新增 `testVaultQuickFiltersResetWhenVaultLocks`，覆盖锁库时快速筛选、搜索和收藏筛选状态复位。
   - `AndroidFeatureMatrix.md` 已把“分类/快速筛选”推进为开发中；完整分类 CRUD、跨分类切换、批量移动/删除仍待后续模块。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；快速筛选相关 3 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 112 个 XCTest；`git diff --check` 通过。
+- 堆叠分组模块第一版已完成：
+  - 按 TDD 新增 `testLoginStackedGroupsSummarizeFilteredEntriesWithoutLeakingPasswords`，先确认 RED 为 `AppSessionModel` 缺少 `loginStackedGroups`。
+  - `AppSessionModel.loginStackedGroups` 现在基于 `filteredLoginEntries` 生成脱敏分组摘要，支持按网站 host 聚合、`www.` 归一、无 URL 回退标题分组，并继承搜索、收藏和回收站筛选结果。
+  - 密码页搜索面板新增“堆叠分组”开关；开启后列表显示分组卡片，卡片只展示组名、条目数、标题预览和账号摘要，不展示密码。
+  - 新增 `testLoginStackedGroupModeResetsWhenVaultLocks`，覆盖锁库时分组模式和分组结果复位。
+  - `AndroidFeatureMatrix.md` 已把“堆叠分组”推进为开发中；备注/应用/自定义分组策略仍待后续模块。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 114 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
