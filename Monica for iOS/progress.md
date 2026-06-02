@@ -898,6 +898,14 @@
   - 错误文案和 display summary 不泄漏 inner stream key、keystream、protected base64、decoded password、数据库密码、key file、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 KDBX4 ChaCha20 inner protected stream、Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
   - 最新验证：Storage protected value 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 6 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 81 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 ChaCha20 inner protected value stream 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 XML protected value 解码器和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecodesKdbx4ChaCha20ProtectedValuesWithoutLeakingSecrets`，先确认 RED 为当前 reader 抛出 `KeePass ChaCha20 protected value stream 尚未接入`。
+  - `KeePassProtectedValueStreamDecoder` 现在支持 KDBX4 ChaCha20 inner stream：要求 64-byte inner random stream key，按 KeePass/KDBX4 口径先做 SHA-512，再使用前 32 bytes 作为 ChaCha20 key、后续 12 bytes 作为 nonce，counter 从 0 起连续生成 keystream。
+  - XML parser 继续按 `Protected="True"` 字段出现顺序消费同一个持续 keystream；普通 XML、KDBX3 Salsa20 和无 inner stream 路径保持不变。
+  - 错误文案和 display summary 不泄漏 inner stream key、ChaCha20 key/nonce、keystream、protected base64、decoded password、数据库密码、key file、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Storage KDBX4 ChaCha20 protected value 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 5 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 82 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
