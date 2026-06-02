@@ -650,6 +650,13 @@
   - 新测试确认 QuickLook 预览文件内容正确、关闭后临时文件被删除，并确认失败/成功状态不泄漏 content hash、wrapped CEK、本地密文路径或附件明文。
   - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点只声明 QuickLook 入口和 raw CEK provider 路径，Android wrapped CEK 解包、附件迁移和同步仍待后续。
   - 最新验证：QuickLook 新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 127 个 XCTest。
+- 附件内容操作时间线第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 App 会话内存时间线、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `testAttachmentQuickLookPreviewAppendsRedactedContentTimelineEvent`，先确认 RED 为 `AppOperationTimelineAction` 缺少 `.viewed`，随后补齐 action 文案/图标和 QuickLook 成功预览后的时间线追加。
+  - QuickLook 预览准备成功后会记录一条 `.viewed` / `attachmentRef` 时间线事件；缺 CEK、预览失败和关闭 QuickLook 不写时间线，避免把失败尝试或临时清理误记为内容操作。
+  - 新测试确认时间线只包含清洗后的附件文件名、条目 ID、动作和时间，不泄漏 content hash、wrapped CEK、本地密文路径、密文内容或附件明文。
+  - `AndroidFeatureMatrix.md` 已更新密码历史/时间线验收内容；持久化历史版本、跨会话审计和版本恢复仍待后续。
+  - 最新验证：附件内容时间线新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 128 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
