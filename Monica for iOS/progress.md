@@ -867,6 +867,13 @@
   - KDBX4 VariantDictionary KDF 解析路径保持原样；KDBX3 legacy KDF 分支只在 `formatVersion == .kdbx3` 且存在 TransformSeed/TransformRounds 时生效，避免误判 KDBX4 header。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实加密 KDBX3 fixture 端到端导入、KDBX4 HMAC block stream、inner protected value stream、Argon2d/Argon2id 执行、KDBX 保存或附件写回/编辑已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 76 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX3 AES 加密 fixture 端到端只读读取第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的默认 KeePass reader、XML snapshot header summary 传递和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecryptsKdbx3AesFixtureToSnapshotWithoutLeakingCredentials`，覆盖完整 KDBX3 bytes：password-only 凭据、AES-KDF TransformSeed/TransformRounds、master seed、AES-256-CBC encrypted payload、stream-start、KDBX3 hashed block stream 和 KeePass XML entry。
+  - `DefaultKeePassDatabaseReader` 现在在真实 KDBX3 解密 payload 后继续把原始 KDBX header summary 交给 `KeePassXMLReadOnlySnapshotReader`，因此 snapshot 能同时保留 `.kdbx3` 版本/KDF 摘要和解密后的 KeePass XML 条目内容。
+  - 测试确认可读出 `GitHub` 条目的 username 与 decoded password，且 `displaySummary` 不泄漏数据库密码、decoded password、TransformSeed、encrypted payload、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和进展备注；本节点仍不声明 KDBX4 HMAC block stream、Argon2d/Argon2id 执行、inner protected value stream、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
+  - 最新验证：Storage 新增目标测试通过 1 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 77 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
