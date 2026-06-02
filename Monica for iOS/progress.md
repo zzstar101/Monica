@@ -602,6 +602,14 @@
   - 密码列表和堆叠分组卡片会按图标策略显示彩色、单色或隐藏图标；新增 `testAppearancePreferencesSurviveVaultLock` 覆盖锁库不清除外观偏好。
   - `AndroidFeatureMatrix.md` 已把“主题/图标”推进为开发中；App Icon 变体和真机资产切换仍待后续模块。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 118 个 XCTest；`git diff --check` 通过。
+- 分类 CRUD / 跨分类切换模块第一版已完成：
+  - 按 TDD 新增 Storage 用例 `entryRepositoryListsRenamesAndDeletesEmptyProjects` 和 `entryRepositoryRefusesDeletingProjectWithActiveEntries`，先确认 RED 为 `LocalVaultEntryRepository` 缺少 project list/rename/delete 能力。
+  - `LocalVaultEntryRepository` 现在暴露 `listProjects()`、`renameProject(projectID:title:)`、`deleteProject(projectID:)`；`MDBXLocalVaultEngine` 增加 iOS Storage 会话内 project 索引，空分类可删，含活动或回收站条目的分类会以 `projectNotEmpty` 拒删。
+  - 按 TDD 新增 App 用例 `testVaultCategoriesCanBeCreatedRenamedSwitchedAndDeletedWhenEmpty`，覆盖分类创建、重命名、切换、删除空分类，以及含条目分类拒删。
+  - `AppSessionModel` 现在维护 `vaultProjects`、`activeVaultProjectID`、`activeVaultCategoryTitle`，并提供 `createVaultCategory`、`switchVaultCategory`、`renameVaultCategory`、`deleteVaultCategory`；创建后自动切到新分类，切换分类会刷新全部条目列表并清空搜索、快速筛选和批量选择状态，锁库/失败路径会清空分类状态。
+  - Vault 页已接入分类管理条，支持分类菜单、创建、重命名和删除当前空分类；当前 Storage/MDBX project 管理由 iOS 会话索引维护，Rust UniFFI/MDBX 原生 project list/rename/delete 持久化和跨分类批量移动仍待后续。
+  - `AndroidFeatureMatrix.md` 已更新“分类/快速筛选”验收内容，继续标记为开发中。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 44 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 121 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
