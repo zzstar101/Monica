@@ -837,6 +837,14 @@
   - 按 TDD 新增 Storage 用例 `unsupportedKeePassPayloadDecryptorDerivesKdfBeforePayloadDecodeWithoutLeakingSecrets`，先确认 RED 为占位 decryptor 不能注入 key deriver；随后让占位 decryptor 先调用可注入 key deriver，再返回脱敏“KDBX payload 解密尚未接入”。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实 Argon2/AES-KDF 全覆盖、master key 派生、payload/block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 69 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX payload crypto header 输入与 master key 组合边界第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX payload/block 解密；改动集中在 `MonicaStorage` 的 KDBX header crypto inputs、master key composer、占位 payload decryptor 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxDecryptInputContextParsesPayloadCryptoInputsWithoutLeakingSecrets`，先确认 RED 为缺少 `cryptoInputs`、inner stream 算法模型和 KDBX4 payload crypto header 字段解析；随后新增 `KeePassKdbxPayloadCryptoInputs` 与 `KeePassKdbxInnerRandomStreamAlgorithm`。
+  - `MonicaStorage` 现在会从 KDBX4 header fields 结构化保留 master seed、encryption IV、inner random stream key、stream start bytes 和 inner random stream id，并映射 None/ArcFourVariant/Salsa20/ChaCha20/unknown 摘要；摘要只显示长度与算法，不显示 master seed、IV、inner key、stream start bytes、KDF seed、数据库密码或 encrypted payload。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxMasterKeyComposerCombinesMasterSeedAndDerivedKeyWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxMasterKeyComposer`；随后新增 `KeePassKdbxMasterKeyMaterial` 与 master key composer，使用 `SHA256(masterSeed + derivedKey)` 生成 KDBX master key material。
+  - 占位 `UnsupportedKeePassKdbxPayloadDecryptor` 现在会先调用 key deriver，再调用 master key composer，最后仍返回脱敏“KDBX payload 解密尚未接入”；这只推进真实 crypto 层的输入边界，不声明已能解密普通加密 KDBX。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实 Argon2d/Argon2id 执行、payload/block 解密、inner stream 解密、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 71 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

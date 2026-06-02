@@ -61,6 +61,8 @@ KDBX/KeePass 进展备注：Storage 已新增 KDBX 解密输入上下文，将 p
 
 KDBX/KeePass 进展备注：Storage 已新增 KDBX key deriver 边界并完成 AES-KDF transform 第一版。AES-KDF 使用 KDBX header 中的 32 字节 seed 对 32 字节 composite key 执行 AES-256 ECB rounds 变换，再 SHA-256 得到 derived key；测试使用 NIST AES-256 已知向量验证一轮变换。占位 payload decryptor 现在会先调用可注入 key deriver，再返回脱敏“payload 解密尚未接入”；Argon2d/Argon2id KDF、master key/payload/block 解密、真实加密 KDBX 导入和保存仍待后续。
 
+KDBX/KeePass 进展备注：Storage 已新增 KDBX payload crypto header 输入边界，结构化保留 master seed、encryption IV、stream start bytes、inner random stream key/id 与 inner stream 算法摘要；摘要只显示长度和算法，不显示 master seed、IV、inner key、stream start bytes、KDF seed、数据库密码或 encrypted payload。Storage 同时新增 master key composer，使用 `SHA256(masterSeed + derivedKey)` 生成 KDBX master key material，并让占位 payload decryptor 在停止于 payload 解密前先完成 KDF 与 master key 组合；真实 Argon2d/Argon2id 执行、payload/block 解密、inner stream 解密、真实加密 KDBX 导入和保存仍待后续。
+
 ## 管理、设置与商业化
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
