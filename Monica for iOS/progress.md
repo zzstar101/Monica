@@ -882,6 +882,14 @@
   - 错误文案保持脱敏，不显示 header bytes、header HMAC、HMAC base key、block payload、encrypted payload、数据库密码、key file 内容、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和进展备注；本节点仍不声明 Argon2d/Argon2id 执行、inner protected value stream、真实 KDBX4 AES/Argon2 fixture 端到端读取、KDBX 保存或附件写回/编辑已完成。
   - 最新验证：Storage KDBX4 目标测试组通过 4 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 79 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 AES-KDF 真实 fixture 端到端只读读取第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KDBX4 KDF UUID 识别、Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecryptsKdbx4AesKdfFixtureToSnapshotWithoutLeakingCredentials`，先确认 RED 为真实 KDBX4 AES-KDF fixture 被识别成“未知 KDBX KDF”，原因是 iOS 常量误写为 `C9D5...` 而非官方 AES-KDF UUID `C9D9...`。
+  - `KeePassFormatInspector` 现在按官方 UUID 识别 KDBX4 AES-KDF VariantDictionary，并继续解析 seed/rounds；既有 KDBX4 AES-KDF header 摘要和 decrypt input context 测试已同步到正确 UUID。
+  - 新增 fixture 覆盖完整 KDBX4 bytes：password-only 凭据、AES-KDF seed/rounds、master seed、header SHA-256/header HMAC、HMAC-protected block stream、AES-256-CBC encrypted payload 和 KeePass XML entry；默认 reader 能读出 `KDBX4 GitLab` 条目的 username 与 decoded password。
+  - display summary 和错误路径仍不泄漏数据库密码、decoded password、AES-KDF seed、encrypted payload、derived/master key、header HMAC 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、inner protected value stream、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
+  - 最新验证：Storage KDBX4 AES-KDF 目标测试组通过 3 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 80 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
