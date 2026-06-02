@@ -657,6 +657,14 @@
   - 新测试确认时间线只包含清洗后的附件文件名、条目 ID、动作和时间，不泄漏 content hash、wrapped CEK、本地密文路径、密文内容或附件明文。
   - `AndroidFeatureMatrix.md` 已更新密码历史/时间线验收内容；持久化历史版本、跨会话审计和版本恢复仍待后续。
   - 最新验证：附件内容时间线新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 128 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 文件识别与导入前诊断第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KeePass 格式识别、App 会话预览状态、设置页入口和回归测试。
+  - 先阅读 Android `KeePassFormatInspector`、`KeePassCodecSupport` 和 `KeePassError`，确认 Android 第一层能力是识别 KDBX、旧版 KDB 和未知格式，并对旧 KDB 给出“请先另存为 .kdbx”的明确提示。
+  - 按 TDD 新增 Storage 用例 `keepPassFormatInspectorDetectsKdbxAndLegacyKdbContainers`，先确认 RED 为缺少 `KeePassFormatInspector` / `KeePassOperationError`，随后补齐 KDBX 签名、KDB 签名、`.kdb` 扩展名兜底识别和 `KeePassImportPreviewReport`。
+  - 按 TDD 新增 App 用例 `testKeePassImportPreviewDetectsKdbxWithoutWritingVault` 和 `testKeePassImportPreviewRejectsLegacyKdbWithReadableMessage`，先确认 RED 为 `AppSessionModel` 缺少 `previewKeePassImport` 与 `keePassImportPreview`，随后补齐 App 预览状态和设置页“检查 KDBX”入口。
+  - KDBX 预览只进入“等待密码或密钥文件解锁”状态，不写入当前 MDBX vault；旧版 KDB 与未知格式不会保留可确认预览，也不会写入 vault。
+  - `AndroidFeatureMatrix.md` 已把 KDBX/KeePass 从“待实现”推进为“开发中”；完整打开、编辑、保存、回收站、附件和云文件源仍待后续。
+  - 最新验证：KDBX Storage/App 新增测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 48 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 130 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
