@@ -665,6 +665,14 @@
   - KDBX 预览只进入“等待密码或密钥文件解锁”状态，不写入当前 MDBX vault；旧版 KDB 与未知格式不会保留可确认预览，也不会写入 vault。
   - `AndroidFeatureMatrix.md` 已把 KDBX/KeePass 从“待实现”推进为“开发中”；完整打开、编辑、保存、回收站、附件和云文件源仍待后续。
   - 最新验证：KDBX Storage/App 新增测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 48 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 130 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 解锁输入预检第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KDBX 公开头部/凭据预检、App 会话临时状态、设置页入口和回归测试。
+  - 先阅读 Android `ImportDataScreen`、`LocalKeePassViewModel` 和 `KeePassKdbxService`，确认 Android 导入路径使用 kotpass `KeePassDatabase.decode`，并把数据库密码与 key file 组合成 `Credentials`；iOS 本节点不手写 KDBX crypto，也不声明已能解码加密数据库。
+  - 按 TDD 新增 Storage 用例 `keepPassUnlockPreflightRequiresCredentialsAndSummarizesInputs`，先确认 RED 为缺少 `headerSummary` / `prepareUnlock`；随后补齐 KDBX 3/4 公开版本头摘要、密码/key file 脱敏凭据摘要、空凭据错误和 ready-to-unlock 预检状态。
+  - 按 TDD 新增 App 用例 `testKeePassUnlockPreflightAcceptsPasswordAndKeyFileWithoutWritingVaultOrLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `prepareKeePassUnlockPreflight`、key file 状态和预检记录；随后补齐待检查 KDBX bytes、密码/key file 临时状态、锁库/失败路径清理和脱敏状态文案。
+  - 设置页 KeePass/KDBX 区块已显示 KDBX 版本摘要、数据库密码输入、密钥文件选择、凭据摘要和“准备解锁”入口；该入口只做解锁输入预检，不写入当前 MDBX vault，也不泄漏密码或 key file 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；完整 KDBX 解码打开、读写同步、回收站、附件和云文件源仍待后续。
+  - 最新验证：Storage/App 新增测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 49 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 131 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
