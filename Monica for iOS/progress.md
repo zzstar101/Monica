@@ -845,6 +845,14 @@
   - 占位 `UnsupportedKeePassKdbxPayloadDecryptor` 现在会先调用 key deriver，再调用 master key composer，最后仍返回脱敏“KDBX payload 解密尚未接入”；这只推进真实 crypto 层的输入边界，不声明已能解密普通加密 KDBX。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明真实 Argon2d/Argon2id 执行、payload/block 解密、inner stream 解密、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 71 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX AES payload cipher 解密边界第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或 App UI；改动集中在 `MonicaStorage` 的 KDBX payload cipher、默认 payload decryptor 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxAesPayloadCipherDecryptsCbcPayloadWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxPayloadCipher` 与 `KeePassKdbxPayloadCipher`；随后用公开 AES-256-CBC 已知向量补齐 AES payload decrypt primitive。
+  - `DefaultKeePassKdbxPayloadCipher` 现在支持 AES-256-CBC payload 解密，要求 32-byte master key、16-byte encryption IV 和 16-byte 对齐 payload，并会剥离合法 PKCS#7 padding；ChaCha20、Twofish 和未知 cipher 仍返回明确脱敏 unsupported。
+  - `DefaultKeePassKdbxPayloadDecryptor` 现在按 KDF -> master key -> payload cipher 的顺序推进，然后停在脱敏“KDBX block stream 解码尚未接入”；旧 `UnsupportedKeePassKdbxPayloadDecryptor` 保留为兼容 wrapper。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassPayloadDecryptorUsesAesCipherBeforeBlockDecodeWithoutLeakingSecrets`，先确认 RED 为缺少默认 payload decryptor/cipher 注入边界；随后验证默认 decryptor 会调用 payload cipher，但错误文案不泄漏 decrypted block stream、encrypted payload、password key 或 composite key。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明 KDBX4 block/HMAC 校验、inner stream 解密、Argon2d/Argon2id 执行、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 73 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
