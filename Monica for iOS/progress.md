@@ -744,6 +744,14 @@
   - 成功文案会显示附件占位项数量，并继续显示 pending 附件待解码摘要；状态文案和映射外显路径不泄漏 KeePass 附件 UUID、数据库密码或 key file 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、附件内容导入/解密、wrapped CEK 处理、编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass 确认导入相关 5 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 138 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX decoded password/TOTP secret 导入契约第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 解码器；改动集中在 `MonicaStorage` 只读 snapshot/导入计划契约、App 会话确认导入路径、App 层回归测试和矩阵文档。
+  - 按 TDD 新增/扩展 Storage 用例，先确认 RED 为 `KeePassReadOnlyTotpSecret`、`decodedPassword`、`decodedTotp` 缺失；随后在 `KeePassReadOnlyEntry` 和 `KeePassReadOnlyImportCandidate` 中传递 decoded secret，并让 pending password/TOTP 只统计 reader 尚未提供 decoded 值的候选。
+  - 按 TDD 新增 App 用例 `testKeePassConfirmImportImportsDecodedPasswordAndTotpSecretWithoutLeakingSecrets`，先确认 RED 为 App 确认导入仍写入空 password/TOTP secret；随后让确认导入在 candidate 提供 `decodedPassword` 时写入 login password，在提供 decoded TOTP 时写入 secret/issuer/account/period/digits/algorithm。
+  - 未提供 decoded secret 的旧路径保持不变：login password 继续留空，TOTP 继续创建空 secret 占位，附件仍只导入占位 metadata，pending 摘要继续提示待解码能力。
+  - 成功状态文案会显示“导入密码字段/TOTP 密钥”的数量，但不会显示数据库密码、key file 内容、decoded password、TOTP secret、KeePass entry/group UUID 或附件敏感字段。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、附件内容导入/解密、编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass planner 相关 2 个 Swift Testing 用例通过；KeePass 确认导入相关 4 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 52 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 139 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
