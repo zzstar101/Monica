@@ -798,6 +798,13 @@
   - 公开摘要只读取 KDBX header 的非秘密字段，并映射 AES-256、ChaCha20、Twofish、无压缩/GZip、AES-KDF、Argon2d、Argon2id；不会显示数据库密码、key file 内容、派生 key、decoded secret、附件内容或明文字段。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 1 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 61 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器第二次通过 143 个 XCTest；`git diff --check` 通过。第一次完整 `xcodebuild test` 曾在 MDBX round-trip 中途遇到模拟器启动 App 的 `NSPOSIXErrorDomain Code=3 No such process`，重跑后通过，未出现测试断言失败。
+- KeePass/KDBX 解密后 GZip payload 解析入口第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 默认 KeePass reader、Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderInflatesGzipKeePassXMLWithoutLeakingCredentials`，先确认 RED 为默认 reader 对 GZip 包裹的 KeePass XML 返回“解码器尚未接入”；随后新增私有 GZip payload inflator。
+  - `DefaultKeePassDatabaseReader` 现在会先尝试原始 XML，再尝试标准 GZip 解压后的 XML；这为后续真实 KDBX crypto 层输出解密 payload 后复用现有 XML reader、只读预览、导入计划和确认导入链路打通压缩层。
+  - 解压失败、非 GZip 数据或普通加密 KDBX header 仍走既有 unsupported 路径；状态和 snapshot 摘要不会显示数据库密码、key file 内容或 decoded secret。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；目标 Storage 测试通过 1 个 Swift Testing 用例；既有 App KeePass reader wiring 目标 XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 62 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
