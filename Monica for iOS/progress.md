@@ -587,6 +587,13 @@
   - 新增 `testVaultDisplayPreferencesSurviveVaultLock`，覆盖锁库不清除显示偏好。
   - `AndroidFeatureMatrix.md` 已把“字段/页面定制”推进为开发中；完整字段顺序、页面重排和更多条目类型显示策略仍待后续模块。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 116 个 XCTest；`git diff --check` 通过。
+- 主题/图标模块第一版已完成：
+  - 按 TDD 新增 `testAppearancePreferencesPersistAndSummarizeIOSThemeCustomization`，先确认 RED 为 `AppSessionModel` 缺少外观偏好模型、store、摘要行和更新入口。
+  - 新增 `AppAppearancePreferences`、颜色模式/强调色/密码列表图标策略枚举，以及 UserDefaults/Memory store；生产环境会持久化到 UserDefaults。
+  - 设置页“应用”区已接入颜色模式、强调色和密码列表图标 Picker；App 根视图会按偏好套用 `preferredColorScheme` 和系统 tint。
+  - 密码列表和堆叠分组卡片会按图标策略显示彩色、单色或隐藏图标；新增 `testAppearancePreferencesSurviveVaultLock` 覆盖锁库不清除外观偏好。
+  - `AndroidFeatureMatrix.md` 已把“主题/图标”推进为开发中；App Icon 变体和真机资产切换仍待后续模块。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 118 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
