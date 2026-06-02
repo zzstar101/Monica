@@ -703,6 +703,14 @@
   - 新增/扩展测试确认 pending 摘要与成功文案不包含数据库密码或 key file 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、编辑保存或云文件源已完成。
   - 最新验证：Storage/App 目标测试从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 134 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 分组路径映射到 iOS 分类第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 `MonicaStorage`；改动集中在 App 会话确认导入路径、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `testKeePassConfirmImportMapsGroupPathsToVaultCategories`，先确认 RED 为所有 KeePass 元数据都落入单一 `KeePass` 分类。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会把 KeePass 分组路径映射到 iOS 分类/项目标题：根路径保留基础标题，`/Work` 映射为 `KeePass / Work`，`/Work/Clients` 映射为 `KeePass / Work / Clients`。
+  - 确认导入会优先复用同名 iOS 分类；不存在时创建新分类，并把每个登录元数据条目写入对应分类。导入后会切到首个导入分类并刷新当前可见列表，仍只导入 title/username/url，password 保持为空。
+  - 既有元数据确认导入测试已更新为新的分类落点，并继续验证 KDBX 文件 bytes、数据库密码、key file、只读 snapshot 和导入计划会在导入成功后清理，pending 摘要不泄漏秘密。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、编辑保存、回收站或云文件源已完成。
+  - 最新验证：新增 KeePass 分组映射 XCTest 从 RED 到 GREEN；既有 KeePass 元数据确认导入 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 135 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
