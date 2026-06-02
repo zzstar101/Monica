@@ -853,6 +853,13 @@
   - 按 TDD 新增 Storage 用例 `defaultKeePassPayloadDecryptorUsesAesCipherBeforeBlockDecodeWithoutLeakingSecrets`，先确认 RED 为缺少默认 payload decryptor/cipher 注入边界；随后验证默认 decryptor 会调用 payload cipher，但错误文案不泄漏 decrypted block stream、encrypted payload、password key 或 composite key。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明 KDBX4 block/HMAC 校验、inner stream 解密、Argon2d/Argon2id 执行、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 73 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX3 hashed block stream 解码第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或 App UI；改动集中在 `MonicaStorage` 的 KDBX block stream decoder、默认 payload decryptor 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx3BlockStreamDecoderValidatesStreamStartAndHashesBlocksWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxBlockStreamDecoder` 与 `KeePassKdbxBlockStreamContext`；随后补齐 KDBX3 解密后 payload 的 stream-start 校验、block index 顺序校验、SHA-256 hash 校验、zero-hash/zero-length terminator 识别和 block data 拼接。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassPayloadDecryptorDecodesKdbx3BlockStreamToXmlPayload`，验证默认 payload decryptor 在 KDBX3 路径会按 KDF -> master key -> payload cipher -> hashed block stream decoder 输出出 XML payload，后续继续复用既有 XML/GZip reader、只读预览、导入计划和确认导入链路。
+  - KDBX4 现在明确停在脱敏“KDBX4 HMAC block stream 解码尚未接入”；错误文案不会泄漏 stream start bytes、block hash、encrypted payload、decrypted block stream、数据库密码、key file 内容、derived/master key 或 XML 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 进展备注；本节点仍不声明 KDBX4 HMAC block stream、inner protected value stream、Argon2d/Argon2id 执行、KDBX3 旧式 header KDF 字段解析、真实加密 KDBX 导入、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 75 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
