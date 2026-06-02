@@ -929,6 +929,14 @@
   - AES-256-CBC 路径保持不变；Twofish 与未知 cipher 仍明确返回脱敏 unsupported；错误文案不显示 master key、IV、encrypted payload、数据库密码、key file、derived key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和 payload cipher 进展备注；本节点仍不声明 Argon2d/Argon2id 执行、key-file 真实加密 fixture、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Storage ChaCha20 payload cipher 目标测试先 RED 后 GREEN；KeePass cipher/reader 目标测试组通过 5 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 85 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX key file 真实加密 fixture 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 凭据候选生成、Storage 真实 KDBX4 fixture 回归测试、App 层候选文案测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecryptsKdbx4AesKdfFixtureWithKeyFileCandidateWithoutLeakingCredentials`，先确认 RED 为密码 + key file 场景缺少 Android 同口径 `password-only` 首候选。
+  - `KeePassCredentialSupport.buildCredentialCandidates(password:keyFile:)` 现在会在密码 + key file 场景先尝试 `password-only`，再尝试 raw/XML `<Data>`/`sha256(raw)` 等 key file 组合；纯 key file 场景仍保留 `key-only` 与 `empty-password+key`。
+  - 新 fixture 覆盖真实加密 KDBX4 AES-KDF：`password-only` 与 raw XML key file bytes 会失败，XML `<Data>` 解出的 key material 会通过 header HMAC、HMAC block unwrap、AES-CBC payload、XML snapshot 路径读出 `KDBX4 Key File` 条目的 username 与 decoded password。
+  - App 预检文案和候选尝试测试已同步为 3 种 key 解析；状态文案和 snapshot summary 不泄漏数据库密码、key file 内容、decoded password、AES-KDF seed、encrypted payload、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；KDBX/key-file 目标回归组通过 6 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 86 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
