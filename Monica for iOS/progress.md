@@ -573,6 +573,14 @@
   - 新增 `testVaultQuickFiltersResetWhenVaultLocks`，覆盖锁库时快速筛选、搜索和收藏筛选状态复位。
   - `AndroidFeatureMatrix.md` 已把“分类/快速筛选”推进为开发中；完整分类 CRUD、跨分类切换、批量移动/删除仍待后续模块。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；快速筛选相关 3 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 112 个 XCTest；`git diff --check` 通过。
+- 批量管理模块第一版已完成：
+  - 按 TDD 新增 `testBatchSelectionDeletesAndRestoresCurrentFilteredLoginEntries`，先确认 RED 为 `AppSessionModel` 缺少批量选择、全选、批量删除和批量恢复 API。
+  - `AppSessionModel` 现在提供统一批量选择状态，支持按 `UnifiedVaultItemKind` 进入批量模式、切换选中、全选当前可见结果、批量软删除和回收站批量恢复；锁库和快速筛选切换会清空批量选择状态。
+  - 批量操作复用当前所有一等条目的 repository 删除/恢复流程，覆盖 `login/totp/note/card/identity/passkey/sshKey/apiToken/wifi/send/attachmentRef`，并为批量删除/恢复写入脱敏操作时间线；登录批量变更后会刷新 AutoFill 加密索引。
+  - Vault 页已接入批量管理条，支持进入/取消批量、全选、删除所选、恢复所选；活动列表和回收站列表在批量模式下显示选择态并将点击切换为选择/取消。
+  - 新增 `testBatchSelectionResetsWhenVaultLocks`，覆盖锁库时批量模式和选择 ID 清空。
+  - `AndroidFeatureMatrix.md` 已更新“分类/快速筛选”验收内容；完整分类 CRUD、跨分类切换和批量移动仍待后续模块。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 120 个 XCTest；`git diff --check` 通过。
 - 堆叠分组模块第一版已完成：
   - 按 TDD 新增 `testLoginStackedGroupsSummarizeFilteredEntriesWithoutLeakingPasswords`，先确认 RED 为 `AppSessionModel` 缺少 `loginStackedGroups`。
   - `AppSessionModel.loginStackedGroups` 现在基于 `filteredLoginEntries` 生成脱敏分组摘要，支持按网站 host 聚合、`www.` 归一、无 URL 回退标题分组，并继承搜索、收藏和回收站筛选结果。
