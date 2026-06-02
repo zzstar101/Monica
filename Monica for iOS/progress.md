@@ -623,6 +623,15 @@
   - `MonicaMDBX` 继续对上层暴露原有 typed Swift API，但内部把 `login/totp/note/card/identity/passkey/sshKey/apiToken/wifi/send/attachmentRef` 映射到通用 `createEntry/listEntries/updateEntry/deleteEntry/restoreEntry/moveEntry` 和 JSON payload，避免继续扩写上层 MDBX 专用业务桥。
   - `AndroidFeatureMatrix.md` 已更新 P0 MDBX 本地保险库验收口径，标明当前 iOS 使用上游通用 FFI，typed payload 适配留在 iOS wrapper。
   - 最新验证：`build-mdbx-xcframework.sh` 成功生成并同步 `mdbx_ffi.swift`；`cargo test -p mdbx-ffi` 通过 5 个 smoke tests；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 123 个 XCTest；`git diff --check` 通过。
+- 附件内容系统第一版已完成：
+  - 本节点遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的本地附件内容仓库、App 会话适配和 App 层回归测试。
+  - 按 TDD 新增 `testAndroidBackupAttachmentContentCanBeLoadedFromLocalBlobStoreWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少附件内容状态和密文读取 API。
+  - `MonicaStorage` 新增 `LocalAttachmentContentStore`、`FileLocalAttachmentContentStore` 和 `LocalAttachmentContentStoreError`，提供保存 Android/本地附件密文 blob、清洗 vault/path 组件、检查本地密文是否存在、读取密文 bytes 的通用接口。
+  - App 层把旧 Android 备份专用 blob store 适配为 `LocalAttachmentContentStore`，保留原注入点兼容既有导入流程；`AppSessionModel.attachmentContentStatus(for:)` 可基于 metadata 和 active vault 判断密文可用/缺失/未解锁。
+  - `AppSessionModel.loadAttachmentEncryptedBlob(_:)` 已可从本地内容仓库读取密文 bytes，并只显示文件名和字节数；新测试确认状态/操作文案不泄漏附件 hash、wrapped CEK、本地密文路径、密文内容或关联登录密码。
+  - 现有 `testFileAndroidBackupAttachmentBlobStoreWritesSanitizedEncryptedBlob` 已扩展覆盖真实文件仓库的路径清洗、存在性检查和读取行为。
+  - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点仍不声明附件解密、QuickLook 预览、迁移、同步或回收站/配置恢复已完成。
+  - 最新验证：新增附件内容 XCTest 从 RED 到 GREEN；真实文件仓库定向 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 124 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
