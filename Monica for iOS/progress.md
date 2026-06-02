@@ -791,6 +791,13 @@
   - App 的 `previewKeePassReadOnlyTree()` 已接入候选尝试管线；新增 `testKeePassReadOnlyTreePreviewAttemptsCredentialCandidatesWithoutLeakingInvalidSecrets` 覆盖第一个候选失败、第二个候选成功时不会写入 MDBX vault，也不会把数据库密码或 key file 内容写入状态文案。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍只打通真实 KDBX 解码器的候选输入管线，不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 60 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 142 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 公开加密 header 诊断第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KeePass 格式检查器、设置页展示、回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `keepPassFormatInspectorSummarizesKdbx4PublicCryptoHeaderWithoutSecrets`，先确认 RED 为 `KeePassHeaderSummary` 没有 `cryptoSummary` / 解析结果为 nil；随后补齐 KDBX4 TLV header 解析、cipher/compression/KDF 摘要模型和 `$UUID` VariantDictionary 提取。
+  - 按 TDD 新增 App 用例 `testKeePassImportPreviewCarriesPublicCryptoSummaryWithoutLeakingSecrets`，先确认 RED 为 preview 不携带公开加密摘要；随后让设置页在 KDBX 版本下显示 `KDBX 加密` 行，如 `AES-256，GZip，Argon2id`。
+  - 公开摘要只读取 KDBX header 的非秘密字段，并映射 AES-256、ChaCha20、Twofish、无压缩/GZip、AES-KDF、Argon2d、Argon2id；不会显示数据库密码、key file 内容、派生 key、decoded secret、附件内容或明文字段。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 1 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 61 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器第二次通过 143 个 XCTest；`git diff --check` 通过。第一次完整 `xcodebuild test` 曾在 MDBX round-trip 中途遇到模拟器启动 App 的 `NSPOSIXErrorDomain Code=3 No such process`，重跑后通过，未出现测试断言失败。
 
 ## 遇到的问题
 
