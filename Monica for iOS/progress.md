@@ -769,6 +769,14 @@
   - 按 TDD 新增 App 用例 `testKeePassConfirmImportImportsNotesAndCustomFieldsWithoutLeakingValues`，先确认 RED 为 App 确认导入没有写入 notes/custom fields；随后让确认导入把 KeePass Notes 与 StringFields 合并写入 iOS login notes，成功文案只显示“备注/自定义字段”计数，不显示数据库密码、Notes 或字段值。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、自定义字段一等编辑 UI、附件写回/编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 55 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 解密后 XML reader 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 默认 KeePass reader、XML-to-snapshot 解析层、App 默认 reader wiring、Storage 回归测试和矩阵文档。
+  - 先对照 Android `KeePassKdbxService` 的 `KeePassEntryData`、自定义字段过滤和 TOTP 字段解析口径，确认 iOS 现有导入链路已经能消费完整 snapshot，但默认 reader 仍只返回 unsupported。
+  - 按 TDD 新增 Storage 用例 `keePassXMLReadOnlySnapshotReaderParsesGroupsEntriesFieldsTotpAndAttachments`，先确认 RED 为缺少 `KeePassXMLReadOnlySnapshotReader`；随后新增解密后 KeePass XML reader，解析 `Group`、`Entry`、`String`、`Binary` 和 `RecycleBinUUID`，映射分组路径、回收站状态、decoded password、TOTP URI、Notes、非保留 StringFields、protected 标记和 decoded attachment bytes，并确保 snapshot 摘要不泄漏数据库密码、decoded password 或附件明文。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderParsesXMLButKeepsEncryptedKdbxUnsupported`，确认默认 reader 会先尝试 XML fixture，但普通加密 KDBX header 仍返回 `KDBX 解码器尚未接入`，避免把 XML 解析层误报成完整 KDBX 解密能力。
+  - App 会话默认 `keePassDatabaseReader` 已从纯 unsupported reader 改为 `DefaultKeePassDatabaseReader`，因此后续真实 KDBX 解密器只要输出 XML/明文 snapshot 数据，就能复用现有预览、导入计划和确认导入链路。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试均先 RED 后 GREEN；目标 reader 测试通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 57 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
