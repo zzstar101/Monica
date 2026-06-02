@@ -641,6 +641,15 @@
   - 新测试确认预览文件内容等于解密明文，且状态文案/展示文件名不泄漏 content hash、wrapped CEK、本地密文路径或附件明文。
   - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点只声明 raw CEK 解密和临时文件物化，Android wrapped CEK 解包、QuickLook UI 预览、迁移和同步仍待后续。
   - 最新验证：Storage 新增解密用例从 RED 到 GREEN；App 新增预览物化 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 125 个 XCTest。
+- 附件 QuickLook 预览入口第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 App 会话状态、Vault 附件卡片和 App 层回归测试。
+  - 先阅读 Android `AttachmentKeyVault` 与 `SecurityManager.encryptData/decryptData`，确认 Android wrapped CEK 绑定 Android SecurityManager/MDK，不具备在 iOS 备份导入时直接跨设备解包的独立格式；因此本节点不伪装完成 wrapped CEK 解包，而是为后续 CEK resolver 留出注入点。
+  - 按 TDD 新增 `testAttachmentQuickLookPreviewUsesInjectedContentKeyAndCleansTemporaryFile` 和 `testAttachmentQuickLookPreviewWithoutContentKeyProviderUsesRedactedFailure`，先确认 RED 为 `AppSessionModel` 缺少 `attachmentContentEncryptionKeyProvider`、`attachmentQuickLookPreviewURL` 和 `presentAttachmentQuickLookPreview`。
+  - `AppSessionModel` 新增可注入附件 CEK provider、QuickLook 预览 URL 状态、`presentAttachmentQuickLookPreview(_:)` 和 `dismissAttachmentQuickLookPreview()`；有 raw CEK 时会复用已有 Android 附件解密/临时文件物化路径并设置 QuickLook URL，关闭或锁库时清理临时目录；无 provider 时只显示脱敏“附件内容密钥尚未可用”提示。
+  - Vault 附件卡片新增预览按钮，并通过 SwiftUI `quickLookPreview` 绑定 App 会话中的预览 URL；删除按钮保留，批量模式仍走选择态。
+  - 新测试确认 QuickLook 预览文件内容正确、关闭后临时文件被删除，并确认失败/成功状态不泄漏 content hash、wrapped CEK、本地密文路径或附件明文。
+  - `AndroidFeatureMatrix.md` 已更新附件引用与 Android 备份包验收内容；本节点只声明 QuickLook 入口和 raw CEK provider 路径，Android wrapped CEK 解包、附件迁移和同步仍待后续。
+  - 最新验证：QuickLook 新增 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 47 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 127 个 XCTest。
 
 ## 遇到的问题
 
