@@ -673,6 +673,13 @@
   - 设置页 KeePass/KDBX 区块已显示 KDBX 版本摘要、数据库密码输入、密钥文件选择、凭据摘要和“准备解锁”入口；该入口只做解锁输入预检，不写入当前 MDBX vault，也不泄漏密码或 key file 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；完整 KDBX 解码打开、读写同步、回收站、附件和云文件源仍待后续。
   - 最新验证：Storage/App 新增测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 49 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 131 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 只读树预览抽象第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX/通用 FFI，也没有扩写上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KeePass reader 抽象、App 会话注入点、设置页只读结构预览入口和回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassDatabaseReaderBuildsReadOnlySnapshotAndKeepsCredentialsOutOfSummary`，先确认 RED 为缺少 `KeePassDatabaseReader`、`KeePassUnlockCredentials` 和只读 snapshot 类型；随后补齐脱敏凭据、分组、条目、汇总模型和默认 unsupported reader。
+  - 按 TDD 新增 App 用例 `testKeePassReadOnlyTreePreviewUsesInjectedReaderWithoutWritingVaultOrLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 reader 注入点、snapshot 状态和 `previewKeePassReadOnlyTree()`；随后补齐 fake reader 可验证的 App 调用链。
+  - Settings KeePass/KDBX 区块已新增“预览结构”入口，成功时显示 KDBX 版本、分组数、条目数以及少量脱敏分组/条目摘要；切换 KDBX、凭据或密钥文件，或锁库时会清理旧 snapshot。
+  - 本节点只建立真实 KDBX 解码器可插拔的只读边界，不声明已经完成 KDBX 密码学解码、打开、编辑、保存、回收站、附件或云文件源。
+  - 最新验证：Storage/App 新增目标测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 50 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 132 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
