@@ -566,6 +566,13 @@
   - 新测试确认时间线只记录动作、条目类型、附件 ID、文件名和时间，不包含附件 hash、wrapped key、本地密文路径、密文内容或关联登录密码。
   - `AndroidFeatureMatrix.md` 已更新“密码历史/时间线”覆盖到所有当前一等条目；持久化历史版本、跨会话审计、附件内容操作和版本恢复仍待后续。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 110 个 XCTest；`git diff --check` 通过。
+- 分类/快速筛选模块第一版已完成：
+  - 按 TDD 新增 `testVaultQuickFiltersSummarizeCurrentCategoryFavoritesAndTrash`，先确认 RED 为 `AppSessionModel` 缺少快速筛选行和应用入口。
+  - `AppSessionModel` 现在提供 `vaultQuickFilterRows` 和 `applyVaultQuickFilter(_:)`，覆盖“全部 / 当前分类 / 收藏 / 回收站”的标题、图标、计数、选中态和状态联动。
+  - Vault 页顶部已接入横向快速筛选条；点击收藏会清空所有搜索并联动所有一等条目的收藏筛选，点击回收站会隐藏活动列表并保留删除/恢复区块。
+  - 新增 `testVaultQuickFiltersResetWhenVaultLocks`，覆盖锁库时快速筛选、搜索和收藏筛选状态复位。
+  - `AndroidFeatureMatrix.md` 已把“分类/快速筛选”推进为开发中；完整分类 CRUD、跨分类切换、批量移动/删除仍待后续模块。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；快速筛选相关 3 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 112 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

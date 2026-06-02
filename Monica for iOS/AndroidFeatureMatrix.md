@@ -61,7 +61,7 @@
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
 | --- | --- | --- | --- | --- |
-| 分类/快速筛选 | `CategoryDao`, `PasswordQuickFilter*` | iOS 分类、筛选、批量管理 | 待实现 | 分类 CRUD、筛选、批量移动/删除 |
+| 分类/快速筛选 | `CategoryDao`, `PasswordQuickFilter*` | iOS 分类、筛选、批量管理 | 开发中 | Vault 页已接入 iOS 横向快速筛选条，支持“全部 / 当前分类 / 收藏 / 回收站”入口，显示当前分类活动条目、收藏条目和已删除条目计数；点击收藏会清空搜索并联动所有一等条目的收藏筛选，点击回收站会隐藏活动列表并保留现有删除/恢复区块，锁库时筛选状态复位；完整分类 CRUD、跨分类切换、批量移动/删除仍待后续 |
 | 堆叠分组 | `PasswordGrouping`, `StackedPasswordGroup` | iOS 分组/堆叠视图 | 待实现 | 按备注/网站/应用/标题等策略分组 |
 | 字段/页面定制 | `PageAdjustmentCustomizationScreen`, `PasswordFieldCustomizationScreen` | iOS 风格显示偏好 | 待实现 | 字段显示、卡片密度、底部导航偏好可配置 |
 | 主题/图标 | `ColorSchemeSelectionScreen`, `IconSettingsScreen` | iOS 风格主题和图标设置 | 待实现 | 深浅色、强调色、图标显示策略、App Icon 变体 |
