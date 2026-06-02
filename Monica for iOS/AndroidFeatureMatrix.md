@@ -12,7 +12,7 @@
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
 | --- | --- | --- | --- | --- |
-| MDBX 本地保险库 | `mdbx/`, `Monica for Android/app/src/main/java/takagi/ru/monica/mdbx` | SwiftUI + UniFFI + `MonicaMDBX`/`MonicaStorage` | 已实现 | 可创建、打开、锁定、重开 MDBX；Rust smoke、SwiftPM、XCTest 通过 |
+| MDBX 本地保险库 | `mdbx/`, `Monica for Android/app/src/main/java/takagi/ru/monica/mdbx` | SwiftUI + 上游通用 `mdbx-ffi` UniFFI + `MonicaMDBX`/`MonicaStorage` | 已实现 | 已从旧 `mdbx-ios-ffi` 迁移到通用 FFI；iOS typed 业务 API 在 wrapper 内映射为 generic entry payload JSON；可创建、打开、锁定、重开 MDBX；Rust smoke、SwiftPM、XCTest 通过 |
 | Android -> iOS 功能矩阵 | Android routes/services/docs | 本文档持续更新 | 已实现 | 每个里程碑更新状态和验收结果 |
 | 仓库基线提交 | Git workspace | 推送 iOS/MDBX 源码到 `zzstar101/Monica` | 已实现 | 已推送 `e97ca360`；源码优先，`.build`、`Build`、`target` 等产物排除 |
 

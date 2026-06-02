@@ -617,6 +617,12 @@
   - `AppSessionModel.moveSelectedVaultBatchItems(toProjectID:)` 和 Vault 页移动菜单复用该 repository 能力，移动后刷新当前分类、清空搜索和批量选择状态；登录条目移动会刷新 AutoFill 加密索引；所有移动写入脱敏 `.moved` 时间线。
   - `AndroidFeatureMatrix.md` 已更新“分类/快速筛选”验收内容；Rust UniFFI/MDBX 原生 project list/rename/delete 持久化仍待后续。
   - 最新验证：Storage RED 已确认；`entryRepositoryMovesEntriesBetweenProjectsPreservingIdentity` 转 GREEN；App 批量移动定向 XCTest 通过；真实 MDBX 移动定向 XCTest 通过；`cargo test -p mdbx-ios-ffi` 通过 11 个 smoke tests；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 123 个 XCTest；`git diff --check` 通过。
+- 通用 MDBX FFI 桥接层迁移节点已完成：
+  - 按用户提醒接入上游最新 `Monica-Pass/Mdbx` 的通用 `mdbx/crates/mdbx-ffi`，旧 iOS 专用 `mdbx-ios-ffi` 从 workspace 和 iOS 绑定路径移除。
+  - iOS 构建脚本和 SwiftPM package 已切到 `mdbx_ffi` / `mdbx_ffiFFI`；`build-mdbx-xcframework.sh` 已重新生成 `MonicaMDBXGenerated.xcframework`，并同步新的 UniFFI Swift binding。
+  - `MonicaMDBX` 继续对上层暴露原有 typed Swift API，但内部把 `login/totp/note/card/identity/passkey/sshKey/apiToken/wifi/send/attachmentRef` 映射到通用 `createEntry/listEntries/updateEntry/deleteEntry/restoreEntry/moveEntry` 和 JSON payload，避免继续扩写上层 MDBX 专用业务桥。
+  - `AndroidFeatureMatrix.md` 已更新 P0 MDBX 本地保险库验收口径，标明当前 iOS 使用上游通用 FFI，typed payload 适配留在 iOS wrapper。
+  - 最新验证：`build-mdbx-xcframework.sh` 成功生成并同步 `mdbx_ffi.swift`；`cargo test -p mdbx-ffi` 通过 5 个 smoke tests；`SwiftPackages/MonicaMDBX` 的 `swift test` 通过 2 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 45 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 123 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 

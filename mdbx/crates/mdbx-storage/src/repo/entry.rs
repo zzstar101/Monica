@@ -161,6 +161,19 @@ impl EntryRepo {
         )
     }
 
+    pub fn list_by_project_and_type(
+        conn: &VaultConnection,
+        project_id: &str,
+        entry_type: EntryType,
+    ) -> StorageResult<Vec<Entry>> {
+        let type_str = entry_type.to_string();
+        EntryRepo::list_where(
+            conn,
+            "deleted = 0 AND project_id = ?1 AND entry_type = ?2",
+            rusqlite::params![project_id, type_str],
+        )
+    }
+
     pub fn list_by_type(
         conn: &VaultConnection,
         entry_type: EntryType,
@@ -175,6 +188,30 @@ impl EntryRepo {
 
     pub fn list_deleted(conn: &VaultConnection) -> StorageResult<Vec<Entry>> {
         EntryRepo::list_where(conn, "deleted = 1", [])
+    }
+
+    pub fn list_deleted_by_project(
+        conn: &VaultConnection,
+        project_id: &str,
+    ) -> StorageResult<Vec<Entry>> {
+        EntryRepo::list_where(
+            conn,
+            "deleted = 1 AND project_id = ?1",
+            rusqlite::params![project_id],
+        )
+    }
+
+    pub fn list_deleted_by_project_and_type(
+        conn: &VaultConnection,
+        project_id: &str,
+        entry_type: EntryType,
+    ) -> StorageResult<Vec<Entry>> {
+        let type_str = entry_type.to_string();
+        EntryRepo::list_where(
+            conn,
+            "deleted = 1 AND project_id = ?1 AND entry_type = ?2",
+            rusqlite::params![project_id, type_str],
+        )
     }
 
     fn list_where(
