@@ -890,6 +890,14 @@
   - display summary 和错误路径仍不泄漏数据库密码、decoded password、AES-KDF seed、encrypted payload、derived/master key、header HMAC 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、inner protected value stream、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
   - 最新验证：Storage KDBX4 AES-KDF 目标测试组通过 3 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 80 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX3 Salsa20 inner protected value stream 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的默认 KeePass reader、XML parser protected value 解保护和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecodesKdbx3Salsa20ProtectedValuesWithoutLeakingSecrets`，先确认 RED 为真实 KDBX3 AES fixture 中 `Protected="True"` password 仍被读成 base64 protected bytes，而不是 decoded password。
+  - `DefaultKeePassDatabaseReader` 现在会把 KDBX 解密上下文中的 `innerRandomStreamKey`/`innerRandomStreamID` 传给 XML reader；XML parser 在遇到 `Protected="True"` 的 `<Value>` 时按文档 Salsa20 常量 nonce 和 `SHA256(innerRandomStreamKey)` 生成 keystream，按出现顺序 XOR 解保护。
+  - 普通 fake XML 或已明文 XML 路径没有 inner stream decoder 时保持原有行为；只读 snapshot 中 password、TOTP/custom protected 字段可消费解保护后的明文，`isProtected` 标记仍保留。
+  - 错误文案和 display summary 不泄漏 inner stream key、keystream、protected base64、decoded password、数据库密码、key file、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 KDBX4 ChaCha20 inner protected stream、Argon2d/Argon2id 执行、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
+  - 最新验证：Storage protected value 目标测试先 RED 后 GREEN；KeePass reader 目标测试组通过 6 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 81 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
