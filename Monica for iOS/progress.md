@@ -695,6 +695,14 @@
   - Settings KeePass/KDBX 区块已在导入计划下新增“确认导入元数据”按钮；无候选项时禁用。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明完整 KDBX 解码打开、秘密字段导入、编辑、保存、回收站、附件或云文件源已完成。
   - 最新验证：新增 App XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 134 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 待解码能力提示第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的只读导入计划摘要、App 会话成功状态、设置页提示和回归测试。
+  - 按 TDD 扩展 Storage 用例 `keepPassReadOnlyImportPlannerBuildsPreviewOnlyPlanWithoutLeakingSecrets`，先确认 RED 为 `KeePassReadOnlyImportPlan` 缺少 `pendingPasswordCount`、`pendingTotpCount`、`pendingAttachmentCount` 和 `pendingCapabilitySummary`。
+  - `KeePassReadOnlyImportPlan` 现在会基于只读 snapshot 的 `hasPassword`、`hasTotp` 和 `attachmentCount` 统计待解码能力，生成如“待解码：1 个密码字段，1 个 TOTP，2 个附件”的脱敏摘要。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 的成功文案会带上 pending 摘要；Settings KeePass/KDBX 导入计划区域也显示“待解码”信息，让用户知道当前确认导入只落地元数据，不包含密码、TOTP 或附件内容。
+  - 新增/扩展测试确认 pending 摘要与成功文案不包含数据库密码或 key file 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、编辑保存或云文件源已完成。
+  - 最新验证：Storage/App 目标测试从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 134 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
