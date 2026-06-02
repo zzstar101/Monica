@@ -784,6 +784,13 @@
   - 既有 `keepPassUnlockPreflightRequiresCredentialsAndSummarizesInputs` 已扩展覆盖 key file 候选数量，App 用例 `testKeePassUnlockPreflightAcceptsPasswordAndKeyFileWithoutWritingVaultOrLeakingSecrets` 已更新为显示“密码 + 密钥文件（N 种 key 解析）”，仍不泄漏数据库密码或 key file 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点只建立 Android 同口径 key file 候选输入，不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 58 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX reader 凭据候选尝试管线第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 的 reader wrapper、App 只读预览调用链和回归测试。
+  - 按 TDD 新增 Storage 用例 `keePassCandidateTryingDatabaseReaderAttemptsCandidatesUntilSnapshotSucceedsWithoutLeakingSecrets` 和 `keePassCandidateTryingDatabaseReaderSummarizesInvalidCandidatesWithoutLeakingSecrets`，先确认 RED 为缺少 `KeePassCandidateTryingDatabaseReader` 与 `candidateLabel`。
+  - `KeePassCandidateTryingDatabaseReader` 现在会按 `KeePassUnlockCredentials.credentialCandidates` 顺序把 resolved password/key material 交给底层 reader；底层 reader 返回 `.invalidCredential` 时继续尝试，遇到格式不支持等非凭据错误会保留原错误并停止，全部凭据失败时用 Android 同口径 label 生成脱敏错误提示。
+  - App 的 `previewKeePassReadOnlyTree()` 已接入候选尝试管线；新增 `testKeePassReadOnlyTreePreviewAttemptsCredentialCandidatesWithoutLeakingInvalidSecrets` 覆盖第一个候选失败、第二个候选成功时不会写入 MDBX vault，也不会把数据库密码或 key file 内容写入状态文案。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍只打通真实 KDBX 解码器的候选输入管线，不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 60 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 142 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
