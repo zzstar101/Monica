@@ -752,6 +752,15 @@
   - 成功状态文案会显示“导入密码字段/TOTP 密钥”的数量，但不会显示数据库密码、key file 内容、decoded password、TOTP secret、KeePass entry/group UUID 或附件敏感字段。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、附件内容导入/解密、编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass planner 相关 2 个 Swift Testing 用例通过；KeePass 确认导入相关 4 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 52 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 139 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX decoded attachment content 导入契约第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 解码器；改动集中在 `MonicaStorage` 只读附件契约、App 会话确认导入路径、QuickLook 预览分支、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `keepPassReadOnlyImportPlannerCarriesDecodedAttachmentContentWithoutCountingItPending`，先确认 RED 为 `KeePassReadOnlyAttachment` 缺少 `decodedContent`；随后让只读附件摘要可携带 decoded bytes，并让 pending 附件数量只统计 reader 尚未提供 decoded content 的附件。
+  - 按 TDD 新增 App 用例 `testKeePassConfirmImportStoresDecodedAttachmentContentForPreviewWithoutLeakingSecrets`，先确认 RED 为 App 确认导入仍只创建附件占位；随后让确认导入在 attachment 提供 decoded bytes 时保存到本地附件内容仓库，metadata 标记 `storageMode=keepass-kdbx-decoded-content`、`downloadState=downloaded`，并记录可预览 localPath。
+  - 未提供 decoded content 的 KeePass 附件旧路径保持不变：继续创建 `keepass-kdbx-placeholder` / `pending-kdbx-decode` 占位，并保留 pending 附件摘要。
+  - QuickLook 预览新增 KeePass decoded content 分支：这类附件直接从本地内容仓库物化临时预览文件，不要求 Android raw CEK provider；Android 备份密文附件仍走既有 CEK 解密路径。
+  - 成功状态文案会显示“导入附件内容”的数量，但不会显示数据库密码、key file 内容、decoded attachment plaintext、content hash、KeePass entry/group/attachment UUID 或本地内容路径。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、附件写回/编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass planner 相关 3 个 Swift Testing 用例通过；KeePass 确认导入相关 4 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 53 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 140 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
