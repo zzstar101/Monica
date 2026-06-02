@@ -687,6 +687,14 @@
   - Settings KeePass/KDBX 区块已新增“预览导入项”入口，显示可预览候选数、跳过数、候选标题/账号和跳过原因；切换 KDBX、凭据、密钥文件或锁库时会清理旧计划。
   - 本节点不把 KeePass 条目写入 MDBX，不制造空密码条目，也不声明已经完成真实 KDBX 解密或确认导入；它只为后续真实 KDBX reader 接入后的确认导入流建立脱敏计划层。
   - 最新验证：Storage/App 新增目标测试均从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 133 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 元数据确认导入边界第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 App 会话、设置页入口、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `testKeePassConfirmImportCreatesLoginMetadataWithoutSecretsAndClearsPreviewState`，先确认 RED 为 `AppSessionModel` 缺少 `confirmKeePassReadOnlyImport(projectTitle:)`。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会使用已有只读导入计划，必要时先生成计划；只把候选条目的 title、username 和 url 写入当前 vault 的登录条目，password 固定为空字符串，避免伪装已经完成 KDBX secret 解码。
+  - 导入成功后会刷新当前条目列表和 AutoFill 索引（若已配置），并清理 KDBX 文件 bytes、数据库密码、key file、只读 snapshot 和导入计划等临时状态；状态文案明确显示“秘密字段待 KDBX 解码器接入”，且不泄漏数据库密码或 key file 内容。
+  - Settings KeePass/KDBX 区块已在导入计划下新增“确认导入元数据”按钮；无候选项时禁用。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明完整 KDBX 解码打开、秘密字段导入、编辑、保存、回收站、附件或云文件源已完成。
+  - 最新验证：新增 App XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 134 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
