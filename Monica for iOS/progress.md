@@ -805,6 +805,14 @@
   - 解压失败、非 GZip 数据或普通加密 KDBX header 仍走既有 unsupported 路径；状态和 snapshot 摘要不会显示数据库密码、key file 内容或 decoded secret。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；目标 Storage 测试通过 1 个 Swift Testing 用例；既有 App KeePass reader wiring 目标 XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 62 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX payload envelope 边界解析第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi`、上层 MDBX 业务桥或真实 KDBX 密码学解密；改动集中在 `MonicaStorage` 的 KDBX header/payload 二进制边界和回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxPayloadEnvelopeSplitsHeaderFieldsAndEncryptedPayloadWithoutSecrets`，先确认 RED 为缺少 `KeePassKdbxPayloadEnvelope`。
+  - `MonicaStorage` 新增 `KeePassKdbxPayloadEnvelope`，可在 KDBX 完整 end-of-header 后返回 `headerSummary`、公开 TLV `headerFields`、`headerByteRange` 和 `encryptedPayload`，为后续 Argon2/AES/ChaCha20 解密管线提供明确输入边界。
+  - 既有 `inspect` 版本摘要保持宽松，仍可对只有签名和版本的合成 KDBX 显示 `KDBX 3/4`；新的 envelope 解析保持严格，header 不完整时返回脱敏 `formatUnsupported` 错误。
+  - envelope 摘要只显示 KDBX 版本、header/payload 字节数和公开 cipher/compression/KDF 摘要，不显示数据库密码、key file 内容、encrypted payload 字节或 decoded secret。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解密、block 解密、编辑保存、附件写回/编辑、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 63 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
