@@ -874,6 +874,14 @@
   - 测试确认可读出 `GitHub` 条目的 username 与 decoded password，且 `displaySummary` 不泄漏数据库密码、decoded password、TransformSeed、encrypted payload、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和进展备注；本节点仍不声明 KDBX4 HMAC block stream、Argon2d/Argon2id 执行、inner protected value stream、key-file 真实加密 fixture、KDBX 保存或附件写回/编辑已完成。
   - 最新验证：Storage 新增目标测试通过 1 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 77 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 HMAC block stream 解码第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、上游通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的 KDBX4 header authentication、HMAC block stream unwrap、默认 payload decryptor 顺序和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx4BlockStreamDecoderValidatesHmacBlocksWithoutLeakingSecrets`，先确认 RED 为 `KeePassKdbxBlockStreamContext` 缺少 HMAC base key 输入；随后实现 KDBX4 per-block key 派生、block HMAC 校验、terminator 识别和 encrypted payload block 拼接。
+  - 按 TDD 新增 `defaultKeePassPayloadDecryptorUnwrapsKdbx4HmacBlocksBeforeAesCipherWithoutLeakingSecrets` 与 `defaultKeePassPayloadDecryptorSkipsKdbx4HeaderHashAndHmacBeforeBlocks`，确认 KDBX4 路径会先验证 header SHA-256/header HMAC、unwrap HMAC block stream，再把拼出的 encrypted payload 交给 AES payload cipher；KDBX3 路径仍保持 AES 解密后再 hashed block stream 解码。
+  - `KeePassKdbxPayloadEnvelope` 现在保留原始 KDBX header bytes，KDBX4 解密路径可据此校验 header hash/HMAC；手写测试 envelope 未提供 header bytes 时仍兼容，只做 block stream 校验。
+  - 错误文案保持脱敏，不显示 header bytes、header HMAC、HMAC base key、block payload、encrypted payload、数据库密码、key file 内容、derived/master key 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表和进展备注；本节点仍不声明 Argon2d/Argon2id 执行、inner protected value stream、真实 KDBX4 AES/Argon2 fixture 端到端读取、KDBX 保存或附件写回/编辑已完成。
+  - 最新验证：Storage KDBX4 目标测试组通过 4 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 79 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
