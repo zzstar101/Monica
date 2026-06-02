@@ -711,6 +711,15 @@
   - 既有元数据确认导入测试已更新为新的分类落点，并继续验证 KDBX 文件 bytes、数据库密码、key file、只读 snapshot 和导入计划会在导入成功后清理，pending 摘要不泄漏秘密。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、编辑保存、回收站或云文件源已完成。
   - 最新验证：新增 KeePass 分组映射 XCTest 从 RED 到 GREEN；既有 KeePass 元数据确认导入 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 135 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 原生身份映射边界第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 的只读 snapshot/plan 模型、App 会话确认导入映射和回归测试。
+  - 先查看 Android `KeePassEntryData`，确认 Android KeePass 管理主线已经按 `entryUuid`、`groupUuid` 和 `groupPath` 做 UUID-first 身份保持，iOS 后续附件、TOTP、回收站和编辑保存也需要同类锚点。
+  - 按 TDD 扩展 `keepPassReadOnlyImportPlannerBuildsPreviewOnlyPlanWithoutLeakingSecrets`，先确认 RED 为 `KeePassReadOnlyEntry` / candidate / skipped 条目缺少 `groupID`。
+  - `MonicaStorage` 现在会在只读 entry、导入候选和跳过条目中保留可选 KeePass group UUID；`displaySummary` 和 pending 摘要仍不显示 entry/group UUID，不泄漏数据库密码或 key file 内容。
+  - 按 TDD 扩展 `testKeePassConfirmImportMapsGroupPathsToVaultCategories`，先确认 RED 为 `AppSessionModel` 缺少 `keePassLastMetadataImportReferences` 和 `AppKeePassImportedEntryReference`。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会记录本次 KeePass source entry ID、source group ID、source group path 到新建 iOS login ID、project ID 的内部映射；成功状态文案不包含 UUID，选择新 KDBX 或普通清理会清空旧映射，成功导入后的临时 KDBX bytes/password/key file 清理会保留本次映射。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、TOTP 导入、编辑保存、回收站或云文件源已完成。
+  - 最新验证：Storage 原生身份目标测试从 RED 到 GREEN；App 原生身份映射目标测试从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 135 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
