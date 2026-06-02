@@ -727,6 +727,14 @@
   - `AppKeePassImportedEntryReference` 现在可记录同一个 KeePass source entry/group 到 iOS login ID、iOS TOTP ID 和 iOS project ID 的内部映射；成功状态文案显示创建的 TOTP 占位数量，但不泄漏 KeePass entry UUID、group UUID、数据库密码或 key file 内容。
   - 既有 KeePass 元数据确认导入测试已同步覆盖 `hasTotp` 时会创建空 secret 的 TOTP 占位项；本节点仍不声明真实 KDBX 解码、TOTP secret 导入、附件导入、编辑保存、回收站或云文件源已完成。
   - 最新验证：新增 App XCTest 先 RED 后 GREEN；KeePass 确认导入相关 3 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 136 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX 回收站元数据导入第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi` 或上层 MDBX 业务桥；改动集中在 `MonicaStorage` 只读导入计划模型、App 会话确认导入路径、App 层回归测试和矩阵文档。
+  - 按 TDD 扩展 Storage 用例 `keepPassReadOnlyImportPlannerBuildsPreviewOnlyPlanWithoutLeakingSecrets`，先确认 RED 为 `KeePassReadOnlyImportPlan` 缺少 `deletedCandidateCount`、`KeePassReadOnlyImportCandidate` 缺少 `isDeleted`。
+  - `KeePassReadOnlyImportPlanner` 现在不再把 KeePass 回收站条目作为 skipped entry 丢弃，而是把它们纳入候选并以 `isDeleted` 标记；导入计划会统计 deleted candidate 数，pending 密码/TOTP/附件能力仍保持脱敏。
+  - 按 TDD 新增 App 用例 `testKeePassConfirmImportPreservesRecycleBinEntriesAsDeletedMetadata`，先确认 RED 为 `AppKeePassImportedEntryReference` 缺少 `importedAsDeleted`，随后补齐实现。
+  - `AppSessionModel.confirmKeePassReadOnlyImport(projectTitle:)` 现在会为回收站候选创建 login 元数据和必要的 TOTP 占位元数据，然后立即调用现有 repository 软删除，让导入结果保留在对应 iOS 分类回收站；引用映射会记录 `importedAsDeleted`，成功文案只显示回收站元数据数量，不泄漏 KeePass entry/group UUID、数据库密码或 key file 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 解码、秘密字段导入、附件导入、编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass 确认导入相关 5 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 51 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 137 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
