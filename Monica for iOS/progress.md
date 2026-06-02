@@ -761,6 +761,14 @@
   - 成功状态文案会显示“导入附件内容”的数量，但不会显示数据库密码、key file 内容、decoded attachment plaintext、content hash、KeePass entry/group/attachment UUID 或本地内容路径。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、附件写回/编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
   - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；KeePass planner 相关 3 个 Swift Testing 用例通过；KeePass 确认导入相关 4 个 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 53 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 140 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX Notes 与 StringFields 导入契约第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi` 或真实 KDBX 解码器；改动集中在 iOS `MonicaMDBX` wrapper 的 login payload JSON、`MonicaStorage` 只读 KeePass 字段契约、App 会话确认导入路径和回归测试。
+  - 先对照 Android `KeePassEntryData`，确认 Android KeePass reader 会输出 `notes` 与 `customFields`；iOS 此前 login draft/entry 没有 notes 承载位，会在 KeePass 导入和 Android 备份密码导入中丢失备注。
+  - 按 TDD 新增 Storage 用例 `keepPassReadOnlyImportPlannerCarriesNotesAndCustomFieldsWithoutLeakingValues`，先确认 RED 为缺少 `KeePassReadOnlyCustomField`、entry/candidate 缺少 notes/customFields；随后让只读 snapshot 与导入计划保留 KeePass Notes/StringFields，按 sortOrder/title 稳定排序，并确认 `displaySummary` / pending 摘要不泄漏字段值。
+  - 按 TDD 新增 Storage 用例 `loginEntryRepositoryPreservesLoginNotes`，先确认 RED 为 `LocalLoginEntryDraft` 缺少 `notes`；随后让 iOS login draft/entry、MDBX wrapper payload JSON、Storage repository 和 fake engine 都保留 notes，旧调用保持默认空 notes 兼容。
+  - 按 TDD 新增 App 用例 `testKeePassConfirmImportImportsNotesAndCustomFieldsWithoutLeakingValues`，先确认 RED 为 App 确认导入没有写入 notes/custom fields；随后让确认导入把 KeePass Notes 与 StringFields 合并写入 iOS login notes，成功文案只显示“备注/自定义字段”计数，不显示数据库密码、Notes 或字段值。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 验收内容；本节点仍不声明真实 KDBX 文件密码学解码、自定义字段一等编辑 UI、附件写回/编辑保存、云文件源或 KeePass 原生回收站恢复语义已完成。
+  - 最新验证：Storage/App 新增目标测试均先 RED 后 GREEN；目标 Storage 测试通过 2 个 Swift Testing 用例；目标 App XCTest 通过 1 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 55 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 141 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
