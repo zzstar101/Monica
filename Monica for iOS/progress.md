@@ -580,6 +580,13 @@
   - 新增 `testLoginStackedGroupModeResetsWhenVaultLocks`，覆盖锁库时分组模式和分组结果复位。
   - `AndroidFeatureMatrix.md` 已把“堆叠分组”推进为开发中；备注/应用/自定义分组策略仍待后续模块。
   - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 114 个 XCTest；`git diff --check` 通过。
+- 字段/页面定制模块第一版已完成：
+  - 按 TDD 新增 `testVaultDisplayPreferencesPersistAndSummarizeIOSFieldCustomization`，先确认 RED 为 `AppSessionModel` 缺少显示偏好模型、store 和摘要行。
+  - 新增 `VaultDisplayPreferences`、`VaultDisplayPreferenceStore`、UserDefaults/Memory store，覆盖密码列表账号字段、网址字段、卡片密度和底部导航文字偏好；生产环境会持久化到 UserDefaults。
+  - 设置页“应用”区已接入卡片密度 Picker 和账号字段/网址字段/底部导航文字 Toggle；密码列表会按偏好隐藏账号/网址并切换舒适/紧凑间距；底部 Tab 会按偏好隐藏文字标签。
+  - 新增 `testVaultDisplayPreferencesSurviveVaultLock`，覆盖锁库不清除显示偏好。
+  - `AndroidFeatureMatrix.md` 已把“字段/页面定制”推进为开发中；完整字段顺序、页面重排和更多条目类型显示策略仍待后续模块。
+  - 最新验证：目标 XCTest 从 RED 到 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 42 个用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 116 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
