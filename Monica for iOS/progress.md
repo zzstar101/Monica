@@ -1012,6 +1012,13 @@
   - `KeePassXMLWritebackPayload.displaySummary` 只显示分组/条目/附件数量，不显示 decoded password、TOTP secret、自定义字段值或附件明文；缺少 decoded attachment content 时返回脱敏错误，避免写出不可回读的附件引用。
   - 本节点只声明 KDBX 保存前的明文 XML payload 层已完成；仍不声明 KDBX header 生成、GZip 压缩写回、KDBX3/4 block stream/HMAC 写回、payload cipher 加密、原 `.kdbx` 原位保存或云文件源 writeback 已完成。
   - 最新验证：新增 XML writeback payload 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 93 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX block stream writer 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX block stream writer、Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx3BlockStreamEncoderRoundTripsXmlPayloadWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxBlockStreamEncoder`；实现后 KDBX3 writer 会输出 stream start bytes、block index、SHA-256 block hash、block length/data 和 zero-hash terminator，并由现有 decoder 回读 XML payload。
+  - 同步新增 `keepPassKdbx4BlockStreamEncoderRoundTripsXmlPayloadWithoutLeakingSecrets`，覆盖 KDBX4 per-block HMAC writer：使用 64-byte HMAC base key 派生 block key，写出 block HMAC、length/data 和 terminator；篡改输出后既有 decoder 会按 HMAC 校验失败。
+  - 错误文案不泄漏 XML payload、stream start bytes、HMAC base key、block hash 或 HMAC；该节点只补齐 XML writeback payload 之后的 block stream 层。
+  - 本节点仍不声明 KDBX header 生成、GZip 压缩写回、payload cipher 加密、完整 KDBX file assembly、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 KDBX3/KDBX4 block stream writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 95 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
