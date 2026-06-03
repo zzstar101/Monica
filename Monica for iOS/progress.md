@@ -1214,3 +1214,13 @@
   - `MonicaAppEnvironment` 支持注入 Plus entitlement store，生产环境默认使用 UserDefaults store；新增 `testProductionPlusEntitlementUsesPersistedResourceUnlockWithoutIAP` 覆盖 production session 从持久化资源解锁态恢复。
   - 本节点仍不声明真实资源包校验/映射或签名真机验收已完成。
   - 最新验证：新增 Plus 持久化目标 XCTest 先 RED 后 GREEN，Plus 目标 XCTest 通过 2 个用例；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留测试断言和 WebDAV/CloudFile receipt 命名；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 173 个 XCTest。
+
+- KeePass/KDBX 云文件源写回第一版已完成：
+  - 时间：2026-06-03 20:49:33 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 层 KeePass 云源上下文、KDBX writeback 分派复用、App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassKdbxSnapshotSaveOverwritesCloudFileSourceWithoutLeakingSecrets`，先确认 RED 为缺少 `previewKeePassImport(fromCloudFile:provider:)` 与 `writeKeePassReadOnlySnapshotBackToCloudSource()`。
+  - `AppSessionModel` 现在会为从 OneDrive/CloudFile 下载的 KDBX 记录 provider、remote item id 和清洗文件名；预览、密码/key file 预检、只读 snapshot、KDBX3/KDBX4 writeback request 构建复用既有本地源 pipeline。
+  - 新的云写回入口会把 coordinator 生成的 KDBX bytes 覆盖回同一云端 item，更新 pending KDBX 数据和云状态；状态文案只显示 provider、清洗文件名、条目/附件/字节数，不泄漏 remote id/path/hash、数据库密码、key file、decoded password 或 KDBX 内容。
+  - Google Drive 继续按当前产品口径后置；本节点不新增 Google Drive feature，也不引入 StoreKit/IAP，Plus 仍是资源按钮本地解锁口径。
+  - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、云端冲突处理、既有 header 原位改写、恢复到原删除前分组或签名真机验收已完成。
+  - 最新验证：新增 KeePass 云文件源写回目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 174 个 XCTest。
