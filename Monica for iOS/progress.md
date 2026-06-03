@@ -1088,6 +1088,14 @@
   - 状态文案只显示清洗后的附件文件名与字节数，不显示选中文件内容、旧/新 hash、decoded password、KDBX bytes 或 header/payload bytes。
   - 本节点推进的是 Settings 可见预览附件的文件选择替换与本地 KDBX 写回；仍不声明完整附件列表/搜索选择 UI、KeePass 原生附件新增/删除、protected binary value 加密写回、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 KeePass 附件文件替换目标 XCTest 先 RED 后 GREEN；KeePass 附件相关目标 XCTest 通过 3 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 156 个 XCTest。
+- KeePass/KDBX 附件全量候选、新增和删除写回第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 Storage KDBX 保存核心；改动集中在 App 会话 snapshot 编辑边界、Settings UI 接入、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassAttachmentEditCandidatesSearchAllAttachmentsWithoutLeakingSecrets`，先确认 RED 为缺少 `keePassAttachmentEditCandidates`；实现后覆盖全量附件候选搜索，不再受 Settings 旧的前三个条目/前两个附件展示限制，并验证候选不泄漏 decoded attachment bytes、content hash、decoded password 或 notes。
+  - 同步新增 `testKeePassSnapshotAttachmentAddAndDeleteWriteBackWithoutLeakingSecrets`，先确认 RED 为缺少添加/删除写回 API；实现后覆盖从文件添加 KeePass 附件、更新 `attachmentCount`、生成 `sha256:` 内容 hash、写回本地源 `.kdbx`，再删除原附件并再次写回。
+  - Settings 的 KeePass 只读预览现在提供全量条目的“添加附件并写回”，并新增附件搜索框和全量候选列表；候选可执行“替换并写回”“删除并写回”，操作完成后复用现有 KDBX4 writeback request 与本地文件写回服务。
+  - 状态文案和候选搜索文本只显示清洗后的文件名、字节数、条目摘要和媒体类型，不显示附件明文、旧/新 hash、decoded password、notes、KDBX bytes 或 header/payload bytes。
+  - 本节点推进的是本地源 `.kdbx` snapshot 附件增删改写回第一版；仍不声明 protected binary value 加密写回、云文件源 writeback、既有 header 原位改写或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 KeePass 附件候选/新增/删除目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 2 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 158 个 XCTest。
 
 ## 遇到的问题
 
