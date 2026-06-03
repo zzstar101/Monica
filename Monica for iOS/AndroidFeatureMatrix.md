@@ -87,6 +87,8 @@ KDBX/KeePass 进展备注：Storage 已新增 KDBX4 writeback coordinator 第一
 
 KDBX/KeePass 进展备注：App 层已新增 KeePass KDBX 本地文件写回边界。通过本地文件选择进入的 KDBX 会记录源 URL，后续可把 Storage writeback coordinator 生成的 `KeePassKdbx4WritebackResult.database` 经可注入文件写回服务替换同一源文件；生产实现使用临时文件 + `FileManager.replaceItemAt`，测试覆盖写回目标、写回 bytes、内存 pending database 更新，以及状态文案不泄漏数据库密码、key file 或 KDBX 内容。该节点仍不声明 App 已自动从当前编辑态生成 writeback request，也不包含云文件源、既有 header 原位改写或 KeePass 原生回收站还原语义。
 
+KDBX/KeePass 进展备注：App 层已接入 KeePass snapshot writeback request 构建。`writeKeePassReadOnlySnapshotBackToSource()` 会从当前只读 snapshot 和 pending KDBX4 envelope 提取 cipher、compression、crypto inputs、KDF 参数与最近一次成功解锁凭据，调用 Storage KDBX4 writeback coordinator 生成数据库 bytes，再经本地文件写回服务替换源 `.kdbx`；测试覆盖密码+key file 候选重试后的成功凭据沿用，以及状态文案不泄漏密码、key file、decoded password 或 KDBX 内容。UI 编辑态自动保存、protected value 加密写回、ChaCha20/Twofish payload 加密写回、既有 header 原位改写、云文件源 writeback 和 KeePass 原生回收站还原语义仍待后续。
+
 ## 管理、设置与商业化
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |

@@ -997,7 +997,8 @@
   - 摘要搜索文本刻意只包含标题、账号/用户名、host、issuer、公开类型等低敏信息，不包含 login password、note body、TOTP secret、API token、Wi-Fi password、Send body、私钥引用或附件 metadata 秘密；`openShortcutEntry` 会按条目类型切换到对应 tab 并复用既有 `presentEditEditor` 填充编辑草稿。
   - `AndroidFeatureMatrix.md` 已把“快捷入口 / Shortcuts/App Intents”从待实现推进到开发中；本节点仍不声明系统 AppIntents 注册、快捷指令 UI、复制动作、跨进程解锁或签名真机验证已完成。
   - 最新验证：快捷入口目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 148 个 XCTest。
-- StoreKit 2 / Plus 权益映射 App 层第一版已完成：
+- StoreKit 2 / Plus 权益映射 App 层第一版已完成（历史节点，已被下一条资源按钮路径取代）：
+  - 这条历史记录只保留为变更脉络；当前 iOS Plus 口径以后续“Android 资源按钮解锁路径修正”为准，不进入 IAP/StoreKit。
   - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、真实 StoreKit 购买流程或 receipt/CDK 网络校验；改动集中在 App 会话 entitlement 映射、Settings 展示、App 层回归测试和矩阵文档。
   - 按 TDD 新增 `VaultSessionModelTests.testPlusEntitlementMappingUnifiesStoreKitAndLegacyCDKWithoutLeakingIdentifiers`，先确认 RED 为缺少 `AppPlusStoreKitProduct`、`AppStoreKitPlusEntitlement`、`AppLegacyPlusEntitlement`、Plus 状态/功能 rows 以及 apply API；实现后覆盖过期订阅不激活、active lifetime StoreKit entitlement 激活 Plus、legacy CDK entitlement 同样激活 Plus。
   - `AppSessionModel` 现在可把 StoreKit product id 映射为 Monica Plus Monthly/Yearly/Lifetime，并把 active StoreKit entitlement 与 legacy Plus/CDK entitlement 统一成 `plusEntitlementStatusRow` 和 `plusFeatureRows`。
@@ -1066,6 +1067,13 @@
   - 错误文案和 display summary 不泄漏数据库密码、decoded password、notes、Argon2 salt、master seed、IV、derived/master key、XML 明文或 encrypted payload。
   - 本节点仍不声明原 `.kdbx` 文件系统/云端 writeback、既有 header 原位改写、ChaCha20/Twofish payload 加密写回、protected value 加密写回或 KeePass 原生回收站还原语义已完成。
   - 最新验证：KDBX4 writeback coordinator 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX App snapshot writeback request 接入第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 Storage 写回核心；改动集中在 App 会话写回 request 构建、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassKdbxSnapshotSaveBuildsWritebackRequestAndWritesSourceFileWithoutLeakingSecrets`，先确认 RED 为 App 缺少从当前 KeePass snapshot 构建 `KeePassKdbx4WritebackRequest` 的入口；实现后又修正测试 fake reader，让 `password-only` 候选先失败、带 key file 候选成功，覆盖写回沿用真实成功凭据。
+  - `AppSessionModel.writeKeePassReadOnlySnapshotBackToSource()` 现在会复用已有只读 snapshot，或在缺少 snapshot 时重新预览；随后从 pending KDBX4 源文件 envelope 提取 cipher、compression、crypto inputs 和 KDF 参数，带上最近一次成功解锁凭据，交给 `DefaultKeePassKdbx4WritebackCoordinator` 生成数据库 bytes，再经本地文件写回服务替换源 `.kdbx`。
+  - 状态文案只显示条目数、附件数和数据库字节数，不泄漏数据库密码、key file 内容、decoded password、KDBX bytes、header/payload bytes 或附件明文。
+  - 本节点把 App 本地源文件 writeback 从“只能写入外部预生成结果”推进到“可从当前 KeePass snapshot 构建 request 并写回”；仍不声明 UI 编辑态自动保存、protected value 加密写回、ChaCha20/Twofish payload 加密写回、既有 header 原位改写、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 App snapshot writeback 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 153 个 XCTest。
 
 ## 遇到的问题
 
