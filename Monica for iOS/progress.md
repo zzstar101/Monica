@@ -1025,8 +1025,16 @@
   - 同步新增 `keepPassKdbxAesPayloadCipherEncryptsCbcPayloadWithoutLeakingSecrets`，先确认 RED 为 `DefaultKeePassKdbxPayloadCipher` 缺少 `encryptPayload`；实现后 AES-256-CBC writer 会对 plaintext payload 做 PKCS#7 padding、CBC XOR 和 AES block encrypt，现有 decryptor 可还原原始 payload。
   - `KeePassKdbxPayloadCipher` 新增默认 unsupported 的 `encryptPayload`，避免只读测试 fake cipher 被迫实现写回路径；`DefaultKeePassKdbxPayloadCipher` 目前只声明 AES-256-CBC 加密完成，ChaCha20/Twofish 加密仍明确返回脱敏 unsupported。
   - 错误文案不泄漏 XML payload、master key、IV、plaintext payload、block bytes 或 encrypted payload；该节点只补齐 XML/GZip/block stream 后到 AES encrypted payload 的写回子层。
-  - 本节点仍不声明 KDBX header 生成、KDBX4 header hash/HMAC section 写回、完整 KDBX file assembly、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 本节点仍不声明 KDBX header 生成、完整 KDBX file assembly、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 GZip compressor 与 AES payload cipher writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 97 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 payload section writer 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX4 payload section writer 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx4PayloadSectionWriterAddsHeaderAuthenticationWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbx4PayloadSectionWriter`。
+  - `DefaultKeePassKdbx4PayloadSectionWriter` 现在会按 KDBX4 口径从 32-byte master seed 与 32-byte derived key 生成 HMAC block base key，写出 `SHA256(header bytes)`、header HMAC 和后续 HMAC block stream。
+  - 测试用现有 `DefaultKeePassKdbxPayloadDecryptor` 反向验证：writer 产物会通过 header hash/header HMAC 校验与 HMAC block unwrap，最终交给 payload cipher 的输入等于原 encrypted payload。
+  - 错误文案不泄漏 header bytes、encrypted payload、master seed、derived key、password key 或 composite key；该节点只补齐 KDBX4 payload section 层。
+  - 本节点仍不声明 KDBX header 生成、完整 KDBX file assembly、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 KDBX4 payload section writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 98 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
