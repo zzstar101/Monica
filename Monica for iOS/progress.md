@@ -952,6 +952,14 @@
   - 默认 reader 能读出 `KDBX4 Argon2id` 条目的 username 与 decoded password，并验证 `memory=1 MiB`、`iterations=2`、`parallelism=1`、`version=0x13`；display summary 不泄漏数据库密码、decoded password、salt、derived/master key、encrypted payload、header HMAC 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Twofish payload、KDBX 保存/writeback、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`swift test --filter defaultKeePassDatabaseReaderDecryptsKdbx4Argon2idFixtureToSnapshotWithoutLeakingCredentials` 通过 1 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 89 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
+- KeePass/KDBX Twofish payload cipher 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 payload cipher、包内 C target、Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxTwofishPayloadCipherDecryptsCbcPayloadWithoutLeakingSecrets`，先确认 RED 为 `.twofish` 分支返回 `KDBX Twofish payload 解密尚未接入`。
+  - `MonicaStorage` 新增 `MonicaStorageTwofish` C target，使用官方 Schneier/Counterpane Twofish reference C 代码，并通过最小 wrapper 暴露 `monica_twofish_decrypt_cbc`；Swift 层继续负责 KDBX 参数校验、脱敏错误和 PKCS#7 padding 剥离。
+  - `DefaultKeePassKdbxPayloadCipher` 现在支持 KDBX Twofish-CBC payload 解密：要求 32-byte master key、16-byte encryption IV 和 16-byte 对齐 payload；AES-256-CBC 与 ChaCha20 路径保持不变，未知 cipher 仍明确返回脱敏 unsupported。
+  - 同步新增 `defaultKeePassDatabaseReaderDecryptsKdbx4TwofishFixtureToSnapshotWithoutLeakingCredentials`，覆盖真实 KDBX4 AES-KDF + Twofish fixture：header HMAC、HMAC block unwrap、Twofish-CBC payload 和 KeePass XML snapshot，默认 reader 能读出 `KDBX4 Twofish` 条目的 username 与 decoded password。
+  - 错误文案和 display summary 不泄漏数据库密码、decoded password、Twofish key/IV、AES-KDF seed、encrypted payload、derived/master key、header HMAC 或 XML 明文；本节点仍不声明 KDBX 保存/writeback、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Twofish 目标测试先 RED 后 GREEN；`swift test --filter Twofish` 通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 91 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
 
 ## 遇到的问题
 
