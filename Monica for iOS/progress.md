@@ -1224,3 +1224,13 @@
   - Google Drive 继续按当前产品口径后置；本节点不新增 Google Drive feature，也不引入 StoreKit/IAP，Plus 仍是资源按钮本地解锁口径。
   - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、云端冲突处理、既有 header 原位改写、恢复到原删除前分组或签名真机验收已完成。
   - 最新验证：新增 KeePass 云文件源写回目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 174 个 XCTest。
+
+- KeePass/KDBX 原始 header 复用写回第一版已完成：
+  - 时间：2026-06-03 21:15:29 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaStorage` KDBX writeback request/coordinator、App 写回 request 构建、Storage/App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `MonicaStorageTests.keepPassKdbx4WritebackCoordinatorReusesExistingHeaderBytesWithoutLeakingSecrets`，先确认 RED 为 `KeePassKdbx4WritebackRequest` 尚不接受 `existingHeaderBytes`；实现后 coordinator 会校验传入 bytes 可被 `KeePassKdbxPayloadEnvelope.parse` 解析为仅包含 header、版本匹配且无 encrypted payload 的 KDBX3/KDBX4 envelope，再复用该 header 组装新数据库。
+  - App 层 KDBX3/KDBX4 本地源写回与 OneDrive/CloudFile KDBX4 云源写回都会把当前 pending/source envelope 的 `headerBytes` 传给 Storage coordinator，避免 snapshot 写回时无条件重新生成外层 header。
+  - 新增 App 回归断言覆盖本地 KDBX4、本地 KDBX3 和云源 KDBX4 写回 request 均携带源文件 header bytes；状态文案仍只显示条目/附件/字节数等脱敏摘要，不泄漏 remote id/path/hash、数据库密码、key file、decoded password、header seed/IV、derived key 或 KDBX 内容。
+  - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
+  - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、云端冲突处理、恢复到原删除前分组或签名真机验收已完成。
+  - 最新验证：Storage 新增 header 复用目标测试先 RED 后 GREEN；App 三个写回 request 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 174 个 XCTest。
