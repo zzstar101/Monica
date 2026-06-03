@@ -1043,6 +1043,14 @@
   - 错误文案不泄漏 header bytes、payload section、数据库密码、XML 明文、derived/master key 或 encrypted payload；该节点只补齐复用既有 header 的 file assembly 层。
   - 本节点仍不声明 KDBX header 生成/改写、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：KDBX file assembler 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 99 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 header writer 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX4 header writer 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx4HeaderWriterBuildsArgon2idHeaderForReadableWritebackWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbx4HeaderWriter`。
+  - `DefaultKeePassKdbx4HeaderWriter` 现在可生成 KDBX4 外层 header bytes，覆盖 AES-256、无压缩/GZip、AES-KDF、Argon2d/Argon2id、master seed、encryption IV、inner random stream key/id 和 VariantDictionary KDF 参数编码。
+  - 测试现场生成 Argon2id header，再接入 KDF 派生、master key、AES-CBC encrypted payload、KDBX4 payload section 与 file assembler，最后用现有 `DefaultKeePassDatabaseReader` 重新打开读出 entry，验证新 header 可被当前读写链路消费。
+  - 错误文案和 display summary 不泄漏 Argon2 salt、AES-KDF seed、master seed、IV、数据库密码、XML 明文、derived/master key 或 encrypted payload。
+  - 本节点仍不声明既有 KDBX header 原位改写、ChaCha20/Twofish payload 加密、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：KDBX4 header writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 100 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
