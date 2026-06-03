@@ -1234,3 +1234,14 @@
   - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
   - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、云端冲突处理、恢复到原删除前分组或签名真机验收已完成。
   - 最新验证：Storage 新增 header 复用目标测试先 RED 后 GREEN；App 三个写回 request 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 174 个 XCTest。
+
+- KeePass/KDBX 云文件 revision 冲突处理第一版已完成：
+  - 时间：2026-06-03 21:32:04 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaSync` CloudFile 契约、App 层 KeePass 云源上下文、App/Sync 回归测试和矩阵/进度文档。
+  - 按 TDD 扩展 `MonicaSyncTests.cloudFileProviderSummariesAvoidProviderSecretsAndRemoteIdentifiers`，先确认 RED 为 `CloudFileItem`、`CloudFileDownload`、`CloudFileWriteReceipt` 尚不携带 revision 且 `CloudFileProviderError.conflict` 不存在；实现后 CloudFile DTO 可保存 provider revision/etag，脱敏摘要仍只显示 provider、清洗文件名和字节数。
+  - `CloudFileProvider.overwriteFile` 新增 `expectedRevision` 条件写回参数，并保留旧三参数 convenience 方法；OneDrive/Google Drive 当前 adapter 仍维持登录/unsupported 边界，不新增 Google Drive feature。
+  - App 层 `previewKeePassImport(fromCloudFile:provider:)` 会记录下载时 revision；`writeKeePassReadOnlySnapshotBackToCloudSource()` 覆盖同一远端 item 时传入 `expectedRevision`，成功后用 receipt revision 更新云源上下文。
+  - 新增 `VaultSessionModelTests.testKeePassKdbxCloudWritebackStopsOnRevisionConflictWithoutLeakingSecrets` 覆盖 provider 返回冲突时停止替换本地 pending KDBX、保留原下载数据库、状态提示重新下载；成功路径也断言传入下载 revision。状态文案不泄漏 remote id/path/hash、revision/etag、数据库密码、key file、decoded password 或 KDBX bytes。
+  - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
+  - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、真实 Graph etag 请求头接入、恢复到原删除前分组或签名真机验收已完成。
+  - 最新验证：Sync revision/conflict 目标测试先 RED 后 GREEN；App KeePass 云写回成功/冲突目标 XCTest 先 RED 后 GREEN；完整验证见本节点提交前记录。
