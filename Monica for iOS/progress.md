@@ -1266,3 +1266,12 @@
   - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
   - 本节点仍不声明真实 MSAL 登录 UI、token refresh、账号选择/登出、真实 Graph 网络验收、云端恢复确认 UI 或签名真机验收已完成。
   - 最新验证：OneDrive Graph provider 目标 SwiftPM 测试先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
+
+- KeePass/KDBX 收尾状态已完成：
+  - 时间：2026-06-03 22:54:30 +0800。
+  - 本节点按用户“直接收尾 KDBX”的要求，没有继续拆小功能提交，也没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、OneDrive、Google Drive 或 Plus/IAP 链路；改动集中在 Android 对齐矩阵与进度口径收口。
+  - 已复核代码与测试覆盖：Storage/App 已具备 KDBX3/KDBX4 读写主链路，覆盖 Argon2d/Argon2id/AES-KDF、AES-256/ChaCha20/Twofish payload、KDBX3 hashed block stream、KDBX4 header HMAC/HMAC block stream、inner protected values、inner header binary pool、key file 候选重试、KDBX3/KDBX4 snapshot writeback、本地源替换、云源 revision 条件写回、附件增删改写回和 `PreviousParentGroup` 原生回收站恢复写回。
+  - `AndroidFeatureMatrix.md` 已把 KDBX/KeePass 从“开发中”收为“已实现”，并把早期逐层推进时留下的“Argon2/writeback/附件仍待后续”等过期备注折叠为当前完成口径，避免后续窗口误判 KDBX 仍是核心阻塞项。
+  - KDB 旧格式仍按产品口径提示用户先用 KeePassDX/KeePassXC 另存为 `.kdbx`；真实 OneDrive MSAL 登录、真实 Graph 网络验收、签名真机文件协调和更多外部 KeePass 兼容样本属于云/验收/兼容性后续，不再阻塞 KDBX 主功能完成。
+  - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
+  - 最新验证：KDBX 目标过滤 `swift test --package-path "Monica for iOS/SwiftPackages/MonicaStorage" --filter 'Kdbx|KeePass|Twofish|Argon'` 通过 46 个 Swift Testing 用例；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
