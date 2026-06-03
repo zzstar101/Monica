@@ -1294,3 +1294,11 @@
   - `DefaultAppOneDriveMSALAuthenticationService` 现在按 MSAL `MSALAccount.identifier` 作为新的 canonical account identifier 保存；针对已保存旧 `homeAccountId.identifier` 的用户，直接查找失败后会扫描 `allAccounts()` 并匹配 `identifier/homeAccountId`，只在本机缓存中确实找不到账号时清除本地 account id。
   - 本节点仍不声明用户签名真机 Microsoft 账号和真实 Graph 网络重新验收已完成；需要用户手动构建安装后复测登录、后台重开、刷新文件和 Graph 列表。
   - 最新验证：OneDrive 恢复目标 XCTest 先 RED 后 GREEN；OneDrive 登录/回调/恢复/diagnostics/Info.plist 目标 XCTest 通过 5 个用例，另补跑 unknown auth diagnostics 目标 XCTest 通过 1 个用例；`git diff --check` 通过；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过。
+
+- OneDrive MSAL Keychain `-34018` 持久化修复已完成：
+  - 时间：2026-06-04 03:37:20 +0800。
+  - 本节点针对真机反馈“登录后刷新仍操作未完成，当前显示 `-34018`”继续收敛 OneDrive 持久化；`-34018` 对应 iOS Keychain missing entitlement。继续不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、Google Drive 或 Plus/IAP 链路。
+  - `DefaultAppOneDriveMSALAuthenticationService` 现在显式设置 `MSALPublicClientApplicationConfig.cacheConfig.keychainSharingGroup = "com.monica-pass.monica"`，让 MSAL token cache 使用 App 已注册的私有 keychain access group，而不是默认 `com.microsoft.adalcache` group。
+  - OneDrive 云文件刷新/列表失败时，App 现在会复用 OneDrive/MSAL 脱敏诊断映射，显示 `MSALErrorDomain`、内部错误码和 correlation id 等排查信息；OAuth callback 中的 `code`/`state` 等敏感字段仍会被 redacted，避免继续只显示泛化“操作未完成”。
+  - 本节点仍不声明用户签名真机 Microsoft 账号和真实 Graph 网络重新验收已完成；需要用户手动构建安装后复测登录、刷新文件、后台重开和再次刷新。
+  - 最新验证：OneDrive Keychain group 目标 XCTest 先 RED 后 GREEN；OneDrive 刷新 MSAL `-34018` 诊断目标 XCTest 先 RED 后 GREEN；OneDrive 登录/回调/恢复/diagnostics/Info.plist/Keychain 目标 XCTest 通过 8 个用例；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist Monica for iOS/App/MonicaApp/MonicaApp.entitlements` 通过；`git diff --check` 通过。
