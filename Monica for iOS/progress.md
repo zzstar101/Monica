@@ -984,6 +984,13 @@
   - `AppSessionModel.saveAutoFillCredential` 会复用现有 active project、login repository、AutoFill 加密 index、secret snapshot 和 QuickType identity 同步链路；状态文案和操作时间线只显示条目标题，不泄漏 username、password 或 URL query。
   - `AndroidFeatureMatrix.md` 已把“保存新密码”从待实现推进到开发中；本节点仍不声明 Credential Provider 真机保存回调、系统保存 UI、未解锁 vault 保存队列、AutoFill Extension 到主 App 的跨进程保存链路或签名真机验收已完成。
   - 最新验证：AutoFill 保存请求目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 147 个 XCTest。
+- Shortcuts/App Intents 快捷入口 App 层第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或系统 AppIntents entitlement；改动集中在 App 会话快捷入口摘要/open API、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testShortcutEntrySearchSummarizesEntriesAndOpensEditorWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `shortcutEntrySummaries` 与 `openShortcutEntry`，实现后覆盖锁库返回空、解锁后搜索 `github` 命中 login/note/totp，并可从 summary 打开对应编辑器。
+  - `AppShortcutEntrySummary` 只包含 `id/kind/title/subtitle/searchableText` 与编辑 route；`AppSessionModel.shortcutEntrySummaries(matching:)` 会从当前解锁 vault 的活动条目生成安全摘要，支持 login/note/totp/card/identity/passkey/sshKey/apiToken/wifi/send。
+  - 摘要搜索文本刻意只包含标题、账号/用户名、host、issuer、公开类型等低敏信息，不包含 login password、note body、TOTP secret、API token、Wi-Fi password、Send body、私钥引用或附件 metadata 秘密；`openShortcutEntry` 会按条目类型切换到对应 tab 并复用既有 `presentEditEditor` 填充编辑草稿。
+  - `AndroidFeatureMatrix.md` 已把“快捷入口 / Shortcuts/App Intents”从待实现推进到开发中；本节点仍不声明系统 AppIntents 注册、快捷指令 UI、复制动作、跨进程解锁或签名真机验证已完成。
+  - 最新验证：快捷入口目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 148 个 XCTest。
 
 ## 遇到的问题
 
