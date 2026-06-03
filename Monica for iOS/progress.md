@@ -968,6 +968,15 @@
   - 写回后 App 会刷新 `attachmentEntries` 并追加 `.updated`/`.attachmentRef` 时间线事件；状态文案与时间线只显示脱敏文件名和字节数，不泄漏旧/新明文、旧/新 hash、wrapped CEK、本地密文路径或密文内容。
   - `AndroidFeatureMatrix.md` 已更新附件引用、Android 备份包、KeePass/KDBX 和时间线行；本节点仍不声明 Android wrapped CEK 解包、附件迁移/同步、KDBX 文件保存/writeback、OneDrive/Google Drive 云文件源或 Bitwarden 双向同步已完成。
   - 最新验证：新增附件写回目标 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 91 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 144 个 XCTest；`git diff --check` 通过。
+- Android wrapped CEK 解包第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 KeePass/KDBX writer；改动集中在 `MonicaStorage` 附件 crypto、App 会话 CEK resolver 和 App/Storage 回归测试。
+  - 先对照 Android `AttachmentKeyVault` 与 `SecurityManager.encryptData/decryptData`，确认 wrapped CEK 是 `Base64(CEK)` 再经 Android `SecurityManager` AES-GCM 包裹；常见跨备份可验证格式为 `MDK|Base64(12B IV + ciphertext + 16B tag)`，旧 legacy 无前缀格式使用同样 GCM envelope，`V2|` Android Keystore-only 不具备跨设备直接解包条件。
+  - 按 TDD 新增 Storage 用例 `androidWrappedAttachmentContentKeyUnwrapperOpensMdkWrappedCekWithoutLeakingSecrets`，先确认 RED 为缺少 `AndroidWrappedAttachmentContentKeyUnwrapper`，随后实现 MDK/legacy wrapping key 解包、Base64 CEK 还原和脱敏错误。
+  - `AndroidWrappedAttachmentContentKeyUnwrapper.unwrap(_:using:)` 现在支持 `.mdk(Data)`、`.legacyKey(Data)` 和 `.legacyMasterKeyDescription(String)` 输入；会校验 32-byte wrapping key、12-byte IV、16-byte tag 和 32-byte CEK，认证失败只返回脱敏错误，不泄漏 CEK、MDK、wrapped payload 或附件明文。
+  - App 会话新增 `androidAttachmentWrappingKeyProvider` 注入点，`resolveAttachmentContentEncryptionKey` 会优先使用既有 raw CEK provider，缺省时用 metadata 的 `wrappedContentEncryptionKey` + wrapping key provider 解出 raw CEK；QuickLook 预览与附件内容写回共用该 resolver。
+  - 按 TDD 新增 `VaultSessionModelTests.testAttachmentQuickLookPreviewUnwrapsAndroidWrappedCekWithoutRawKeyProvider`，验证没有 raw CEK provider 时，App 可用 `MDK|` wrapped CEK 解出 CEK、解密本地 Android `.enc` blob、生成 QuickLook 临时文件并清理，状态文案不泄漏 wrapped CEK、CEK、MDK、hash 或附件明文。
+  - `AndroidFeatureMatrix.md` 已更新附件引用和 Android 备份包行；本节点仍不声明 Android MDK 自动迁移/导入、`V2|` Keystore-only CEK 跨设备解包、附件迁移/同步、KDBX 文件保存/writeback、OneDrive/Google Drive 云文件源或 Bitwarden 双向同步已完成。
+  - 最新验证：Storage wrapped CEK 目标测试先 RED 后 GREEN；App wrapped CEK QuickLook 目标 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 145 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
