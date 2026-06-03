@@ -71,6 +71,8 @@ KDBX/KeePass 进展备注：Storage 已新增 KDBX3 旧式 AES-KDF header 解析
 
 KDBX/KeePass 进展备注：Storage 已用真实加密 KDBX3 AES fixture 验证默认 reader 端到端只读路径：KDBX3 header -> password-only composite key -> AES-KDF -> master key -> AES-256-CBC encrypted payload -> KDBX3 hashed block stream -> KeePass XML snapshot。解密后的 snapshot 会保留 KDBX3 header summary，并读取 decoded password 供既有只读导入/确认导入链路消费；display summary 继续不泄漏数据库密码、decoded password、transform seed、encrypted payload、derived/master key 或 XML 明文。KDBX4 HMAC block stream 已接入；inner protected value stream、Argon2d/Argon2id 执行、KDBX 保存和附件写回/编辑仍待后续。
 
+KDBX/KeePass 进展备注：Storage 已新增 KeePass XML writeback payload writer 第一版，可把已解密/已编辑的 `KeePassReadOnlySnapshot` 重新序列化为 KeePass XML payload，保留分组层级、条目 UUID、回收站分组标记、密码/TOTP/Notes/StringFields 和 decoded attachment binaries；writer 摘要只显示分组/条目/附件数量，不显示数据库密码、decoded password、TOTP secret、自定义字段值或附件明文。该节点只补齐 KDBX 保存前的明文 XML payload 层，不声明 KDBX header、压缩、block stream、HMAC、payload cipher 或原文件原位保存/writeback 已完成。
+
 ## 管理、设置与商业化
 
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |

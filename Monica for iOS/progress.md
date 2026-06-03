@@ -1005,6 +1005,13 @@
   - 状态文案只显示 Android 同口径资源按钮解锁/关闭结果，不显示 transaction、receipt、license、资源标识或其它凭据；CDK/legacy 入口也已从 iOS 活动 Plus 链路移除；本节点不声明 Plus 权益持久化、真实资源包校验/映射或签名真机验收已完成。
   - 新增 `VaultSessionModelTests.testPlusResourceButtonActivatesAndroidCompatiblePlusWithoutPurchase`、`testPlusResourceButtonFailureDoesNotUnlockOrLeakSecret`、`testPlusResourceButtonCanDeactivatePlusLocally` 覆盖无购买激活、失败不解锁和本地关闭路径。
   - 最新验证：Plus 资源按钮目标 XCTest 通过 3 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX XML writeback payload 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KeePass snapshot -> XML payload writer 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keePassXMLPayloadWriterSerializesSnapshotForWritebackWithoutLeakingSecretsInSummary`，先确认 RED 为缺少 `KeePassXMLPayloadWriter`；实现后又扩展为普通条目与回收站条目各带附件，先复现 Binary Ref 串线失败，再修正为按 entry id + attachment index 绑定 binary id。
+  - `KeePassXMLPayloadWriter` 现在可把已解密/已编辑的 `KeePassReadOnlySnapshot` 序列化为 KeePass XML payload，保留分组层级、条目 UUID、回收站分组 `RecycleBinUUID`、Title/UserName/Password/URL/Notes、TOTP otpauth URI、自定义字段和 decoded attachment binaries。
+  - `KeePassXMLWritebackPayload.displaySummary` 只显示分组/条目/附件数量，不显示 decoded password、TOTP secret、自定义字段值或附件明文；缺少 decoded attachment content 时返回脱敏错误，避免写出不可回读的附件引用。
+  - 本节点只声明 KDBX 保存前的明文 XML payload 层已完成；仍不声明 KDBX header 生成、GZip 压缩写回、KDBX3/4 block stream/HMAC 写回、payload cipher 加密、原 `.kdbx` 原位保存或云文件源 writeback 已完成。
+  - 最新验证：新增 XML writeback payload 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 93 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
