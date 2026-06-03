@@ -937,6 +937,14 @@
   - App 预检文案和候选尝试测试已同步为 3 种 key 解析；状态文案和 snapshot summary 不泄漏数据库密码、key file 内容、decoded password、AES-KDF seed、encrypted payload、derived/master key 或 XML 明文。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2d/Argon2id 执行、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Storage 新增目标测试先 RED 后 GREEN；KDBX/key-file 目标回归组通过 6 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 86 个 Swift Testing 用例；完整 `xcodebuild test` 在 `iPhone 17` iOS 26.5 模拟器通过 143 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX Argon2d/Argon2id KDF 执行第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX key deriver、SwiftPM 依赖和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbxArgon2idDeriverExecutesKdfWithoutLeakingSecrets`，先确认 RED 为 `Argon2id KDF 尚未接入`；实现后使用公开 Argon2id 参数向量 `password/somesalt, t=2, m=16 KiB, p=1, v=19` 验证 raw 32-byte derived key。
+  - 同步新增 `keepPassKdbxArgon2dDeriverExecutesKdfWithoutLeakingSecrets`，覆盖 Argon2d 同参数向量，避免只接通 Argon2id 单一路径。
+  - `MonicaStorage` 现在引入官方 PHC `phc-winner-argon2` C reference package，并固定到 revision `f57e61e19229e23c4445b85494dbf7c07de721cb`；KDBX Argon2 memory 从 header bytes 转为 KiB 传入 reference C `argon2_hash`，支持 KDBX version `0x10` 与 `0x13`。
+  - 参数校验会拒绝缺失 salt/iterations/memory/parallelism、salt 过短、memory 非 KiB 对齐或溢出、iterations 溢出、不支持 version 等情况；错误和 display summary 不泄漏 salt、composite key、derived key、encrypted payload、数据库密码或 key file 内容。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2id 真实 KDBX fixture、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 Argon2id 目标测试先 RED 后 GREEN；`swift test --filter keepPassKdbxArgon2` 通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 88 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；首次按 name 跑 `xcodebuild test` 遇到同名 simulator launch 的 `Invalid connectionUUID specified`，改用 UDID `4F179679-A513-4C20-A935-6164CBCE2711` 后 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
 
 ## 遇到的问题
 
