@@ -945,6 +945,13 @@
   - 参数校验会拒绝缺失 salt/iterations/memory/parallelism、salt 过短、memory 非 KiB 对齐或溢出、iterations 溢出、不支持 version 等情况；错误和 display summary 不泄漏 salt、composite key、derived key、encrypted payload、数据库密码或 key file 内容。
   - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Argon2id 真实 KDBX fixture、Twofish payload、KDBX 保存、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 Argon2id 目标测试先 RED 后 GREEN；`swift test --filter keepPassKdbxArgon2` 通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 88 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；首次按 name 跑 `xcodebuild test` 遇到同名 simulator launch 的 `Invalid connectionUUID specified`，改用 UDID `4F179679-A513-4C20-A935-6164CBCE2711` 后 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
+- KeePass/KDBX Argon2id 真实 KDBX4 fixture 端到端只读读取第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 Storage 回归测试和矩阵文档。
+  - 按 TDD 新增 Storage 用例 `defaultKeePassDatabaseReaderDecryptsKdbx4Argon2idFixtureToSnapshotWithoutLeakingCredentials`，先确认 RED 为 fixture header/derived key 常量不匹配会在 header parse 或 KDBX4 header HMAC 校验阶段失败。
+  - 新 fixture 覆盖真实 KDBX4 Argon2id 读链路：VariantDictionary KDF 参数、PHC Argon2id raw 32-byte derived key、master key、header SHA-256/header HMAC、HMAC block unwrap、AES-256-CBC payload 和 KeePass XML snapshot。
+  - 默认 reader 能读出 `KDBX4 Argon2id` 条目的 username 与 decoded password，并验证 `memory=1 MiB`、`iterations=2`、`parallelism=1`、`version=0x13`；display summary 不泄漏数据库密码、decoded password、salt、derived/master key、encrypted payload、header HMAC 或 XML 明文。
+  - `AndroidFeatureMatrix.md` 已更新 KDBX/KeePass 主表；本节点仍不声明 Twofish payload、KDBX 保存/writeback、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：Storage 新增目标测试先 RED 后 GREEN；`swift test --filter defaultKeePassDatabaseReaderDecryptsKdbx4Argon2idFixtureToSnapshotWithoutLeakingCredentials` 通过 1 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 89 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
 
 ## 遇到的问题
 
