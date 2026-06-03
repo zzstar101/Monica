@@ -1176,3 +1176,12 @@
   - 新增 `MonicaWidgetExtension` WidgetKit target、Info.plist、App Group entitlements 和 timeline provider；Widget 只读取 App Group 中的脱敏快照，缺失或损坏时显示锁定态，不打开 MDBX vault，不读取密码、TOTP secret、notes、URL query、附件 hash/localPath 或附件内容。
   - 本节点推进的是真实 WidgetKit target/timeline/App Group 边界；仍不声明签名真机 App Group/Widget 刷新验收、锁屏小组件、Live Activity 或短时通知已完成。
   - 最新验证：Widget snapshot store 目标 XCTest 先 RED 后 GREEN；`xcodebuild build -project Monica.xcodeproj -target MonicaWidgetExtension CODE_SIGNING_ALLOWED=NO` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 165 个 XCTest。
+
+- Share/Action Extension 真实扩展边界第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App/Extension 共享 inbox store、`MonicaShareExtension` target、Xcode 工程、App Group 常量对齐、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testShareExtensionInboxPersistsImportRequestsWithoutManifestSecrets`，先确认 RED 为缺少 `AppShareExtensionInboxStore`；实现后覆盖 URL/text/file 写入 App Group 风格 inbox，manifest 不泄漏 URL query、共享文本正文、源文件绝对路径或文件内容，读取时可恢复完整导入请求。
+  - 按 TDD 新增 `VaultSessionModelTests.testShareExtensionInboxImportCreatesEntriesAndClearsPendingRequests`，覆盖 App 从 inbox 读取 pending items、复用现有 `importSharedItems` 创建 login/note/attachmentRef，并在成功导入后清空 inbox。
+  - 新增 `MonicaShareExtension` Share extension target、Info.plist 和 App Group entitlements；`ShareViewController` 支持从 `NSItemProvider` 读取 URL、plain text、file URL，写入 `share-inbox-v1` 后完成 extension request；extension 不打开 vault、不读取 MDBX/KDBX、不接触密码或密钥。
+  - `AppShareImportRequest` 和 `AppShareExtensionInboxStore` 已抽到 App/Extension 共享源文件；App、AutoFill、Widget、Share 的 App Group 常量对齐到 `group.monica-pass.monica`，新 Share target bundle id 为 `com.monica-pass.monica.share`。
+  - 本节点推进的是真实 Share extension target + App Group inbox + App 导入闭环；仍不声明签名真机 Share Sheet 唤起、更多 UTType/data item 兼容、二维码导入、冲突 UI 或后台导入通知已完成。
+  - 最新验证：Share inbox 目标 XCTest 通过 2 个用例；`xcodebuild build -project Monica.xcodeproj -target MonicaShareExtension CODE_SIGNING_ALLOWED=NO` 通过；`git diff --check` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 167 个 XCTest。
