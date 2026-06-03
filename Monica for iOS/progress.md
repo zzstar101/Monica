@@ -1112,3 +1112,13 @@
   - 状态文案只显示条目标题和目标分组路径，不显示数据库密码、decoded password、notes、附件内容/hash、KDBX bytes 或 header/payload bytes。
   - 本节点推进的是 KeePass 原生回收站恢复语义第一版；仍不声明恢复到原删除前分组、protected value/binary 加密写回、既有 header 原位改写、云文件源 writeback、ChaCha20/Twofish payload 加密写回已完成。
   - 最新验证：新增 KeePass 回收站恢复目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 159 个 XCTest。
+
+- KeePass/KDBX 写回核心收口大节点已完成：
+  - 本节点按用户要求不再拆小提交，继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaStorage` KDBX 写回核心、Twofish C wrapper、Storage 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `keepPassKdbxChaCha20PayloadCipherEncryptsPayloadWithoutLeakingSecrets` 与 `keepPassKdbxTwofishPayloadCipherEncryptsCbcPayloadWithoutLeakingSecrets`，先确认 RED 为 ChaCha20/Twofish payload 加密写回尚未接入；实现后 AES、ChaCha20、Twofish payload cipher 均支持读写对称闭环。
+  - 按 TDD 新增 `keepPassKdbx4WritebackCoordinatorProtectsValuesAndRoundTripsWithoutLeakingSecrets`，覆盖 KDBX4 writeback 默认使用 inner random stream 加密 `Protected="True"` 的密码、自定义字段和 TOTP otpauth 字段，读回后仍能恢复 decoded password/custom field/TOTP secret，并验证 encrypted payload/display summary 不泄漏数据库密码、protected value 或附件内容。
+  - KDBX4 writeback coordinator 现在默认使用 `KeePassXMLPayloadWriter(protectedValueMode: .encryptProtectedValues, binaryMode: .externalReferences)`，把附件内容写入 KDBX4 inner header binary pool，XML 只保留 `Ref`，默认 reader 可从 inner header binaries 重新合并回 snapshot。
+  - Twofish C target 新增 `monica_twofish_encrypt_cbc`，Swift `DefaultKeePassKdbxPayloadCipher` 接入 Twofish-CBC + PKCS#7 padding 加密；ChaCha20 加密复用同一 keystream XOR 路径并校验 32-byte master key/12-byte IV。
+  - 新增 `keepPassKdbx4WritebackCoordinatorRoundTripsChaCha20AndTwofishDatabasesWithoutLeakingSecrets`，覆盖完整 KDBX4 coordinator 用 ChaCha20 和 Twofish 生成数据库后由默认 reader 端到端打开，保留条目密码和 notes。
+  - 本节点把 KDBX4 本地写回从 AES/plain protected fallback 推进到三 cipher + protected values + inner binary pool 的闭环；仍不声明既有 header 原位改写、云文件源 writeback、KDBX3 写回、恢复到原删除前分组或真机文件协调冲突处理已完成。
+  - 最新验证：新增 Storage KDBX 核心目标测试先 RED 后 GREEN；目标 KDBX Storage 测试通过 4 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 105 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 159 个 XCTest。
