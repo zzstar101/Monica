@@ -1147,3 +1147,13 @@
   - `redactedDebugSummary` 覆盖状态、条目数、TOTP 摘要和快捷入口摘要，不包含 TOTP code/secret、登录密码、note 正文、URL query、附件 hash、本地路径或附件内容。
   - 本节点推进的是 Widget 的 App 层数据契约；仍不声明 WidgetKit target、timeline provider、App Group 持久化、锁定态刷新、Live Activity、短时通知或签名真机验收已完成。
   - 最新验证：Widget 目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 162 个 XCTest。
+
+- OneDrive / Google Drive 云文件源 App 层边界第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaSync` 云文件 provider 契约、App 会话云文件源注入/API、Sync/App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `MonicaSyncTests.cloudFileProviderKindsExposeOneDriveAndGoogleDriveAdapters` 与 `cloudFileProviderSummariesAvoidProviderSecretsAndRemoteIdentifiers`，先确认 RED 为缺少 `CloudFileProviderKind`、`CloudFileItem`、`CloudFileDownload` 和 `CloudFileWriteReceipt`。
+  - `MonicaSync` 现在提供通用 `CloudFileProvider` 协议，覆盖连接态、远端文件列表、下载、上传和覆盖写回；`OneDriveCloudFileProvider` 与 `GoogleDriveCloudFileProvider` 作为真实 SDK 接入前的 provider adapter 边界存在，未登录时明确返回 authentication required。
+  - 按 TDD 新增 `VaultSessionModelTests.testCloudFileSourcesListDownloadUploadAndOverwriteWithoutLeakingSecrets`，先确认 RED 为 App 缺少 `cloudFileProviders` 注入、云文件列表/下载/上传/覆盖 API 和 test provider。
+  - `AppSessionModel` 现在可通过注入 provider 对 OneDrive/Google Drive 执行远端 KDBX 列表、下载恢复预览、上传当前 vault 备份，以及将 KDBX writeback bytes 覆盖写回远端文件；状态文案只显示 provider、清洗文件名和字节数。
+  - 脱敏契约覆盖 OAuth/access token、remote item id、remote path、SHA/hash、下载 bytes、本地 vault bytes 和 KDBX writeback bytes。
+  - 本节点推进的是云文件源 App/Sync 边界；仍不声明 MSAL/Google Sign-In、真实 Graph/Drive API 浏览创建、云端恢复确认、冲突处理、后台同步或签名真机验收已完成。
+  - 最新验证：Sync 云 provider 目标测试先 RED 后 GREEN；App 云文件源目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 10 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 163 个 XCTest。
