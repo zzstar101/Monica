@@ -1196,3 +1196,12 @@
   - 本节点不声明签名真机 Shortcuts UI、iOS 17 降级动作、复制动作或真机 App Group/deep link entitlement 验收已完成；这些仍需要后续设备验收。
   - Plus 口径确认：后续 Plus 仍按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP；本节点没有新增 IAP 链路。
   - 最新验证：Shortcuts 目标 XCTest 通过 2 个用例；`git diff --check` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 169 个 XCTest，且 App target AppIntents metadata extraction 已写出 `Metadata.appintents`。
+
+- OneDrive MSAL 配置边界与 Google Drive 后置已完成：
+  - 时间：2026-06-03 20:08:53 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaSync` OneDrive 配置 DTO、App 生产环境 provider 注入、主 App `Info.plist` URL scheme、Sync/App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `MonicaSyncTests.oneDriveConfigurationCarriesMSALClientAndRedirectWithoutLeakingSecrets`，先确认 RED 为缺少 `OneDriveCloudFileConfiguration`；实现后生产配置携带 client id `2aaf8c2c-b817-4085-9517-586a4a113dfc`、redirect URI `msauth.com.monica-pass.monica://auth` 和默认 scope `Files.ReadWrite.AppFolder`，脱敏摘要只显示 redirect scheme，不泄漏 client id 或完整 redirect URI。
+  - 按 TDD 新增 `MonicaSyncTests.googleDriveProviderIsDeferredUntilExplicitlyEnabled` 与 `VaultSessionModelTests.testCloudFileEnvironmentConfiguresOneDriveAndDefersGoogleDrive`；App 生产环境现在只注入 OneDrive provider，Google Drive 暂不作为 feature 实现，保留 provider 边界但对 list/download/upload/overwrite 返回 unsupported。
+  - 主 App `Info.plist` 已注册 `msauth.com.monica-pass.monica` URL scheme，为后续 MSAL 回调接入预留真实客户端边界；真实 MSAL 登录、Graph API 浏览/创建、云端恢复确认、冲突处理和签名真机验收仍待后续。
+  - Plus 口径再次确认：Plus 仍按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP；代码搜索未发现 StoreKit 或 IAP 入口。
+  - 最新验证：`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；新增 OneDrive/Google Drive App 目标 XCTest 通过 2 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 171 个 XCTest。
