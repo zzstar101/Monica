@@ -43,7 +43,7 @@
 | IME 键盘填充 | `ime/MonicaInputMethodService` | 不复制；用 AutoFill、Shortcuts、Share Extension 替代 | iOS 原生替代 | 文档说明限制；关键用户路径有替代入口 |
 | Accessibility 辅助填充 | `MonicaAccessibilityService` | 不复制；用 iOS 原生 AutoFill 替代 | iOS 原生替代 | 文档说明限制；无私有 API |
 | Android Credential Provider Passkey | `passkey/MonicaCredentialProviderService` | AuthenticationServices Passkey | 待实现 | 支持注册、认证、RP ID 校验、associated domains |
-| TOTP 常驻通知 | `AutofillOtpNotificationService`, `NotificationValidatorService` | Widget/Live Activity/短时通知安全替代 | 开发中 | App 层已新增 Widget 安全快照边界：锁定状态不返回条目，解锁后只返回 TOTP 标题/issuer/account/剩余秒数和快捷入口摘要，不返回 TOTP code、secret、密码、note 正文、URL query、附件 hash 或本地路径；WidgetKit target、timeline provider、App Group 持久化、锁定态刷新和签名真机验收仍待后续 |
+| TOTP 常驻通知 | `AutofillOtpNotificationService`, `NotificationValidatorService` | Widget/Live Activity/短时通知安全替代 | 开发中 | App 层已新增 Widget 安全快照边界：锁定状态不返回条目，解锁后只返回 TOTP 标题/issuer/account/剩余秒数和快捷入口摘要，不返回 TOTP code、secret、密码、note 正文、URL query、附件 hash 或本地路径；主 App 已通过 App Group 写入 `widget-snapshot-v1.json` 安全快照，`MonicaWidgetExtension` WidgetKit target 已接入 timeline provider 并只读取该脱敏快照，缺失/损坏时显示锁定态；锁屏小组件/Live Activity、签名真机 App Group/Widget 刷新验收仍待后续 |
 
 ## 同步、导入导出与外部格式
 
@@ -114,6 +114,6 @@ KDBX/KeePass 进展备注：App/Settings 层已新增 KeePass 附件编辑候选
 | --- | --- | --- | --- | --- |
 | 快捷入口 | Quick Tile, launcher aliases | Shortcuts/App Intents | 开发中 | App 会话已新增快捷入口安全摘要搜索和打开编辑器第一版：解锁后可跨 login/note/totp/card/identity/passkey/sshKey/apiToken/wifi/send 生成 Shortcuts 可展示的 title/subtitle/searchableText，并按条目类型切换到对应 tab 打开编辑器；摘要不会包含 login password、note body、TOTP secret、API token、Wi-Fi password、Send body、私钥引用、附件 hash/wrapped key/localPath 等秘密；系统 AppIntents 注册、快捷指令 UI、复制动作和签名真机验证仍待后续 |
 | 分享/导入 | Android intents/file picker | Share/Action Extension | 开发中 | App 会话已新增 Share/Action 导入请求边界第一版：系统扩展或文件入口解析出的 URL 会创建 login，文本会创建 note，文件会保存为本地 attachmentRef metadata + 本地 blob，并刷新当前 vault 列表；状态文案和时间线只显示计数、host、固定标题或清洗文件名，不泄漏 URL query、共享文本正文、文件内容、content hash 或本地 blob path；Share/Action Extension target、ItemProvider 解析、跨进程唤起、二维码导入和签名真机验收仍待后续 |
-| 小组件 | Android 通知/快捷状态 | iOS Widget | 待实现 | 安全显示 TOTP/快捷状态，不泄漏秘密 |
+| 小组件 | Android 通知/快捷状态 | iOS Widget | 开发中 | 已新增 `MonicaWidgetExtension` WidgetKit target、App Group entitlements、timeline provider 和安全快照 reader；主 App production 会在 App Group 可用时注入 `AppWidgetSnapshotFileStore`，创建/打开/锁库和全量条目刷新会写入锁定态/解锁态摘要；Widget 只显示保险库状态、总数、TOTP 标题/issuer/account/剩余秒数或快捷入口摘要，不读取 vault、不显示 TOTP code/secret、密码、notes、URL query、附件 hash/localPath；签名真机安装、系统刷新策略、锁屏小组件和 Live Activity 仍待后续 |
 | iPad | Android 大屏适配 | iPhone 优先 + iPad 自适应 | 开发中 | iPad 不崩溃、不遮挡；后续再做一等分栏体验 |
 | Apple Watch | 无直接 Android 等价 | 后置 | 待实现 | 本轮不作为完成条件 |

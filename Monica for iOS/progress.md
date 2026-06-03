@@ -1167,3 +1167,12 @@
   - 脱敏契约覆盖 Bitwarden revision、远端 item/send id、本地 send id、URL query、login password、TOTP secret、notes、Send body、Send notes 和本地 Send 正文。
   - 本节点推进的是 Bitwarden 双向同步的 App/Sync 边界；仍不声明真实 Bitwarden OAuth/API、vault/folder/password/TOTP 双向映射、远端 ID 持久化、删除同步、附件同步、冲突合并 UI、后台队列或签名真机验收已完成。
   - 最新验证：Sync Bitwarden 目标测试先 RED 后 GREEN；App Bitwarden 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 11 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 164 个 XCTest。
+
+- WidgetKit 真实小组件边界第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 会话 Widget 快照持久化、WidgetKit extension target、Xcode 工程、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testWidgetSnapshotStorePersistsAppGroupSafeSnapshotWithoutLeakingSecrets`，先确认 RED 为缺少 `AppWidgetSnapshotFileStore`、`widgetSnapshotStore` 注入和刷新 API；实现后覆盖锁定态快照、解锁态 TOTP/快捷摘要持久化，以及 App Group JSON 不泄漏登录密码、note 正文、TOTP secret/code 或 URL query。
+  - `AppWidgetSnapshot`、`AppWidgetTotpItem`、`AppShortcutEntrySummary` 已支持安全 JSON 编解码；`AppWidgetSnapshotFileStore` 固定写入 `widget-snapshot-v1.json`，使用 atomic + complete file protection。
+  - `AppSessionModel.production(environment:)` 在 App Group container 可用时注入 Widget snapshot store；创建/打开 vault、锁库和全量条目刷新会写入当前锁定态/解锁态摘要。
+  - 新增 `MonicaWidgetExtension` WidgetKit target、Info.plist、App Group entitlements 和 timeline provider；Widget 只读取 App Group 中的脱敏快照，缺失或损坏时显示锁定态，不打开 MDBX vault，不读取密码、TOTP secret、notes、URL query、附件 hash/localPath 或附件内容。
+  - 本节点推进的是真实 WidgetKit target/timeline/App Group 边界；仍不声明签名真机 App Group/Widget 刷新验收、锁屏小组件、Live Activity 或短时通知已完成。
+  - 最新验证：Widget snapshot store 目标 XCTest 先 RED 后 GREEN；`xcodebuild build -project Monica.xcodeproj -target MonicaWidgetExtension CODE_SIGNING_ALLOWED=NO` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 165 个 XCTest。
