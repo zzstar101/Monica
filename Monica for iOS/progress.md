@@ -208,6 +208,12 @@
   - `WebDAVClient.download(fileName:)` 会优先使用远端返回的 `X-Monica-Backup-SHA256`；如果 header 缺失，则读取同名 `.sha256` sidecar 并校验下载内容。
   - sidecar 上传失败、下载状态异常、sidecar 空内容或 checksum 不匹配都会进入明确失败状态，不产生恢复预览。
   - `SwiftPackages/MonicaSync` 已新增/更新测试覆盖 sidecar 上传、sidecar 上传失败、header 缺失时读取 sidecar 和 sidecar checksum 不匹配。
+- KeePass KDBX 本地文件写回边界已补第一版：
+  - 按 TDD 新增 App 层 XCTest，先确认 RED 为缺失 `RecordingAppKeePassKdbxFileWritebackService`、`keePassKdbxFileWritebackService` 注入参数和 `writeKeePassKdbx4Database`。
+  - `AppSessionModel.previewKeePassImport(from:)` 现在会记录本地 KDBX 源文件 URL，切换/清理 KeePass 导入状态时同步清空，避免误写回旧文件。
+  - 新增 `AppKeePassKdbxFileWritebackService`、`FileSystemAppKeePassKdbxFileWritebackService` 和脱敏错误 `AppKeePassKdbxWritebackError`。
+  - `AppSessionModel.writeKeePassKdbx4Database(_:)` 可把 Storage 生成的 `KeePassKdbx4WritebackResult.database` 写回源文件，并更新内存 pending database bytes/name；状态文案只显示条目/附件/字节数，不泄漏数据库密码、key file 或 KDBX 内容。
+  - 该节点仍不包含 App 自动从当前编辑态生成 `KeePassKdbx4WritebackRequest`、云文件源 writeback、既有 header 原位改写或 KeePass 原生回收站还原语义。
 - App vault Keychain/LocalAuthentication 解锁边界第一版曾先以测试 resolver 搭出门禁流程，现已被下一段 MDBX `security_key` 路线替换：
   - 已按 TDD 新增两个 App 层 XCTest，先确认 RED 为缺失 `AppVaultKeychainService`。
   - 新增 `AppVaultKeychainService` 协议，用于 App 层保存 opaque `WrappedVaultKey`，以及在 LocalAuthentication 成功后读取 wrapped key。
