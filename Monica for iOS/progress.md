@@ -1122,3 +1122,11 @@
   - 新增 `keepPassKdbx4WritebackCoordinatorRoundTripsChaCha20AndTwofishDatabasesWithoutLeakingSecrets`，覆盖完整 KDBX4 coordinator 用 ChaCha20 和 Twofish 生成数据库后由默认 reader 端到端打开，保留条目密码和 notes。
   - 本节点把 KDBX4 本地写回从 AES/plain protected fallback 推进到三 cipher + protected values + inner binary pool 的闭环；仍不声明既有 header 原位改写、云文件源 writeback、KDBX3 写回、恢复到原删除前分组或真机文件协调冲突处理已完成。
   - 最新验证：新增 Storage KDBX 核心目标测试先 RED 后 GREEN；目标 KDBX Storage 测试通过 4 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 105 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 159 个 XCTest。
+
+- KeePass/KDBX KDBX3 本地写回闭环已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaStorage` KDBX3 writer/coordinator、App 写回分派和回归测试。
+  - 按 TDD 新增 `keepPassKdbx3WritebackCoordinatorBuildsReadableDatabaseWithoutLeakingSecrets`，先确认 RED 为缺少 `KeePassKdbx3WritebackRequest` 与 `DefaultKeePassKdbx3WritebackCoordinator`；实现后 KDBX3 AES-KDF + GZip + hashed block stream + AES-CBC payload 可生成完整数据库，并由默认 reader 读回密码、notes 和附件。
+  - App 层新增 KDBX3 writeback coordinator 注入与版本分派，`writeKeePassReadOnlySnapshotBackToSource()` 会按源文件 envelope 在 KDBX3/KDBX4 coordinator 间选择，附件增删改和回收站恢复写回复用通用结果，不再被 KDBX4 返回类型绑定。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassKdbx3SnapshotSaveBuildsWritebackRequestAndWritesSourceFileWithoutLeakingSecrets`，覆盖本地 KDBX3 源文件从 snapshot 构建 request、沿用成功解锁凭据、替换源文件且状态文案不泄漏数据库密码、decoded password 或 KDBX bytes。
+  - 本节点把本地源 `.kdbx` 写回覆盖从 KDBX4 扩到 KDBX3 legacy AES-KDF；仍不声明既有 header 原位改写、云文件源 writeback、恢复到原删除前分组或真机文件协调冲突处理已完成。
+  - 最新验证：Storage KDBX3 目标测试通过 1 个用例；App KDBX3 目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 160 个 XCTest。
