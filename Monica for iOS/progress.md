@@ -991,6 +991,13 @@
   - 摘要搜索文本刻意只包含标题、账号/用户名、host、issuer、公开类型等低敏信息，不包含 login password、note body、TOTP secret、API token、Wi-Fi password、Send body、私钥引用或附件 metadata 秘密；`openShortcutEntry` 会按条目类型切换到对应 tab 并复用既有 `presentEditEditor` 填充编辑草稿。
   - `AndroidFeatureMatrix.md` 已把“快捷入口 / Shortcuts/App Intents”从待实现推进到开发中；本节点仍不声明系统 AppIntents 注册、快捷指令 UI、复制动作、跨进程解锁或签名真机验证已完成。
   - 最新验证：快捷入口目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 148 个 XCTest。
+- StoreKit 2 / Plus 权益映射 App 层第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、真实 StoreKit 购买流程或 receipt/CDK 网络校验；改动集中在 App 会话 entitlement 映射、Settings 展示、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testPlusEntitlementMappingUnifiesStoreKitAndLegacyCDKWithoutLeakingIdentifiers`，先确认 RED 为缺少 `AppPlusStoreKitProduct`、`AppStoreKitPlusEntitlement`、`AppLegacyPlusEntitlement`、Plus 状态/功能 rows 以及 apply API；实现后覆盖过期订阅不激活、active lifetime StoreKit entitlement 激活 Plus、legacy CDK entitlement 同样激活 Plus。
+  - `AppSessionModel` 现在可把 StoreKit product id 映射为 Monica Plus Monthly/Yearly/Lifetime，并把 active StoreKit entitlement 与 legacy Plus/CDK entitlement 统一成 `plusEntitlementStatusRow` 和 `plusFeatureRows`。
+  - Plus 功能 row 对齐 Android `PlusFeature` 的 `premium_themes`、`validator_vibration`、`copy_next_code`、`bitwarden_sync`；Settings 已新增 “Monica Plus” 区块显示激活状态和每个功能的解锁状态。
+  - 可见状态文案只显示来源类别和产品层级，不显示 transaction id、original transaction id、license id、receipt、CDK 原始标识或其它购买凭据；本节点仍不声明 Apple IAP 购买/恢复、App Store receipt 校验、CDK 网络校验、权益持久化或签名真机支付验收已完成。
+  - 最新验证：Plus entitlement 映射目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 149 个 XCTest。
 
 ## 遇到的问题
 
