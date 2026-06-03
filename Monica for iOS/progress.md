@@ -1074,6 +1074,13 @@
   - 状态文案只显示条目数、附件数和数据库字节数，不泄漏数据库密码、key file 内容、decoded password、KDBX bytes、header/payload bytes 或附件明文。
   - 本节点把 App 本地源文件 writeback 从“只能写入外部预生成结果”推进到“可从当前 KeePass snapshot 构建 request 并写回”；仍不声明 UI 编辑态自动保存、protected value 加密写回、ChaCha20/Twofish payload 加密写回、既有 header 原位改写、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 App snapshot writeback 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 153 个 XCTest。
+- KeePass/KDBX decoded 附件内容替换并进入 writeback request 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 Storage KDBX 保存核心；改动集中在 App 会话 snapshot 编辑边界、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassSnapshotAttachmentContentEditWritesUpdatedAttachmentWithoutLeakingSecrets`，先确认 RED 为缺少 `replaceKeePassReadOnlyAttachmentContent`；实现后覆盖当前 snapshot 中指定 KeePass entry/attachment 的 decoded bytes 替换、originalSize 更新、`sha256:` 内容 hash 更新，并验证后续 `writeKeePassReadOnlySnapshotBackToSource()` 传给 coordinator 的 request 带着更新后的附件。
+  - 同步新增 `testKeePassSnapshotAttachmentContentEditFailureIsRedactedAndKeepsSnapshot` 覆盖失败路径：找不到附件时返回脱敏错误、保留原 snapshot，不泄漏 entry password、旧 hash、缺失 attachment id 或替换 bytes。
+  - 状态文案只显示清洗后的附件文件名与字节数，不显示附件明文、内容 hash、decoded password、KDBX bytes 或 header/payload bytes。
+  - 本节点推进的是 App 层 decoded 附件内容替换与 KDBX writeback request 串接；仍不声明 Settings/UI 文件选择保存、KeePass 原生附件新增/删除、protected binary value 加密写回、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 KeePass 附件编辑目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 155 个 XCTest。
 
 ## 遇到的问题
 
