@@ -1286,3 +1286,11 @@
   - 状态文案和新增测试继续覆盖脱敏边界：不泄漏 OAuth token、MSAL redirect code/state、remote item id、remote path、etag/revision、hash、KDBX bytes 或文件内容。
   - 本节点仍不声明签名真机 Microsoft 账号交互登录、真实 Graph 网络验收、云端恢复确认 UX 或真实 Graph 冲突 UX 已完成；这些属于 OneDrive 云能力验收后续。
   - 最新验证：OneDrive MSAL 目标 XCTest 通过 2 个用例；`git diff --check` 通过；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过；StoreKit/IAP 关键词搜索未发现 App 支付入口，仅命中 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 178 个 XCTest。
+
+- OneDrive MSAL 登录持久化恢复已完成：
+  - 时间：2026-06-04 02:27:44 +0800。
+  - 本节点针对真机反馈“登录完成后第一次刷新操作未完成、第二次未登录、后台重新打开仍需登录”收敛修复；继续不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、Google Drive 或 Plus/IAP 链路。
+  - 按 TDD 新增 `VaultSessionModelTests.testOneDriveAuthenticationRestoreUsesPersistedMSALSessionWithoutSignIn`，先确认 RED 为 App 会话缺少非交互 OneDrive 恢复接口；实现后 App 可在启动和回前台时静默恢复 MSAL 缓存账号，恢复过程不调用交互登录，也不把 access token 写入状态文案。
+  - `DefaultAppOneDriveMSALAuthenticationService` 现在按 MSAL `MSALAccount.identifier` 作为新的 canonical account identifier 保存；针对已保存旧 `homeAccountId.identifier` 的用户，直接查找失败后会扫描 `allAccounts()` 并匹配 `identifier/homeAccountId`，只在本机缓存中确实找不到账号时清除本地 account id。
+  - 本节点仍不声明用户签名真机 Microsoft 账号和真实 Graph 网络重新验收已完成；需要用户手动构建安装后复测登录、后台重开、刷新文件和 Graph 列表。
+  - 最新验证：OneDrive 恢复目标 XCTest 先 RED 后 GREEN；OneDrive 登录/回调/恢复/diagnostics/Info.plist 目标 XCTest 通过 5 个用例，另补跑 unknown auth diagnostics 目标 XCTest 通过 1 个用例；`git diff --check` 通过；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过。
