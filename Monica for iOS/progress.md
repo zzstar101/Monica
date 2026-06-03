@@ -1081,6 +1081,13 @@
   - 状态文案只显示清洗后的附件文件名与字节数，不显示附件明文、内容 hash、decoded password、KDBX bytes 或 header/payload bytes。
   - 本节点推进的是 App 层 decoded 附件内容替换与 KDBX writeback request 串接；仍不声明 Settings/UI 文件选择保存、KeePass 原生附件新增/删除、protected binary value 加密写回、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 KeePass 附件编辑目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 155 个 XCTest。
+- KeePass/KDBX Settings 附件文件替换并写回第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 Storage KDBX 保存核心；改动集中在 App 会话文件选择聚合 API、Settings UI 接入、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassSnapshotAttachmentFileReplacementWritesBackSelectedFileWithoutLeakingSecrets`，先确认 RED 为缺少 `replaceKeePassReadOnlyAttachmentContentFromFileAndWriteBack`；实现后覆盖从用户选择的本地文件读取 bytes、清洗文件名、替换 KeePass snapshot 附件内容/hash/size/media type，并立即把更新后的 snapshot 写回本地源 `.kdbx`。
+  - Settings 的 KeePass 只读预览现在会在可见条目的附件下显示“替换并写回”按钮；点击后进入 iOS 文件选择器，选中文件后调用 App 层聚合 API 并清理 pending 选择状态。
+  - 状态文案只显示清洗后的附件文件名与字节数，不显示选中文件内容、旧/新 hash、decoded password、KDBX bytes 或 header/payload bytes。
+  - 本节点推进的是 Settings 可见预览附件的文件选择替换与本地 KDBX 写回；仍不声明完整附件列表/搜索选择 UI、KeePass 原生附件新增/删除、protected binary value 加密写回、云文件源 writeback 或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：新增 KeePass 附件文件替换目标 XCTest 先 RED 后 GREEN；KeePass 附件相关目标 XCTest 通过 3 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 156 个 XCTest。
 
 ## 遇到的问题
 
