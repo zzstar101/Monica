@@ -977,6 +977,13 @@
   - 按 TDD 新增 `VaultSessionModelTests.testAttachmentQuickLookPreviewUnwrapsAndroidWrappedCekWithoutRawKeyProvider`，验证没有 raw CEK provider 时，App 可用 `MDK|` wrapped CEK 解出 CEK、解密本地 Android `.enc` blob、生成 QuickLook 临时文件并清理，状态文案不泄漏 wrapped CEK、CEK、MDK、hash 或附件明文。
   - `AndroidFeatureMatrix.md` 已更新附件引用和 Android 备份包行；本节点仍不声明 Android MDK 自动迁移/导入、`V2|` Keystore-only CEK 跨设备解包、附件迁移/同步、KDBX 文件保存/writeback、OneDrive/Google Drive 云文件源或 Bitwarden 双向同步已完成。
   - 最新验证：Storage wrapped CEK 目标测试先 RED 后 GREEN；App wrapped CEK QuickLook 目标 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 145 个 XCTest；`git diff --check` 通过。
+- AutoFill 保存新密码 App 层第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥、AutoFill Extension 真机回调或 Credential Provider entitlement；改动集中在 App 会话保存请求处理、App 层回归测试和矩阵文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testAutoFillSaveRequestCreatesLoginAndRefreshesSharedArtifactsWithoutLeakingSecret`，先确认 RED 为缺少 `AppAutoFillCredentialSaveRequest` 与 `saveAutoFillCredential`；实现后可把 service identifier、username、password 和建议 title 保存为新的 iOS login。
+  - 同步新增 `testAutoFillSaveRequestUpdatesMatchingLoginInsteadOfDuplicating`，覆盖同一 host + username 的保存请求会更新既有 login password，保留原 title/url/notes/favorite，不重复创建条目。
+  - `AppSessionModel.saveAutoFillCredential` 会复用现有 active project、login repository、AutoFill 加密 index、secret snapshot 和 QuickType identity 同步链路；状态文案和操作时间线只显示条目标题，不泄漏 username、password 或 URL query。
+  - `AndroidFeatureMatrix.md` 已把“保存新密码”从待实现推进到开发中；本节点仍不声明 Credential Provider 真机保存回调、系统保存 UI、未解锁 vault 保存队列、AutoFill Extension 到主 App 的跨进程保存链路或签名真机验收已完成。
+  - 最新验证：AutoFill 保存请求目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 147 个 XCTest。
 
 ## 遇到的问题
 

@@ -37,7 +37,7 @@
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
 | --- | --- | --- | --- | --- |
 | Android AutofillService | `autofill_ng/MonicaAutofillServiceNg` | `MonicaAutoFillExtension` Credential Provider | 开发中 | QuickType identity 展示、域名匹配、搜索、解锁、填充真机通过 |
-| 保存新密码 | `AutofillSaveActivity`, `AutofillSaveTransparentActivity` | Credential Provider/主 App 保存流 | 待实现 | 从系统保存请求创建或更新登录条目 |
+| 保存新密码 | `AutofillSaveActivity`, `AutofillSaveTransparentActivity` | Credential Provider/主 App 保存流 | 开发中 | App 会话已新增 AutoFill 保存请求处理第一版：可把系统/扩展传入的 service identifier、username、password 和建议 title 保存为 iOS login；同一 host + username 会更新既有 login password 而不是重复创建；保存后复用现有 AutoFill 加密 index、secret snapshot 和 QuickType identity 同步链路；状态文案和时间线不泄漏 username/password/URL query；Credential Provider 真机保存回调与系统保存 UI 仍待后续 |
 | Inline suggestion | `autofill_inline_*` layouts | iOS QuickType/credential identity | iOS 原生替代 | 系统建议栏展示匹配账号 |
 | 手动填充 Tile | `AutofillTileService` | Shortcuts/App Intents + Share/Action Extension | iOS 原生替代 | 可从快捷入口搜索并复制/打开对应条目 |
 | IME 键盘填充 | `ime/MonicaInputMethodService` | 不复制；用 AutoFill、Shortcuts、Share Extension 替代 | iOS 原生替代 | 文档说明限制；关键用户路径有替代入口 |
