@@ -1103,3 +1103,12 @@
 - 已确认 `xcodebuild test` 不能使用 `generic/platform=iOS Simulator`，必须指定具体模拟器。
 - 真机安装/运行当前被签名和 provisioning 阻塞：需要在 Xcode Accounts 添加/刷新 Team `B6R6XP99R2` 的账号，或提供包含 App Group、Keychain Access Group、Credential Provider Extension 能力的 development provisioning profiles；之后再验证 App Group、Keychain access group、Credential Provider、QuickType、TOTP 相机权限和 MDBX `security_key` 真机解锁。
 - 待完成技术项：在真机/签名环境确认 device slice、App Group、Keychain access group、Credential Provider、QuickType identity 展示、TOTP 相机权限/扫描画面，以及 Keychain/LocalAuthentication + MDBX `security_key` 解锁可运行；继续打磨 TOTP 扫描视觉细节和本地 Vault 多类型条目体验；继续完善 WebDAV 真实服务兼容测试。
+
+- KeePass/KDBX 回收站条目恢复并写回第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 Storage KDBX 保存核心；改动集中在 App 会话 snapshot 编辑边界、Settings UI 接入、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassSnapshotRecycleBinEntryRestoreMovesEntryToTargetGroupAndWritesBackWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `restoreKeePassReadOnlyRecycleBinEntryAndWriteBack`。
+  - `AppSessionModel.restoreKeePassReadOnlyRecycleBinEntryAndWriteBack(entryID:targetGroupID:)` 现在会从当前 KeePass snapshot 定位回收站条目，校验目标分组不是回收站，保留 entry UUID、密码、notes、TOTP、自定义字段和附件内容，把 `groupID/groupPath/isDeleted` 改为目标普通分组后复用现有 KDBX4 writeback request 与本地文件写回服务。
+  - Settings 的 KeePass 只读预览会在回收站条目上显示“恢复并写回”，默认恢复到第一个普通分组；测试覆盖显式目标分组写回。
+  - 状态文案只显示条目标题和目标分组路径，不显示数据库密码、decoded password、notes、附件内容/hash、KDBX bytes 或 header/payload bytes。
+  - 本节点推进的是 KeePass 原生回收站恢复语义第一版；仍不声明恢复到原删除前分组、protected value/binary 加密写回、既有 header 原位改写、云文件源 writeback、ChaCha20/Twofish payload 加密写回已完成。
+  - 最新验证：新增 KeePass 回收站恢复目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 159 个 XCTest。
