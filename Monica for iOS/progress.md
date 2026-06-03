@@ -1255,3 +1255,14 @@
   - 状态文案和测试断言继续覆盖脱敏边界：不泄漏数据库密码、key file、decoded password、notes、附件明文/content hash、remote revision 或 KDBX/XML bytes。
   - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、签名真机文件协调/云端冲突 UX、Google Drive feature、MDBX 相关改动或 StoreKit/IAP；Google Drive 按当前产品口径继续后置，Plus 继续按 Android 同口径资源按钮本地解锁。
   - 最新验证：Storage KeePass XML 目标测试先 RED 后 GREEN；App 原分组恢复目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
+
+- OneDrive Graph app-folder provider 边界第一版已完成：
+  - 时间：2026-06-03 22:32:47 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaSync` OneDrive provider、可注入 Graph transport/token provider、Sync 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `MonicaSyncTests.oneDriveGraphProviderListsDownloadsUploadsAndConditionallyOverwritesAppFolderFilesWithoutLeakingSecrets`，先确认 RED 为缺少 `OneDriveAccessTokenProvider`、`OneDriveGraphTransport`、Graph request/response DTO 和 provider 注入构造器；实现后 OneDrive provider 在注入 access token 后会使用 Microsoft Graph `/me/drive/special/approot` app folder 列出文件、下载 metadata+content、上传新文件，以及用 `If-Match` revision/etag 条件覆盖写回。
+  - `URLSessionOneDriveGraphTransport` 已作为真实 HTTP 边界接入；生产 `OneDriveCloudFileProvider` 仍默认使用空 token provider，未登录时保持 `authenticationRequired`，等待后续 MSAL token 获取/刷新层注入。
+  - Graph 返回的 drive item 会映射为 `CloudFileItem`/`CloudFileDownload`/`CloudFileWriteReceipt`，保留 etag revision 供既有 KeePass 云写回冲突保护使用；列表会过滤 folder，仅返回 file item。
+  - 状态文案和测试断言继续覆盖脱敏边界：不泄漏 OAuth token、remote item id、remote path、etag/revision、hash、KDBX bytes 或上传/覆盖文件内容。
+  - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
+  - 本节点仍不声明真实 MSAL 登录 UI、token refresh、账号选择/登出、真实 Graph 网络验收、云端恢复确认 UI 或签名真机验收已完成。
+  - 最新验证：OneDrive Graph provider 目标 SwiftPM 测试先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
