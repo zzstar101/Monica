@@ -1130,3 +1130,11 @@
   - 按 TDD 新增 `VaultSessionModelTests.testKeePassKdbx3SnapshotSaveBuildsWritebackRequestAndWritesSourceFileWithoutLeakingSecrets`，覆盖本地 KDBX3 源文件从 snapshot 构建 request、沿用成功解锁凭据、替换源文件且状态文案不泄漏数据库密码、decoded password 或 KDBX bytes。
   - 本节点把本地源 `.kdbx` 写回覆盖从 KDBX4 扩到 KDBX3 legacy AES-KDF；仍不声明既有 header 原位改写、云文件源 writeback、恢复到原删除前分组或真机文件协调冲突处理已完成。
   - 最新验证：Storage KDBX3 目标测试通过 1 个用例；App KDBX3 目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 160 个 XCTest。
+
+- Share/Action Extension App 层导入边界第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 会话 Share/Action 导入 DTO/API、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testShareActionImportCreatesEntriesAndAttachmentWithoutLeakingSecrets`，先确认 RED 为缺少 `AppShareImportRequest` 与 `AppSessionModel.importSharedItems`；实现后覆盖锁库拒绝导入，解锁后 URL 导入为 login、文本导入为 note、文件导入为 attachmentRef metadata + 本地 blob。
+  - `AppShareImportRequest` 现在作为未来 Share/Action Extension 或文件入口传入 App 层的稳定边界；URL 标题使用 host，文本使用固定“来自分享的文本”标题，文件名会清洗后保存，附件 metadata 使用 `storageMode=share-extension-imported-blob`、`source=ios-share-extension`、`downloadState=downloaded`。
+  - 状态文案和时间线只显示导入计数、host、固定标题或清洗文件名，不显示 URL query、共享文本正文、文件内容、content hash、本地 blob path 或附件明文。
+  - 本节点推进的是 Share/Action 的 App 层导入闭环；仍不声明 Share/Action Extension target、ItemProvider 解析、跨进程唤起、二维码导入或签名真机验收已完成。
+  - 最新验证：Share/Action 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 161 个 XCTest。

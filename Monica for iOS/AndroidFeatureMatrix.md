@@ -113,7 +113,7 @@ KDBX/KeePass 进展备注：App/Settings 层已新增 KeePass 附件编辑候选
 | Android 功能域 | Android 来源 | iOS 目标实现 | 当前状态 | 验收标准 |
 | --- | --- | --- | --- | --- |
 | 快捷入口 | Quick Tile, launcher aliases | Shortcuts/App Intents | 开发中 | App 会话已新增快捷入口安全摘要搜索和打开编辑器第一版：解锁后可跨 login/note/totp/card/identity/passkey/sshKey/apiToken/wifi/send 生成 Shortcuts 可展示的 title/subtitle/searchableText，并按条目类型切换到对应 tab 打开编辑器；摘要不会包含 login password、note body、TOTP secret、API token、Wi-Fi password、Send body、私钥引用、附件 hash/wrapped key/localPath 等秘密；系统 AppIntents 注册、快捷指令 UI、复制动作和签名真机验证仍待后续 |
-| 分享/导入 | Android intents/file picker | Share/Action Extension | 待实现 | 从文件、URL、二维码、文本导入到当前 vault |
+| 分享/导入 | Android intents/file picker | Share/Action Extension | 开发中 | App 会话已新增 Share/Action 导入请求边界第一版：系统扩展或文件入口解析出的 URL 会创建 login，文本会创建 note，文件会保存为本地 attachmentRef metadata + 本地 blob，并刷新当前 vault 列表；状态文案和时间线只显示计数、host、固定标题或清洗文件名，不泄漏 URL query、共享文本正文、文件内容、content hash 或本地 blob path；Share/Action Extension target、ItemProvider 解析、跨进程唤起、二维码导入和签名真机验收仍待后续 |
 | 小组件 | Android 通知/快捷状态 | iOS Widget | 待实现 | 安全显示 TOTP/快捷状态，不泄漏秘密 |
 | iPad | Android 大屏适配 | iPhone 优先 + iPad 自适应 | 开发中 | iPad 不崩溃、不遮挡；后续再做一等分栏体验 |
 | Apple Watch | 无直接 Android 等价 | 后置 | 待实现 | 本轮不作为完成条件 |
