@@ -1245,3 +1245,13 @@
   - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
   - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、真实 Graph etag 请求头接入、恢复到原删除前分组或签名真机验收已完成。
   - 最新验证：Sync revision/conflict 目标测试先 RED 后 GREEN；App KeePass 云写回成功/冲突目标 XCTest 先 RED 后 GREEN；完整验证见本节点提交前记录。
+
+- KeePass/KDBX 原生回收站恢复到原分组第一版已完成：
+  - 时间：2026-06-03 22:12:06 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaStorage` KeePass XML snapshot 模型/reader/writer、App 层回收站恢复目标选择、App 回归测试和矩阵/进度文档。
+  - 按 TDD 扩展 Storage KeePass XML reader/writer 测试，先确认 RED 为 `PreviousParentGroup` 未解析、writer 未写出、reparse 后原分组元数据丢失；实现后 `KeePassReadOnlyEntry` 可携带 `originalGroupID/originalGroupPath`，XML reader 会从回收站 entry 的 `PreviousParentGroup` UUID 查回原分组路径，XML writer 会在 deleted entry 写回该 KeePass 原生字段。
+  - 按 TDD 新增 `VaultSessionModelTests.testKeePassSnapshotRecycleBinEntryRestoreMovesEntryToOriginalGroupAndWritesBackWithoutLeakingSecrets`，覆盖 App 恢复时优先使用 reader 提供的原分组 UUID，其次可使用原路径，再退回显式目标/根分组；恢复后 snapshot 条目清除原分组暂存字段、`isDeleted=false`，并复用 KDBX writeback pipeline 写回源文件。
+  - 附件替换/新增/删除重建 KeePass entry 时会保留 `originalGroupID/originalGroupPath`，避免回收站附件编辑后丢失原生还原目标。
+  - 状态文案和测试断言继续覆盖脱敏边界：不泄漏数据库密码、key file、decoded password、notes、附件明文/content hash、remote revision 或 KDBX/XML bytes。
+  - 本节点仍不声明真实 OneDrive MSAL/Graph 浏览创建、签名真机文件协调/云端冲突 UX、Google Drive feature、MDBX 相关改动或 StoreKit/IAP；Google Drive 按当前产品口径继续后置，Plus 继续按 Android 同口径资源按钮本地解锁。
+  - 最新验证：Storage KeePass XML 目标测试先 RED 后 GREEN；App 原分组恢复目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
