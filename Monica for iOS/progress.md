@@ -1157,3 +1157,13 @@
   - 脱敏契约覆盖 OAuth/access token、remote item id、remote path、SHA/hash、下载 bytes、本地 vault bytes 和 KDBX writeback bytes。
   - 本节点推进的是云文件源 App/Sync 边界；仍不声明 MSAL/Google Sign-In、真实 Graph/Drive API 浏览创建、云端恢复确认、冲突处理、后台同步或签名真机验收已完成。
   - 最新验证：Sync 云 provider 目标测试先 RED 后 GREEN；App 云文件源目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 10 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 163 个 XCTest。
+
+- Bitwarden 双向同步 App/Sync 边界第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 `MonicaSync` Bitwarden provider 契约、App 会话 Bitwarden 同步注入/API、Sync/App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `MonicaSyncTests.bitwardenSyncSnapshotAndMutationSummariesAvoidSecrets`，先确认 RED 为缺少 `BitwardenSyncSnapshot`、`BitwardenSyncItem`、`BitwardenSendSyncItem`、`BitwardenSyncMutation` 和 `BitwardenSyncConflict`。
+  - `MonicaSync` 现在提供 `BitwardenSyncProvider` 协议，覆盖 pull snapshot 与 push mutations；snapshot 可承载 vault item、Send、revision 和附件字节数，push result 可承载已接受变更数和冲突摘要；默认 provider 在未登录时返回 authentication required。
+  - 按 TDD 新增 `VaultSessionModelTests.testBitwardenSyncPreviewAndPushLocalSendWithoutLeakingSecrets`，先确认 RED 为 App 缺少 `bitwardenSyncProvider` 注入、同步预览/推送 API 和 recording provider。
+  - `AppSessionModel.previewBitwardenSync()` 现在可拉取远端 Bitwarden snapshot 并保存 App 层脱敏预览；`pushLocalBitwardenChanges()` 会把当前本地活动 Send 条目组装为 upsert mutation 推送到注入 provider，并用计数级状态记录已接受变更和冲突数量。
+  - 脱敏契约覆盖 Bitwarden revision、远端 item/send id、本地 send id、URL query、login password、TOTP secret、notes、Send body、Send notes 和本地 Send 正文。
+  - 本节点推进的是 Bitwarden 双向同步的 App/Sync 边界；仍不声明真实 Bitwarden OAuth/API、vault/folder/password/TOTP 双向映射、远端 ID 持久化、删除同步、附件同步、冲突合并 UI、后台队列或签名真机验收已完成。
+  - 最新验证：Sync Bitwarden 目标测试先 RED 后 GREEN；App Bitwarden 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 11 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 164 个 XCTest。
