@@ -960,6 +960,14 @@
   - 同步新增 `defaultKeePassDatabaseReaderDecryptsKdbx4TwofishFixtureToSnapshotWithoutLeakingCredentials`，覆盖真实 KDBX4 AES-KDF + Twofish fixture：header HMAC、HMAC block unwrap、Twofish-CBC payload 和 KeePass XML snapshot，默认 reader 能读出 `KDBX4 Twofish` 条目的 username 与 decoded password。
   - 错误文案和 display summary 不泄漏数据库密码、decoded password、Twofish key/IV、AES-KDF seed、encrypted payload、derived/master key、header HMAC 或 XML 明文；本节点仍不声明 KDBX 保存/writeback、附件写回/编辑、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：Twofish 目标测试先 RED 后 GREEN；`swift test --filter Twofish` 通过 2 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 91 个 Swift Testing 用例；`git diff --check` 通过；`xcodebuild build -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17 Pro' CODE_SIGNING_ALLOWED=NO` 通过；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 143 个 XCTest。
+- 附件内容写回/编辑第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 KeePass/KDBX writer；改动集中在 `MonicaStorage` metadata repository、App 会话附件内容写回路径和 App 层回归测试。
+  - 按 TDD 新增 `VaultSessionModelTests.testReplacingAttachmentContentUpdatesEncryptedBlobMetadataAndTimelineWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `replaceAttachmentContent`、测试 engine 缺少 metadata update 记录，随后完成 App/Storage 侧实现。
+  - `LocalVaultEngine` 与 `LocalVaultEntryRepository` 新增 `updateAttachmentMetadata`，`MDBXLocalVaultEngine` 复用既有 parity entry 更新能力，按同一 `attachmentID` 更新文件名、media type、大小、hash、storageMode、source、downloadState、wrapped CEK 和 localPath。
+  - `AppSessionModel.replaceAttachmentContent(_:plaintext:mediaType:)` 会要求 active vault/session/repository 与可注入的 32-byte 附件 CEK provider，使用 CryptoKit AES-GCM 重新加密新内容，写回原有 localPath 或默认 `attachmentID.enc`，再把 metadata 更新为 `storageMode=ios-edited-encrypted-blob`、`downloadState=downloaded` 和新的 `sha256:` 明文 hash。
+  - 写回后 App 会刷新 `attachmentEntries` 并追加 `.updated`/`.attachmentRef` 时间线事件；状态文案与时间线只显示脱敏文件名和字节数，不泄漏旧/新明文、旧/新 hash、wrapped CEK、本地密文路径或密文内容。
+  - `AndroidFeatureMatrix.md` 已更新附件引用、Android 备份包、KeePass/KDBX 和时间线行；本节点仍不声明 Android wrapped CEK 解包、附件迁移/同步、KDBX 文件保存/writeback、OneDrive/Google Drive 云文件源或 Bitwarden 双向同步已完成。
+  - 最新验证：新增附件写回目标 XCTest 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 91 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 144 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
