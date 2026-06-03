@@ -1185,3 +1185,14 @@
   - `AppShareImportRequest` 和 `AppShareExtensionInboxStore` 已抽到 App/Extension 共享源文件；App、AutoFill、Widget、Share 的 App Group 常量对齐到 `group.monica-pass.monica`，新 Share target bundle id 为 `com.monica-pass.monica.share`。
   - 本节点推进的是真实 Share extension target + App Group inbox + App 导入闭环；仍不声明签名真机 Share Sheet 唤起、更多 UTType/data item 兼容、二维码导入、冲突 UI 或后台导入通知已完成。
   - 最新验证：Share inbox 目标 XCTest 通过 2 个用例；`xcodebuild build -project Monica.xcodeproj -target MonicaShareExtension CODE_SIGNING_ALLOWED=NO` 通过；`git diff --check` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 167 个 XCTest。
+
+- Shortcuts/App Intents 安全快照与系统入口边界第一版已完成：
+  - 时间：2026-06-03 19:31:07 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 会话 Shortcuts 快照持久化、主 App target 的 AppIntents 文件、Xcode 工程、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testShortcutSnapshotStorePersistsAppGroupSafeEntriesWithoutLeakingSecrets`，先确认 RED 为缺少 `AppShortcutSnapshotFileStore`、`shortcutSnapshotStore` 注入和刷新 API；实现后覆盖锁定态快照、解锁态 login/note/totp 摘要持久化，以及 App Group JSON 不泄漏登录密码、note 正文、TOTP secret 或 URL query。
+  - `AppShortcutSnapshot` 和 `AppShortcutSnapshotEntry` 固定写入 `shortcuts-snapshot-v1.json`，每个条目只包含 kind、title、subtitle、searchableText 和 `monica://shortcut/<kind>/<id>` openURL；`AppSessionModel.production(environment:)` 在 App Group container 可用时注入该 store，并在创建/打开 vault、创建条目、锁库时刷新快照。
+  - 新增 `MonicaShortcutsAppIntents.swift` 到主 App target：`MonicaShortcutEntryEntity`、`MonicaShortcutEntryQuery` 和 iOS 18+ `OpenMonicaShortcutEntryIntent` 只读 App Group 快照，不打开 vault、不读取 MDBX/KDBX、不接触密码/密钥，并通过 `OpenURLIntent` 打开 deep link。
+  - App 根视图已接入 `monica://shortcut/<kind>/<id>` URL handler，回到 App 后会复用 `openShortcutEntry` 路由到对应条目编辑器；无效 scheme/host/path 或已失效条目会被拒绝并显示脱敏错误。
+  - 本节点不声明签名真机 Shortcuts UI、iOS 17 降级动作、复制动作或真机 App Group/deep link entitlement 验收已完成；这些仍需要后续设备验收。
+  - Plus 口径确认：后续 Plus 仍按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP；本节点没有新增 IAP 链路。
+  - 最新验证：Shortcuts 目标 XCTest 通过 2 个用例；`git diff --check` 通过；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 169 个 XCTest，且 App target AppIntents metadata extraction 已写出 `Metadata.appintents`。
