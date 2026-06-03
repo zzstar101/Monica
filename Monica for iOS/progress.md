@@ -1035,6 +1035,14 @@
   - 错误文案不泄漏 header bytes、encrypted payload、master seed、derived key、password key 或 composite key；该节点只补齐 KDBX4 payload section 层。
   - 本节点仍不声明 KDBX header 生成、完整 KDBX file assembly、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：新增 KDBX4 payload section writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 98 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX file assembler 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX file assembler 和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx4FileAssemblerBuildsReadableDatabaseWithExistingHeaderWithoutLeakingSecrets`，先确认 RED 为缺少 `DefaultKeePassKdbxFileAssembler`。
+  - `DefaultKeePassKdbxFileAssembler` 现在可校验并复用既有 KDBX header bytes，把 header 与写回后的 payload section 拼成完整 `.kdbx` bytes；payload section 为空或 header 无法解析时返回脱敏错误。
+  - 测试现场生成 KDBX4 AES-KDF header、XML payload、AES-CBC encrypted payload、KDBX4 payload section，再由 assembler 拼成完整数据库，并用现有 `DefaultKeePassDatabaseReader` 重新打开读出 entry，验证 writeback bytes 可被当前读链路消费。
+  - 错误文案不泄漏 header bytes、payload section、数据库密码、XML 明文、derived/master key 或 encrypted payload；该节点只补齐复用既有 header 的 file assembly 层。
+  - 本节点仍不声明 KDBX header 生成/改写、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：KDBX file assembler 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 99 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
