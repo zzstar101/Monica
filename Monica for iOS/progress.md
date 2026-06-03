@@ -1138,3 +1138,12 @@
   - 状态文案和时间线只显示导入计数、host、固定标题或清洗文件名，不显示 URL query、共享文本正文、文件内容、content hash、本地 blob path 或附件明文。
   - 本节点推进的是 Share/Action 的 App 层导入闭环；仍不声明 Share/Action Extension target、ItemProvider 解析、跨进程唤起、二维码导入或签名真机验收已完成。
   - 最新验证：Share/Action 目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 161 个 XCTest。
+
+- Widget App 层安全快照第一版已完成：
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 会话 Widget 快照 DTO/API、App 层回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testWidgetSnapshotSummarizesSafeTotpAndShortcutStateWithoutLeakingSecrets`，先确认 RED 为 `AppSessionModel` 缺少 `widgetSnapshot(now:)`。
+  - `AppWidgetSnapshot` 现在作为未来 WidgetKit timeline 的安全显示边界：锁定状态返回空列表；解锁状态返回总条目数、最多 3 个 TOTP 摘要和最多 4 个快捷入口摘要。
+  - TOTP 摘要只暴露 title、issuer、accountName 和剩余秒数；快捷入口复用现有 `AppShortcutEntrySummary` 脱敏搜索摘要。
+  - `redactedDebugSummary` 覆盖状态、条目数、TOTP 摘要和快捷入口摘要，不包含 TOTP code/secret、登录密码、note 正文、URL query、附件 hash、本地路径或附件内容。
+  - 本节点推进的是 Widget 的 App 层数据契约；仍不声明 WidgetKit target、timeline provider、App Group 持久化、锁定态刷新、Live Activity、短时通知或签名真机验收已完成。
+  - 最新验证：Widget 目标 XCTest 先 RED 后 GREEN；目标 XCTest 通过 1 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 162 个 XCTest。

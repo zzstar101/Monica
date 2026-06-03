@@ -43,7 +43,7 @@
 | IME 键盘填充 | `ime/MonicaInputMethodService` | 不复制；用 AutoFill、Shortcuts、Share Extension 替代 | iOS 原生替代 | 文档说明限制；关键用户路径有替代入口 |
 | Accessibility 辅助填充 | `MonicaAccessibilityService` | 不复制；用 iOS 原生 AutoFill 替代 | iOS 原生替代 | 文档说明限制；无私有 API |
 | Android Credential Provider Passkey | `passkey/MonicaCredentialProviderService` | AuthenticationServices Passkey | 待实现 | 支持注册、认证、RP ID 校验、associated domains |
-| TOTP 常驻通知 | `AutofillOtpNotificationService`, `NotificationValidatorService` | Widget/Live Activity/短时通知安全替代 | iOS 原生替代 | 不常驻暴露敏感验证码；用户主动开启后可快速查看 |
+| TOTP 常驻通知 | `AutofillOtpNotificationService`, `NotificationValidatorService` | Widget/Live Activity/短时通知安全替代 | 开发中 | App 层已新增 Widget 安全快照边界：锁定状态不返回条目，解锁后只返回 TOTP 标题/issuer/account/剩余秒数和快捷入口摘要，不返回 TOTP code、secret、密码、note 正文、URL query、附件 hash 或本地路径；WidgetKit target、timeline provider、App Group 持久化、锁定态刷新和签名真机验收仍待后续 |
 
 ## 同步、导入导出与外部格式
 
