@@ -10,7 +10,7 @@ Monica for iOS 是 Monica 的 SwiftUI 客户端工作区。
 - Rust/Swift 桥接使用 UniFFI。
 - 首阶段只验证 Tiga `Multi Type`。
 - 首个 TestFlight 包含 MDBX、本地 Vault、WebDAV 和较完整 AutoFill。
-- Passkey、KeePass、Bitwarden、附件、Plus/IAP 后置。
+- Passkey、KeePass、Bitwarden、附件、Plus 资源解锁后置；Plus 不进入 IAP。
 
 ## 当前目录结构
 

@@ -28,7 +28,7 @@
 - 已决定 Rust/Swift 桥接采用 UniFFI。UniFFI 官方文档说明 Swift binding 可由 Rust library/UDL 生成，并支持 Swift 原生类型映射。
 - 已决定最低支持 iOS 17+、iPhone 优先。
 - 已决定 AutoFill 使用 App Group 加密索引：主 App 维护加密后的域名/标题/账号索引，Extension 解锁后读取。
-- 已决定 Passkey、KeePass、Bitwarden、附件、Plus/IAP 后置。
+- 已决定 Passkey、KeePass、Bitwarden、附件、Plus 后置；当前 Android 口径下 Plus 是资源按钮解锁，不进入 IAP。
 
 ## MDBX 规范约束
 

@@ -998,6 +998,13 @@
   - Plus 功能 row 对齐 Android `PlusFeature` 的 `premium_themes`、`validator_vibration`、`copy_next_code`、`bitwarden_sync`；Settings 已新增 “Monica Plus” 区块显示激活状态和每个功能的解锁状态。
   - 可见状态文案只显示来源类别和产品层级，不显示 transaction id、original transaction id、license id、receipt、CDK 原始标识或其它购买凭据；本节点仍不声明 Apple IAP 购买/恢复、App Store receipt 校验、CDK 网络校验、权益持久化或签名真机支付验收已完成。
   - 最新验证：Plus entitlement 映射目标 XCTest 先 RED 后 GREEN；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；`xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 149 个 XCTest。
+- Plus Android 资源按钮解锁路径修正已完成：
+  - 用户明确纠正：Android Plus 不进入 IAP/StoreKit，`PaymentScreen` 通过点击按钮调用 `settingsViewModel.updatePlusActivated(true)` 解锁 Plus，无需支付；本节点按该口径修正上一节点的 StoreKit 方向。
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或任何真实支付链路；改动集中在 App 会话、生产环境注入、Settings 展示、App 层回归测试和矩阵文档。
+  - App 层移除了活动 StoreKit product/entitlement 映射，新增 `AppPlusResourceUnlockService` 与默认资源解锁服务；`AppSessionModel.activatePlusFromResource()` 成功后把 Plus source 标记为 `.resourceUnlock`，`deactivatePlus()` 可本地关闭，Settings 显示“激活 Plus/关闭 Plus”按钮和功能权益 rows。
+  - 状态文案只显示 Android 同口径资源按钮解锁/关闭结果，不显示 transaction、receipt、license、资源标识或其它凭据；CDK/legacy 入口也已从 iOS 活动 Plus 链路移除；本节点不声明 Plus 权益持久化、真实资源包校验/映射或签名真机验收已完成。
+  - 新增 `VaultSessionModelTests.testPlusResourceButtonActivatesAndroidCompatiblePlusWithoutPurchase`、`testPlusResourceButtonFailureDoesNotUnlockOrLeakSecret`、`testPlusResourceButtonCanDeactivatePlusLocally` 覆盖无购买激活、失败不解锁和本地关闭路径。
+  - 最新验证：Plus 资源按钮目标 XCTest 通过 3 个用例；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 92 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
