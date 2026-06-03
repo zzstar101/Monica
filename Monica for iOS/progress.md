@@ -1051,6 +1051,15 @@
   - 错误文案和 display summary 不泄漏 Argon2 salt、AES-KDF seed、master seed、IV、数据库密码、XML 明文、derived/master key 或 encrypted payload。
   - 本节点仍不声明既有 KDBX header 原位改写、ChaCha20/Twofish payload 加密、原 `.kdbx` 原位保存/writeback、云文件源或 KeePass 原生回收站还原语义已完成。
   - 最新验证：KDBX4 header writer 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 100 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
+- KeePass/KDBX KDBX4 writeback coordinator 第一版已完成：
+  - 本节点继续遵循用户提醒，没有修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥或 App 层；改动集中在 `MonicaStorage` 的 KDBX4 writeback coordinator、XML writer 保护值模式和 Storage 回归测试。
+  - 按 TDD 新增 Storage 用例 `keepPassKdbx4WritebackCoordinatorBuildsReadableDatabaseWithoutLeakingSecrets`，先确认 RED 为缺少 `KeePassKdbx4WritebackRequest` 与 `DefaultKeePassKdbx4WritebackCoordinator`。
+  - `DefaultKeePassKdbx4WritebackCoordinator` 现在可把 KeePass snapshot 串到完整 `.kdbx` bytes：XML payload -> GZip -> Argon2id KDF -> master key -> AES-256-CBC encrypted payload -> KDBX4 header/payload section -> file assembler。
+  - 测试用 coordinator 生成 AES-256 + GZip + Argon2id KDBX4 数据库，并用现有 `DefaultKeePassDatabaseReader` 重新打开读出分组、登录条目、decoded password 和 notes，验证保存 pipeline 产物可被当前读链路消费。
+  - 为避免写出当前 inner protected stream 无法解码的 XML，coordinator 第一版使用 `KeePassXMLPayloadWriter(protectedValueMode: .writePlainValues)`，让 XML protected values 在外层 KDBX 加密保护下写成普通 Value；默认 XML writer 仍保留原 protected attribute 行为。
+  - 错误文案和 display summary 不泄漏数据库密码、decoded password、notes、Argon2 salt、master seed、IV、derived/master key、XML 明文或 encrypted payload。
+  - 本节点仍不声明原 `.kdbx` 文件系统/云端 writeback、既有 header 原位改写、ChaCha20/Twofish payload 加密写回、protected value 加密写回或 KeePass 原生回收站还原语义已完成。
+  - 最新验证：KDBX4 writeback coordinator 目标测试先 RED 后 GREEN；`SwiftPackages/MonicaStorage` 的 `swift test` 通过 101 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'id=4F179679-A513-4C20-A935-6164CBCE2711' CODE_SIGNING_ALLOWED=NO` 通过 151 个 XCTest；`git diff --check` 通过。
 
 ## 遇到的问题
 
