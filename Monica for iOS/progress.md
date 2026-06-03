@@ -1205,3 +1205,12 @@
   - 主 App `Info.plist` 已注册 `msauth.com.monica-pass.monica` URL scheme，为后续 MSAL 回调接入预留真实客户端边界；真实 MSAL 登录、Graph API 浏览/创建、云端恢复确认、冲突处理和签名真机验收仍待后续。
   - Plus 口径再次确认：Plus 仍按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP；代码搜索未发现 StoreKit 或 IAP 入口。
   - 最新验证：`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；新增 OneDrive/Google Drive App 目标 XCTest 通过 2 个用例；`git diff --check` 通过；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 171 个 XCTest。
+
+- Plus 资源解锁权益持久化已完成：
+  - 时间：2026-06-03 20:28:31 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 层 Plus entitlement store、生产环境注入、App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testPlusResourceUnlockPersistsAcrossSessionsWithoutPurchaseArtifacts`，先确认 RED 为缺少 `MemoryAppPlusEntitlementStore` 和 `plusEntitlementStore` 注入；实现后资源按钮激活会写入 Plus entitlement store，新建 `AppSessionModel` 可恢复激活态，关闭 Plus 会同步写回未激活。
+  - 新增 `AppPlusEntitlementStore`、`UserDefaultsAppPlusEntitlementStore` 与 `MemoryAppPlusEntitlementStore`；持久化数据只保存 `resourceUnlock` source，不保存 transaction、receipt、license、IAP 或 StoreKit 语义。
+  - `MonicaAppEnvironment` 支持注入 Plus entitlement store，生产环境默认使用 UserDefaults store；新增 `testProductionPlusEntitlementUsesPersistedResourceUnlockWithoutIAP` 覆盖 production session 从持久化资源解锁态恢复。
+  - 本节点仍不声明真实资源包校验/映射或签名真机验收已完成。
+  - 最新验证：新增 Plus 持久化目标 XCTest 先 RED 后 GREEN，Plus 目标 XCTest 通过 2 个用例；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留测试断言和 WebDAV/CloudFile receipt 命名；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 13 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 106 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 173 个 XCTest。
