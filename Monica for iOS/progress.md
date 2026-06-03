@@ -1275,3 +1275,14 @@
   - KDB 旧格式仍按产品口径提示用户先用 KeePassDX/KeePassXC 另存为 `.kdbx`；真实 OneDrive MSAL 登录、真实 Graph 网络验收、签名真机文件协调和更多外部 KeePass 兼容样本属于云/验收/兼容性后续，不再阻塞 KDBX 主功能完成。
   - Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
   - 最新验证：KDBX 目标过滤 `swift test --package-path "Monica for iOS/SwiftPackages/MonicaStorage" --filter 'Kdbx|KeePass|Twofish|Argon'` 通过 46 个 Swift Testing 用例；`git diff --check` 通过；StoreKit/IAP 关键词搜索未发现活动支付入口，仅保留 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 176 个 XCTest。
+
+- OneDrive 真实 MSAL 登录闭环已完成：
+  - 时间：2026-06-04 00:09:46 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在 App 层 OneDrive MSAL auth service、生产环境 provider 注入、设置页 OneDrive 操作入口、Xcode 本地 MSAL package、App 回归测试和矩阵/进度文档。
+  - 按 TDD 新增 `VaultSessionModelTests.testOneDriveMSALLoginConnectsProductionProviderWithoutLeakingSecrets` 与 `testOneDriveMSALRedirectAndSignOutDoNotLeakSecrets`，先确认 RED 为缺少 App 层 OneDrive auth service/state/injection/redirect/signout API；实现后 App 会话可通过注入的 OneDrive auth service 登录、把 token provider 注入生产 `OneDriveCloudFileProvider`、处理 `msauth.com.monica-pass.monica://auth` 回调并登出清理 OneDrive 本地状态。
+  - 新增 `DefaultAppOneDriveMSALAuthenticationService`，使用官方 MSAL 2.12.1 `MSAL.xcframework`；支持 interactive token acquisition、账号选择、保存 MSAL account identifier、silent token refresh、登出 remove account、本 app redirect URL 回调，并把 OAuth access token 只交给 `OneDriveCloudFileProvider` 请求头，不进入 UI 文案。
+  - 为避免 Xcode/SwiftPM 长时间 mirror 上游 MSAL Git repo，本节点使用用户已下载的官方 release `MSAL.zip`，解出并纳入 `Artifacts/MSAL/MSAL.xcframework`，通过本地 Swift package `SwiftPackages/MSAL` 暴露 `MSAL` product；`Monica.xcodeproj` 主 App target 链接该本地 package product。
+  - 设置页已新增 OneDrive 区块，提供登录/退出、刷新文件、上传当前 vault 和下载预览入口；生产 `MonicaAppEnvironment` 只注入 OneDrive provider，Google Drive 继续按当前产品口径后置；Plus 继续按 Android 同口径资源按钮本地解锁，不进入 StoreKit/IAP。
+  - 状态文案和新增测试继续覆盖脱敏边界：不泄漏 OAuth token、MSAL redirect code/state、remote item id、remote path、etag/revision、hash、KDBX bytes 或文件内容。
+  - 本节点仍不声明签名真机 Microsoft 账号交互登录、真实 Graph 网络验收、云端恢复确认 UX 或真实 Graph 冲突 UX 已完成；这些属于 OneDrive 云能力验收后续。
+  - 最新验证：OneDrive MSAL 目标 XCTest 通过 2 个用例；`git diff --check` 通过；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist` 通过；StoreKit/IAP 关键词搜索未发现 App 支付入口，仅命中 Plus 资源解锁测试名/断言；`SwiftPackages/MonicaSync` 的完整 `swift test` 通过 14 个 Swift Testing 用例；`SwiftPackages/MonicaStorage` 的完整 `swift test` 通过 107 个 Swift Testing 用例；完整 `xcodebuild test -project Monica.xcodeproj -scheme Monica -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO` 通过 178 个 XCTest。
