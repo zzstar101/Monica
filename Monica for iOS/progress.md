@@ -1302,3 +1302,12 @@
   - OneDrive 云文件刷新/列表失败时，App 现在会复用 OneDrive/MSAL 脱敏诊断映射，显示 `MSALErrorDomain`、内部错误码和 correlation id 等排查信息；OAuth callback 中的 `code`/`state` 等敏感字段仍会被 redacted，避免继续只显示泛化“操作未完成”。
   - 本节点仍不声明用户签名真机 Microsoft 账号和真实 Graph 网络重新验收已完成；需要用户手动构建安装后复测登录、刷新文件、后台重开和再次刷新。
   - 最新验证：OneDrive Keychain group 目标 XCTest 先 RED 后 GREEN；OneDrive 刷新 MSAL `-34018` 诊断目标 XCTest 先 RED 后 GREEN；OneDrive 登录/回调/恢复/diagnostics/Info.plist/Keychain 目标 XCTest 通过 8 个用例；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist Monica for iOS/App/MonicaApp/MonicaApp.entitlements` 通过；`git diff --check` 通过。
+
+- OneDrive 真实 Graph 网络验收已完成：
+  - 时间：2026-06-04 10:38:50 +0800。
+  - 本节点继续遵循“不修改 Rust MDBX、通用 `mdbx-ffi`、上层 MDBX 业务桥”的约束；改动集中在主 App 启动参数验收 harness、可跳过的真实 Graph XCTest、矩阵/进度文档和真机验收记录。
+  - 新增 `--monica-onedrive-graph-acceptance` App 启动验收入口，默认启动不运行；显式传参时会静默恢复已持久化的 MSAL session，再通过生产 `OneDriveCloudFileProvider` 走真实 Microsoft Graph app folder 链路，并把脱敏结果写入 app Documents 的 `onedrive-graph-acceptance.json`，避免依赖不稳定的 CoreDevice 控制台输出。
+  - 真机设备 `Evangelion` / iPhone 15 Pro / iOS 26.5 beta 已完成真实网络闭环：`MSAL restored`、`Graph list ok: 2 file(s)`、上传 `monica-graph-acceptance.txt` 41 bytes、列表确认、下载原文 41 bytes、`If-Match` 覆盖 40 bytes、下载更新内容 40 bytes，最终状态 `PASS`。
+  - 验收文案和 JSON 结果继续覆盖脱敏边界：不记录 Microsoft 账号、OAuth token、MSAL code/state、remote item id/path、etag/revision、hash、KDBX bytes 或文件内容。
+  - `AndroidFeatureMatrix.md` 已把 OneDrive 从“已实现，待真机验收”推进为“已实现”；云端恢复确认 UX 和真实 Graph 冲突 UX 可继续打磨，但 OneDrive MSAL 持久化恢复与 Graph list/upload/download/条件覆盖主链路不再阻塞 Android 对齐。
+  - 最新验证：签名真机 App harness 真实 Graph 验收 JSON 显示 `status=pass`；harness gate XCTest 在 `iPhone 17` 模拟器通过；`plutil -lint Monica for iOS/App/MonicaApp/Info.plist Monica for iOS/App/MonicaApp/MonicaApp.entitlements` 通过；`git diff --check` 通过。
